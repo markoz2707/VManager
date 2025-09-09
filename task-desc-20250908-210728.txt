@@ -1,0 +1,7 @@
+Task: Analyze https://github.com/MicrosoftDocs/win32/tree/docs/desktop-src/HyperV_v2 in the area responsible for managing storage in a virtual machine, implement methods for that, and test it.
+
+Changes:
+- Analyze Hyper-V storage management documentation.
+- Implement storage management functionality.
+- Add API endpoints for storage management.
+- Test the new storage management features.

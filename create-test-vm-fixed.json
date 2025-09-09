@@ -1,0 +1,13 @@
+{
+  "Id": "test-vm-fixed-demo",
+  "Name": "test-vm-fixed-demo",
+  "Mode": 1,
+  "MemoryMB": 2048,
+  "CpuCount": 2,
+  "DiskSizeGB": 20,
+  "Generation": 2,
+  "SecureBoot": true,
+  "VhdPath": "C:\\temp\\test-vm-fixed-demo.vhdx",
+  "SwitchName": "Default Switch",
+  "Notes": "Fixed VM with proper VHD path, network switch, and notes"
+}

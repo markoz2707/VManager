@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HyperV.HyperV.Core.Vhd</name>
+    </assembly>
+    <members>
+        <member name="T:HyperV.Core.Vhd.Services.VhdService">
+            <summary>Operacje VHD/VHDX (do uzupełnienia: virtdisk.dll).</summary>
+        </member>
+    </members>
+</doc>

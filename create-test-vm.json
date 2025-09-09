@@ -1,0 +1,8 @@
+{
+  "Id": "test-vm-endpoint-demo",
+  "Name": "test-vm-endpoint-demo",
+  "Mode": 1,
+  "MemoryMB": 2048,
+  "CpuCount": 2,
+  "DiskSizeGB": 20
+}

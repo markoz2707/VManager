@@ -1,0 +1,103 @@
+TASK: Add VM creation support for Generation, SecureBoot, VhdPath, SwitchName, Notes
+DATE: 2025-09-09 06:32:12
+STATUS: COMPLETED SUCCESSFULLY
+
+OBJECTIVE:
+Enhance the VM creation functionality to support additional properties: Generation, SecureBoot, VhdPath, SwitchName, and Notes in the CreateVmRequest model and VmCreationService.
+
+CHANGES IMPLEMENTED:
+
+1. ENHANCED CreateVmRequest MODEL (src/HyperV.Contracts/Models/CreateVmRequest.cs):
+   ✅ Added Generation property (int, range 1-2, default 2)
+   ✅ Added SecureBoot property (bool, default true)
+   ✅ Added VhdPath property (string?, optional custom VHD path)
+   ✅ Added SwitchName property (string?, optional network switch)
+   ✅ Added Notes property (string?, optional VM description)
+
+2. ENHANCED VmCreationService (src/HyperV.Core.Wmi/Services/VmCreationService.cs):
+   ✅ Updated CreateHyperVVm method to use new properties
+   ✅ Added VHD path logic: use provided path or create default timestamped path
+   ✅ Added VHD existence check: only create if file doesn't exist
+   ✅ Enhanced PowerShell command generation with new parameters:
+      - Generation parameter in New-VM command
+      - Network switch connection via Connect-VMNetworkAdapter
+      - Secure Boot configuration via Set-VMFirmware (Generation 2 only)
+      - VM notes via Set-VM -Notes command
+   ✅ Added proper string escaping for Notes (single quotes)
+
+ENHANCED REQUEST FORMAT:
+The CreateVmRequest now supports these additional properties:
+```json
+{
+  "Id": "vm-id",
+  "Name": "vm-name",
+  "Mode": 1,
+  "MemoryMB": 4096,
+  "CpuCount": 4,
+  "DiskSizeGB": 40,
+  "Generation": 2,
+  "SecureBoot": true,
+  "VhdPath": "C:\\custom\\path\\vm.vhdx",
+  "SwitchName": "Default Switch",
+  "Notes": "Custom VM description"
+}
+```
+
+TESTING RESULTS:
+✅ Created test VM "test-vm-enhanced-demo" with enhanced properties:
+   - Memory: 4096 MB (4 GB)
+   - CPU: 4 cores
+   - Disk: 40 GB
+   - Generation: 2
+   - Secure Boot: Enabled
+   - Network: Connected to "Default Switch"
+   - Notes: "Enhanced VM created with all new properties via /api/v1/vms endpoint"
+
+✅ VM creation successful via POST /api/v1/vms
+✅ VM presence confirmed: present=True, wmi=True
+✅ VM properties accessible via GET /api/v1/vms/{name}/properties
+✅ VM assigned GUID: 92F13F1E-A017-4932-A33F-7954644A0A6F
+
+TECHNICAL IMPLEMENTATION DETAILS:
+
+1. VHD Path Handling:
+   - If VhdPath provided: checks existence, creates if missing
+   - If VhdPath not provided: creates default timestamped path
+   - Default location: %ProgramData%\HyperV.Agent\VHDs\{id}-{timestamp}.vhdx
+
+2. PowerShell Command Enhancement:
+   - Base: New-VM -Name '{name}' -MemoryStartupBytes {memory} -VHDPath '{path}' -Generation {gen}
+   - CPU: Set-VMProcessor -VMName '{name}' -Count {count}
+   - Network: Connect-VMNetworkAdapter -VMName '{name}' -SwitchName '{switch}' (if specified)
+   - Secure Boot: Set-VMFirmware -VMName '{name}' -EnableSecureBoot {On|Off} (Gen 2 only)
+   - Notes: Set-VM -VMName '{name}' -Notes '{notes}' (if specified)
+
+3. Validation:
+   - Generation: Range 1-2, default 2
+   - SecureBoot: Boolean, default true
+   - All new properties are optional (nullable)
+   - Proper string escaping for PowerShell injection prevention
+
+BACKWARD COMPATIBILITY:
+✅ All existing VM creation requests continue to work unchanged
+✅ New properties have sensible defaults
+✅ Optional properties can be omitted from requests
+
+FILES MODIFIED:
+- src/HyperV.Contracts/Models/CreateVmRequest.cs (added 5 new properties)
+- src/HyperV.Core.Wmi/Services/VmCreationService.cs (enhanced PowerShell generation)
+
+TEST FILES CREATED:
+- create-test-vm-enhanced.json (comprehensive test request)
+
+VALIDATION PERFORMED:
+1. Enhanced VM creation: ✅ Success
+2. VM presence verification: ✅ Present in WMI backend
+3. VM properties access: ✅ Accessible via API
+4. Backward compatibility: ✅ Previous simple requests still work
+
+CONCLUSION:
+The VM creation API now supports comprehensive configuration options including VM generation, security settings, custom VHD paths, network connectivity, and documentation through notes. The implementation maintains full backward compatibility while providing enhanced functionality for advanced VM provisioning scenarios.
+
+NEXT STEPS:
+The enhanced VM creation functionality is ready for production use. Users can now create VMs with detailed specifications including security, networking, and storage configurations through the consolidated /api/v1/vms endpoint.

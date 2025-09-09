@@ -1,0 +1,8 @@
+{
+  "id": "test-vm-ops",
+  "name": "test-vm-ops",
+  "memoryMB": 1024,
+  "cpuCount": 1,
+  "diskSizeGB": 10,
+  "mode": 0
+}

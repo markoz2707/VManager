@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HyperV.HyperV.Core.Hcn</name>
+    </assembly>
+    <members>
+        <member name="T:HyperV.Core.Hcn.Interop.HcnNative">
+            <summary>Interop z Host Compute Network (HCN).</summary>
+        </member>
+        <member name="T:HyperV.Core.Hcn.Services.NetworkService">
+            <summary>Serwis tworzenia prostych sieci NAT (HCN).</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcn.Services.NetworkService.CreateNATNetwork(System.String,System.String)">
+            <summary>Tworzy sieć NAT o podanej nazwie i prefiksie.</summary>
+        </member>
+    </members>
+</doc>

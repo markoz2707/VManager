@@ -1,0 +1,13 @@
+{
+  "Id": "test-vm-enhanced-demo",
+  "Name": "test-vm-enhanced-demo",
+  "Mode": 1,
+  "MemoryMB": 4096,
+  "CpuCount": 4,
+  "DiskSizeGB": 40,
+  "Generation": 2,
+  "SecureBoot": true,
+  "VhdPath": "C:\\temp\\test-vm-enhanced-demo.vhdx",
+  "SwitchName": "Default Switch",
+  "Notes": "Enhanced VM created with all new properties via /api/v1/vms endpoint"
+}

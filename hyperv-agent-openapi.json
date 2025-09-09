@@ -1,0 +1,140 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hyper-V Agent API",
+    "version": "v1",
+    "description": "REST API exposing Hyper-V host functions (HCS, HCN, WMI, VHD).",
+    "contact": {
+      "name": "HyperV Agent",
+      "email": "admin@example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Healthy"
+          }
+        }
+      }
+    },
+    "/api/v1/vms": {
+      "post": {
+        "summary": "Create new VM",
+        "description": "Creates a VM using HCS JSON schema.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "VM created"
+          },
+          "400": {
+            "description": "Invalid request"
+          }
+        }
+      }
+    },
+    "/api/v1/networks/nat": {
+      "post": {
+        "summary": "Create NAT network",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "prefix",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "192.168.100.0/24"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Network created"
+          }
+        }
+      }
+    },
+    "/api/v1/service/vm-present/{name}": {
+      "get": {
+        "summary": "Check VM presence",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "VM presence info"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateVmRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique VM ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "VM name"
+          },
+          "memoryMB": {
+            "type": "integer",
+            "default": 2048,
+            "description": "RAM in MB"
+          },
+          "cpuCount": {
+            "type": "integer",
+            "default": 2,
+            "description": "Number of vCPUs"
+          },
+          "vhdxPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "switchName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HyperV.HyperV.Core.Hcs</name>
+    </assembly>
+    <members>
+        <member name="T:HyperV.Core.Hcs.Interop.HcsNative">
+            <summary>Interop z Host Compute System (HCS).</summary>
+        </member>
+        <member name="T:HyperV.Core.Hcs.Services.ContainerService">
+            <summary>Container Service using Host Compute System (HCS) API for lightweight containers.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.Create(System.String,HyperV.Contracts.Models.CreateContainerRequest)">
+            <summary>Creates a container using HCS API with container-specific configuration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.CreateContainerConfiguration(System.String,HyperV.Contracts.Models.CreateContainerRequest,System.String)">
+            <summary>Creates HCS container configuration optimized for containers.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.StartContainer(System.IntPtr)">
+            <summary>Starts a container using HCS API.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.IsContainerPresent(System.String)">
+            <summary>Checks if an HCS container exists by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.StartContainer(System.String)">
+            <summary>Starts an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.StopContainer(System.String)">
+            <summary>Stops an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.TerminateContainer(System.String)">
+            <summary>Terminates an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.PauseContainer(System.String)">
+            <summary>Pauses an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.ResumeContainer(System.String)">
+            <summary>Resumes an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.GetContainerProperties(System.String)">
+            <summary>Gets properties of an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.ModifyContainer(System.String,System.String)">
+            <summary>Modifies an HCS container by name.</summary>
+        </member>
+        <member name="T:HyperV.Core.Hcs.Services.VmService">
+            <summary>VM Service using Host Compute System (HCS) API for real Hyper-V integration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.Create(System.String,HyperV.Contracts.Models.CreateVmRequest)">
+            <summary>Creates a VM using HCS API with comprehensive configuration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.CreateVmConfiguration(System.String,HyperV.Contracts.Models.CreateVmRequest,System.String)">
+            <summary>Creates proper Hyper-V VM configuration for HCS based on NanaBox sample.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.StartVm(System.IntPtr)">
+            <summary>Starts a VM using HCS API.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.GenerateMacAddress">
+            <summary>Generates a random MAC address for the VM.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.GetCurrentUserSid">
+            <summary>Gets the current user's SID for HCS access control.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.SafeCloseOperation(System.IntPtr@)">
+            <summary>Safely closes an HCS operation handle, preventing access violations.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.SafeCloseComputeSystem(System.IntPtr@)">
+            <summary>Safely closes an HCS compute system handle, preventing access violations.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.ListVms">
+            <summary>Lists all HCS VMs.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.IsVmPresent(System.String)">
+            <summary>Checks if an HCS VM exists by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.StartVm(System.String)">
+            <summary>Starts an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.StopVm(System.String)">
+            <summary>Stops an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.TerminateVm(System.String)">
+            <summary>Terminates an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.PauseVm(System.String)">
+            <summary>Pauses an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.ResumeVm(System.String)">
+            <summary>Resumes an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.GetVmProperties(System.String)">
+            <summary>Gets properties of an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.ModifyVm(System.String,System.String)">
+            <summary>Modifies an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.ListVmSnapshots(System.String)">
+            <summary>Lists snapshots for an HCS VM (not supported - returns empty list).</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.CreateVmSnapshot(System.String,System.String,System.String)">
+            <summary>Creates a snapshot for an HCS VM (not supported).</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.DeleteVmSnapshot(System.String,System.String)">
+            <summary>Deletes a snapshot for an HCS VM (not supported).</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.RevertVmToSnapshot(System.String,System.String)">
+            <summary>Reverts an HCS VM to a snapshot (not supported).</summary>
+        </member>
+    </members>
+</doc>

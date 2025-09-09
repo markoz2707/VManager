@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>HyperV.Agent</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HyperV.Core.Hcs\HyperV.Core.Hcs.csproj" />
+    <ProjectReference Include="..\HyperV.Core.Hcn\HyperV.Core.Hcn.csproj" />
+    <ProjectReference Include="..\HyperV.Core.Wmi\HyperV.Core.Wmi.csproj" />
+    <ProjectReference Include="..\HyperV.Core.Vhd\HyperV.Core.Vhd.csproj" />
+    <ProjectReference Include="..\HyperV.Contracts\HyperV.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
+  </ItemGroup>
+</Project>

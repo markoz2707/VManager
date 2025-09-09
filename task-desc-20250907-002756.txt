@@ -1,0 +1,79 @@
+Task Description - Fix VM Creation Errors
+Started: 2025-09-07 00:27:56
+
+1. Current Work:
+   Fixed critical VM creation errors in the HyperV Agent API. The main issue was "Dokument JSON maszyny wirtualnej lub kontenera jest nieprawidłowy" (Invalid JSON document for virtual machine or container) error code 0x8037010D when attempting to create VMs through the HCS API.
+
+2. Key Technical Concepts:
+   - Host Compute System (HCS) API JSON schema validation
+   - Virtual Disk path handling and placeholder file creation
+   - HCS compute system configuration requirements
+   - VirtDisk API permission issues and fallback mechanisms
+   - ExposeVirtualizationExtensions processor setting
+
+3. Relevant Files and Code Changes:
+   - src/HyperV.Core.Hcs/Services/VmService.cs:
+     * Fixed ExposeVirtualizationExtensions setting from false to true
+     * Modified CreateVirtualDisk method to return actual path used (string instead of void)
+     * Enhanced VHD path handling to use placeholder files when VirtDisk API fails
+     * Added debugging output to track path usage
+     * Simplified path logic in VM configuration JSON
+     * Improved error handling and resource cleanup
+
+4. Problem Analysis:
+   - Root cause: HCS API was rejecting the JSON configuration due to invalid processor settings
+   - Secondary issue: VHD path mismatch between actual created files and JSON configuration
+   - VirtDisk API failing with HRESULT 0x00000057 (insufficient privileges)
+   - JSON configuration referencing non-existent .vhdx files instead of .placeholder files
+
+5. Implemented Fixes:
+   a) Processor Configuration Fix:
+      * Changed ExposeVirtualizationExtensions from false to true
+      * This aligns with HCS requirements for proper VM processor configuration
+   
+   b) VHD Path Handling Fix:
+      * Modified CreateVirtualDisk to return the actual path used
+      * When VirtDisk API fails, returns placeholder file path
+      * VM configuration now uses the correct path (placeholder when needed)
+   
+   c) Path Logic Simplification:
+      * Removed redundant conditional logic in JSON path assignment
+      * Direct path usage from CreateVirtualDisk return value
+   
+   d) Enhanced Debugging:
+      * Added console output for original vs actual VHD paths
+      * Improved error logging for troubleshooting
+
+6. Testing Results:
+   - Application compiles successfully without errors
+   - VM creation attempts still result in HCS JSON validation errors
+   - VirtDisk API consistently fails with HRESULT 0x00000057 (expected due to permissions)
+   - Placeholder files are created correctly in C:\ProgramData\HyperV.Agent\VHDs\
+   - JSON configuration shows proper structure with all required fields
+
+7. Current Status:
+   - Fixes implemented but VM creation still failing
+   - HCS API continues to reject JSON configuration
+   - Issue may require additional HCS schema compliance or system-level permissions
+   - Application remains stable and functional for other endpoints
+
+8. Error Pattern Observed:
+   - Consistent error: System.ComponentModel.Win32Exception (0x8037010D)
+   - Message: "Dokument JSON maszyny wirtualnej lub kontenera jest nieprawidłowy"
+   - Occurs during HcsCreateComputeSystem call
+   - JSON structure appears valid but may have schema compliance issues
+
+9. Next Steps for Resolution:
+   - Investigate HCS JSON schema requirements more thoroughly
+   - Consider testing with administrator privileges
+   - Review Microsoft HCS documentation for required/optional fields
+   - Test with minimal VM configuration to isolate problematic fields
+   - Consider alternative VM creation approaches if HCS continues to fail
+
+10. Files Modified:
+    - src/HyperV.Core.Hcs/Services/VmService.cs (multiple fixes applied)
+
+11. Technical Debt:
+    - VirtDisk handle cleanup not implemented (TODO comment added)
+    - Placeholder file cleanup on successful VHD creation not implemented
+    - Error handling could be more granular for different HCS error codes

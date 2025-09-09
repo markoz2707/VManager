@@ -1,0 +1,53 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "I:\\AI Projects\\VManager\\hyperv-agent\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.wmi\\services\\replicationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|solutionrelative:src\\hyperv.core.wmi\\services\\replicationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.wmi\\hyperv.core.wmi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|solutionrelative:src\\hyperv.core.wmi\\hyperv.core.wmi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ReplicationService.cs",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\Services\\ReplicationService.cs",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Wmi\\Services\\ReplicationService.cs",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\Services\\ReplicationService.cs",
+              "RelativeToolTip": "src\\HyperV.Core.Wmi\\Services\\ReplicationService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-06T07:49:49.444Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "HyperV.Core.Wmi.csproj",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+              "RelativeToolTip": "src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-06T07:49:46.83Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

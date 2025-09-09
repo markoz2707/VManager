@@ -1,0 +1,99 @@
+TASK DESCRIPTION: Check implementation progress and fix not working WMI VM configuration
+======================================================================================
+Date (start): 2025-09-08 13:23:27
+Task: Verify current implementation status and fix WMI-based VM configuration changes (memory/CPU) not applying in Hyper-V Manager.
+
+Context Summary (from prior task-desc files):
+- Core VM management implemented with dual backend (HCS + WMI).
+- VM listing and snapshots (list/create/delete/revert) are working via WMI.
+- Notes modification works; memory and CPU modifications report WMI success but do not reflect in Hyper-V Manager.
+- Snapshot endpoints sometimes return 500 despite success (API response handling issue).
+- Polish localization and VM state handling implemented; job monitoring implemented.
+
+Primary Problem to Fix:
+- WMI memory/CPU configuration changes complete successfully (return value 0 / job success) but do not take effect on the VM (no change visible in Hyper-V Manager). Root causes to investigate:
+  1) Modifying wrong resource instances (e.g., default template instead of VM&#39;s current/pending VSSD-associated RASDs).
+  2) Using wrong SettingType context (need VSSD with SettingType = Current (3) or Pending (4)).
+  3) Wrong ResourceSubType identifiers (e.g., "Microsoft:Hyper-V:Memory" vs "Microsoft:Hyper-V:Synthetic Memory" depending on WMI schema).
+  4) Units/fields mismatch (VirtualQuantity, Reservation, Limit, AllocationUnits… MB vs bytes).
+  5) VM state requirements (off vs running) and pending changes promotion.
+  6) ModifyResourceSettings input is not the embedded instance text of the correct RASD objects.
+  7) Using Persistence or applying to Realized (current) objects instead of the target configurable ones.
+
+Plan of Work:
+1) Read all prior task-desc files to ensure full context.
+2) Audit src/HyperV.Core.Wmi/Services/VmService.cs implementation of ModifyVmConfiguration (ModifyVmMemory/ModifyVmProcessor).
+3) Verify association logic: map VM -> Msvm_ComputerSystem -> VSSD (Msvm_VirtualSystemSettingData with SettingType=3/4) -> RASDs (Msvm_MemorySettingData, Msvm_ProcessorSettingData) via Msvm_VirtualSystemSettingDataComponent.
+4) Ensure selection of the correct RASD instances (not default pool, not template).
+5) Ensure correct ResourceSubType strings per Hyper-V WMI v2:
+   - Memory: "Microsoft:Hyper-V:Memory" (v2) and properties: DynamicMemoryEnabled, VirtualQuantity, Reservation, Limit, MinimumMemory, MaximumMemory, TargetMemoryBuffer.
+   - Processor: "Microsoft:Hyper-V:Processor" with VirtualQuantity (vCPU count), Limit/Reservation/Weight as needed.
+6) Confirm required fields/units:
+   - Memory fields typically in MB for VirtualQuantity/Minimum/Maximum (v2), or bytes via AllocationUnits ("byte * 2^20"). Align to what existing code expects.
+   - Processor VirtualQuantity is integer count.
+7) Enforce VM state (off) when required; fall back to Pending settings if running and commit behavior is supported.
+8) Call ModifyResourceSettings with the serialized embedded instances of the exact RASD objects tied to the VM&#39;s VSSD; monitor job to completion.
+9) Validate via Hyper-V Manager after operation.
+10) Adjust API response handling for snapshot endpoints (known 500 despite success).
+
+Deliverables:
+- Fixed memory/CPU modification via WMI that applies in Hyper-V Manager.
+- Tests and manual validation notes.
+- This task description updated with technical details of the fix.
+
+Initial TODO (live checklist - see progress in git/task logs):
+- [ ] Read all task-desc files for full history
+- [ ] Audit WMI VM configuration code paths (ModifyVmConfiguration/Memory/Processor)
+- [ ] Review request payloads for configure endpoint (ServiceController, test-vm-wmi.json/test-vm-request.json)
+- [ ] Reproduce and observe current behavior
+- [ ] Identify root cause (resource selection/state/units/subtype/pending vs current)
+- [ ] Implement fix for memory configuration
+- [ ] Implement fix for CPU configuration
+- [ ] Build and run API, verify with Hyper-V Manager
+- [ ] Address snapshot 500 response handling (if in scope/time)
+- [ ] Document technical changes and validation results in this file
+
+PROGRESS UPDATE (2025-09-08 19:53):
+
+COMPLETED WORK:
+- [x] Created task description file with start timestamp
+- [x] Audited WMI VM configuration implementation (VmService.ModifyVmConfiguration + helpers)
+- [x] Implemented fixes for WMI VM configuration (memory/CPU) - code updated with proper VSSD/RASD association logic
+- [x] Built solution successfully
+- [x] Ran API server and validated endpoints
+- [x] Called vm-configure to change Memory/CPU (executed)
+
+TECHNICAL CHANGES IMPLEMENTED:
+
+1. **Fixed ModifyVmMemory method**:
+   - Changed from direct VSSD query to proper VM -> VSSD association via Msvm_SettingsDefineState
+   - Prioritizes Current (SettingType=3) over Pending (SettingType=4) VSSD
+   - Uses proper RASD association via Msvm_VirtualSystemSettingDataComponent
+   - Selects correct Memory RASD by ResourceSubType ("Microsoft:Hyper-V:Memory" or "Microsoft:Hyper-V:Synthetic Memory")
+   - Disables dynamic memory and sets static values for VirtualQuantity, Reservation, Limit
+
+2. **Fixed ModifyVmProcessor method**:
+   - Same association logic as memory (VM -> VSSD -> RASD)
+   - Selects correct Processor RASD by ResourceSubType ("Microsoft:Hyper-V:Processor")
+   - Updates only VirtualQuantity (CPU count) while preserving other tuning parameters
+
+3. **Root Cause Analysis**:
+   The original implementation was using incorrect WMI object selection:
+   - Wrong: Direct VSSD query by InstanceID pattern matching
+   - Correct: VM association to get the actual configurable VSSD, then RASD association
+
+CURRENT STATUS:
+❌ **MEMORY/CPU CHANGES STILL NOT APPLYING IN HYPER-V MANAGER**
+
+Despite WMI operations completing successfully (return value 0, job completion), the memory and CPU values remain unchanged in Hyper-V Manager. This indicates a deeper WMI implementation issue that requires further investigation.
+
+NEXT STEPS FOR INVESTIGATION:
+1. Analyze detailed WMI job logs and error descriptions
+2. Investigate alternative WMI methods (ModifySystemSettings on VSSD directly)
+3. Explore PowerShell Hyper-V module approach as reference
+4. Consider VM generation-specific requirements or security constraints
+
+Notes:
+- Respect Windows-specific command separator (;) if any scripts are used.
+- Keep changes localized to WMI service where possible; keep HCS/HV architecture unchanged.
+- WMI operations report success but changes don't persist - suggests schema/permission/state issue.

@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>HyperV.Core.Hcs</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HyperV.Contracts\HyperV.Contracts.csproj" />
+  </ItemGroup>
+</Project>

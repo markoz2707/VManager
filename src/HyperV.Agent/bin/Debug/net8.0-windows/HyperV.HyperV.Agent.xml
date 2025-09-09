@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HyperV.HyperV.Agent</name>
+    </assembly>
+    <members>
+        <member name="T:HyperV.Agent.Controllers.ContainersController">
+            <summary>Container management API controller.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ContainersController.CreateContainer(HyperV.Contracts.Models.CreateContainerRequest)">
+            <summary>Creates a new container using specified backend (HCS or WMI).</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ContainersController.ListContainers">
+            <summary>Lists all containers from both HCS and WMI backends.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ContainersController.GetContainer(System.String)">
+            <summary>Gets container information by ID.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ContainersController.StartContainer(System.String)">
+            <summary>Starts a container by ID.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ContainersController.StopContainer(System.String)">
+            <summary>Stops a container by ID.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ContainersController.TerminateContainer(System.String)">
+            <summary>Terminates a container by ID.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ContainersController.PauseContainer(System.String)">
+            <summary>Pauses a container by ID.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ContainersController.ResumeContainer(System.String)">
+            <summary>Resumes a container by ID.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ContainersController.DeleteContainer(System.String)">
+            <summary>Deletes a container by ID.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.NetworksController">
+            <summary>Operacje sieciowe (HCN).</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.NetworksController.CreateNat(System.String,System.String)">
+            <summary>Tworzy prostą sieć NAT.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.NetworksController.DeleteNetwork(System.Guid)">
+            <summary>Usuwa sieć.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.NetworksController.GetNetworkProperties(System.Guid,System.String)">
+            <summary>Pobiera właściwości sieci.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.NetworksController.CreateEndpoint(System.Guid,System.String,System.String)">
+            <summary>Tworzy endpoint w sieci.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.NetworksController.DeleteEndpoint(System.Guid)">
+            <summary>Usuwa endpoint.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.NetworksController.GetEndpointProperties(System.Guid,System.String)">
+            <summary>Pobiera właściwości endpoint.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.ServiceController">
+            <summary>Usługi i diagnostyka agenta.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ServiceController.GetHealth">
+            <summary>Sprawdza status agenta HyperV.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ServiceController.GetInfo">
+            <summary>Pobiera informacje o agencie.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.VmsController">
+            <summary>Operacje na maszynach wirtualnych (VM).</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.Create(HyperV.Contracts.Models.CreateVmRequest)">
+            <summary>Utwórz nową maszynę wirtualną.</summary>
+            <param name="req">Parametry VM.</param>
+            <returns>JSON odpowiedzi HCS lub WMI.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.VmPresent(System.String)">
+            <summary>Sprawdza, czy istnieje maszyna o podanej nazwie (HCS lub WMI).</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.StartVm(System.String)">
+            <summary>Uruchamia maszynę wirtualną.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.StopVm(System.String)">
+            <summary>Zatrzymuje maszynę wirtualną.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ShutdownVm(System.String)">
+            <summary>Wyłącza maszynę wirtualną (graceful shutdown).</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.TerminateVm(System.String)">
+            <summary>Terminuje maszynę wirtualną (force stop).</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.PauseVm(System.String)">
+            <summary>Wstrzymuje maszynę wirtualną.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ResumeVm(System.String)">
+            <summary>Wznawia maszynę wirtualną.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.SaveVm(System.String)">
+            <summary>Zapisuje stan maszyny wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmProperties(System.String)">
+            <summary>Pobiera właściwości maszyny wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ModifyVm(System.String,System.String)">
+            <summary>Modyfikuje konfigurację maszyny wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ListVms">
+            <summary>Listuje wszystkie maszyny wirtualne.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ConfigureVm(System.String,HyperV.Agent.Controllers.VmConfigurationRequest)">
+            <summary>Modyfikuje konfigurację VM (pamięć, CPU, notatki).</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ListVmSnapshots(System.String)">
+            <summary>Listuje snapshoty maszyny wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.CreateVmSnapshot(System.String,HyperV.Agent.Controllers.CreateSnapshotRequest)">
+            <summary>Tworzy snapshot maszyny wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.DeleteVmSnapshot(System.String,System.String)">
+            <summary>Usuwa snapshot maszyny wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.RevertVmToSnapshot(System.String,System.String)">
+            <summary>Przywraca VM do snapshotu.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.VmConfigurationRequest">
+            <summary>Request model for VM configuration.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.CreateSnapshotRequest">
+            <summary>Request model for creating snapshots.</summary>
+        </member>
+    </members>
+</doc>

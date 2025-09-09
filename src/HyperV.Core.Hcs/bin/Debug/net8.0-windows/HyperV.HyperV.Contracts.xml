@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HyperV.HyperV.Contracts</name>
+    </assembly>
+    <members>
+        <member name="T:HyperV.Contracts.Models.ContainerCreationMode">
+            <summary>
+            Container creation mode - HCS or WMI.
+            </summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.ContainerCreationMode.HCS">
+            <summary>Host Compute System API (lightweight containers).</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.ContainerCreationMode.WMI">
+            <summary>Windows Management Instrumentation API (Hyper-V containers).</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.CreateContainerRequest">
+            <summary>
+            Request to create a new Hyper-V container.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.Id">
+            <summary>Unique container ID (UUID or friendly name).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.Name">
+            <summary>Container name visible in management tools.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.MemoryMB">
+            <summary>Memory limit in MB.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.CpuCount">
+            <summary>CPU limit (number of cores).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.StorageSizeGB">
+            <summary>Storage size in GB (for persistent containers).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.Image">
+            <summary>Container image or base OS.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.Mode">
+            <summary>Container creation mode - HCS (lightweight) or WMI (Hyper-V isolated).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.Environment">
+            <summary>Environment variables for the container.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.PortMappings">
+            <summary>Port mappings for the container.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateContainerRequest.VolumeMounts">
+            <summary>Volume mounts for the container.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.VmCreationMode">
+            <summary>
+            Tryb tworzenia VM - HCS lub WMI.
+            </summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmCreationMode.HCS">
+            <summary>Host Compute System API (kontener-like, nie widoczny w Hyper-V Manager).</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmCreationMode.WMI">
+            <summary>Windows Management Instrumentation API (pełna VM widoczna w Hyper-V Manager).</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.CreateVmRequest">
+            <summary>
+            Żądanie utworzenia nowej maszyny wirtualnej Hyper-V.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.Id">
+            <summary>Unikalny identyfikator VM (UUID lub friendly name).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.Name">
+            <summary>Nazwa VM widoczna w menedżerze Hyper-V.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.MemoryMB">
+            <summary>Pamięć RAM w MB.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.CpuCount">
+            <summary>Liczba CPU vCore.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.DiskSizeGB">
+            <summary>Rozmiar dysku w GB.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.Mode">
+            <summary>Tryb tworzenia VM - HCS (kontener-like) lub WMI (pełna VM).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.Generation">
+            <summary>Generacja VM (1 lub 2). Domyślnie 2.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.SecureBoot">
+            <summary>Czy włączyć Secure Boot (tylko dla Generation 2).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.VhdPath">
+            <summary>Ścieżka do pliku VHD/VHDX. Jeśli nie podano, zostanie utworzona automatycznie.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.SwitchName">
+            <summary>Nazwa przełącznika sieciowego do podłączenia VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmRequest.Notes">
+            <summary>Notatki/opis VM.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.VmSummary">
+            <summary>Podsumowanie stanu VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmSummary.Id">
+            <summary>ID VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmSummary.Name">
+            <summary>Nazwa VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmSummary.State">
+            <summary>Bieżący stan.</summary>
+        </member>
+    </members>
+</doc>

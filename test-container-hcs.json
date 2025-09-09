@@ -1,0 +1,18 @@
+{
+  "Id": "test-container-hcs",
+  "Name": "test-container-hcs",
+  "Image": "mcr.microsoft.com/windows/nanoserver:ltsc2022",
+  "MemoryMB": 512,
+  "CpuCount": 1,
+  "StorageSizeGB": 10,
+  "Mode": 0,
+  "Environment": {
+    "TEST_VAR": "test_value"
+  },
+  "PortMappings": {
+    "8080": 80
+  },
+  "VolumeMounts": {
+    "C:\\temp": "C:\\data"
+  }
+}

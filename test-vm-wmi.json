@@ -1,0 +1,8 @@
+{
+  "Id": "test-vm-wmi-001",
+  "Name": "Test VM WMI Mode",
+  "MemoryMB": 2048,
+  "CpuCount": 2,
+  "DiskSizeGB": 20,
+  "Mode": 1
+}

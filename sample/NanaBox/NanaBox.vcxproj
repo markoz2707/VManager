@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BF54E51D-D562-4F07-8FE0-EF538B0A1628}</ProjectGuid>
+    <ProjectName>NanaBox</ProjectName>
+    <RootNamespace>NanaBox</RootNamespace>
+    <MileProjectType>WindowsApplication</MileProjectType>
+    <MileProjectManifestFile>NanaBox.manifest</MileProjectManifestFile>
+    <MinimalCoreWin>false</MinimalCoreWin>
+    <DefaultLanguage>en</DefaultLanguage>
+    <AppContainerApplication>false</AppContainerApplication>
+    <AppxPackage>false</AppxPackage>
+    <ApplicationType>Windows Store</ApplicationType>
+    <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
+    <WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion>
+    <MileProjectEnableCppWinRTSupport>true</MileProjectEnableCppWinRTSupport>
+    <MileProjectUseProjectProperties>true</MileProjectUseProjectProperties>
+    <MileProjectCompanyName>M2-Team</MileProjectCompanyName>
+    <MileProjectFileDescription>NanaBox for Windows</MileProjectFileDescription>
+    <MileProjectInternalName>NanaBox</MileProjectInternalName>
+    <MileProjectLegalCopyright>© M2-Team and Contributors. All rights reserved.</MileProjectLegalCopyright>
+    <MileProjectOriginalFilename>NanaBox.exe</MileProjectOriginalFilename>
+    <MileProjectProductName>NanaBox</MileProjectProductName>
+    <MileProjectVersion>1.5.$([System.DateTime]::Today.Subtract($([System.DateTime]::Parse('2022-04-01'))).TotalDays).0</MileProjectVersion>
+    <MileProjectVersionTag>Update 3</MileProjectVersionTag>
+    <MileUniCrtDisableRuntimeDebuggingFeature>true</MileUniCrtDisableRuntimeDebuggingFeature>
+  </PropertyGroup>
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1622" Project="Mile.Project.Platform.x64.props" />
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1622" Project="Mile.Project.Platform.ARM64.props" />
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1622" Project="Mile.Project.Cpp.Default.props" />
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1622" Project="Mile.Project.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="PropertySheet.props" />
+  </ImportGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>WINRT_NO_SOURCE_LOCATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <RuntimeLibrary Condition="'$(Configuration)' == 'Debug'">MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)' == 'Release'">MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AboutPage.cpp">
+      <DependentUpon>AboutPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="ConfigurationManager.cpp" />
+    <ClCompile Include="HostCompute.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="MainWindowControl.cpp">
+      <DependentUpon>MainWindowControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="MessagePage.cpp">
+      <DependentUpon>MessagePage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="NanaBox.Configuration.Parser.cpp" />
+    <ClCompile Include="NanaBox.cpp" />
+    <ClCompile Include="NewVirtualHardDiskPage.cpp">
+      <DependentUpon>NewVirtualHardDiskPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="ProgressRing.cpp">
+      <DependentUpon>ProgressRing.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="QuickStartPage.cpp">
+      <DependentUpon>QuickStartPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="RdpBase.cpp" />
+    <ClCompile Include="RdpClient.cpp" />
+    <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="ReloadConfirmationPage.cpp">
+      <DependentUpon>ReloadConfirmationPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="ResizeVirtualHardDiskPage.cpp">
+      <DependentUpon>ResizeVirtualHardDiskPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="SponsorPage.cpp">
+      <DependentUpon>SponsorPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="ExitConfirmationPage.cpp">
+      <DependentUpon>ExitConfirmationPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="AboutPage.idl">
+      <DependentUpon>AboutPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="App.idl">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="MainWindowControl.idl">
+      <DependentUpon>MainWindowControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="ExitConfirmationPage.idl">
+      <DependentUpon>ExitConfirmationPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="MessagePage.idl">
+      <DependentUpon>MessagePage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="NewVirtualHardDiskPage.idl">
+      <DependentUpon>NewVirtualHardDiskPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="ProgressRing.idl">
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="QuickStartPage.idl">
+      <DependentUpon>QuickStartPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="ReloadConfirmationPage.idl">
+      <DependentUpon>ReloadConfirmationPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="ResizeVirtualHardDiskPage.idl">
+      <DependentUpon>ResizeVirtualHardDiskPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="SponsorPage.idl">
+      <DependentUpon>SponsorPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PropertySheet.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="NanaBox.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AboutPage.h">
+      <DependentUpon>AboutPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="ConfigurationManager.h" />
+    <ClInclude Include="NanaBox.Configuration.Parser.h" />
+    <ClInclude Include="NanaBox.Configuration.Specification.h" />
+    <ClInclude Include="HostCompute.h" />
+    <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="MainWindowControl.h">
+      <DependentUpon>MainWindowControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="MessagePage.h">
+      <DependentUpon>MessagePage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="MsTscAx.h" />
+    <ClInclude Include="NewVirtualHardDiskPage.h">
+      <DependentUpon>NewVirtualHardDiskPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="ProgressRing.h">
+      <DependentUpon>ProgressRing.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="QuickStartPage.h">
+      <DependentUpon>QuickStartPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="RdpBase.h" />
+    <ClInclude Include="RdpClient.h" />
+    <ClInclude Include="App.h">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="NanaBoxResources.h" />
+    <ClInclude Include="ReloadConfirmationPage.h">
+      <DependentUpon>ReloadConfirmationPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="ResizeVirtualHardDiskPage.h">
+      <DependentUpon>ResizeVirtualHardDiskPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="SponsorPage.h">
+      <DependentUpon>SponsorPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="Utils.h" />
+    <ClInclude Include="ExitConfirmationPage.h">
+      <DependentUpon>ExitConfirmationPage.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="AboutPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MainWindowControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ExitConfirmationPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MessagePage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="NewVirtualHardDiskPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="QuickStartPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ReloadConfirmationPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ResizeVirtualHardDiskPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SponsorPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="NanaBoxResources.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Mile.Xaml">
+      <Version>2.5.1250</Version>
+    </PackageReference>
+    <PackageReference Include="Mile.Windows.Helpers">
+      <Version>1.0.952</Version>
+    </PackageReference>
+    <PackageReference Include="wtl">
+      <Version>10.0.10320</Version>
+    </PackageReference>
+    <PackageReference Include="Mile.Json">
+      <Version>1.0.1057</Version>
+    </PackageReference>
+    <PackageReference Include="Mile.Windows.UniCrt">
+      <Version>1.2.410</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Strings\en\AboutPage.resw" />
+    <PRIResource Include="Strings\en\MainWindow.resw" />
+    <PRIResource Include="Strings\en\ExitConfirmationPage.resw" />
+    <PRIResource Include="Strings\en\MessagePage.resw" />
+    <PRIResource Include="Strings\en\Messages.resw" />
+    <PRIResource Include="Strings\en\NewVirtualHardDiskPage.resw" />
+    <PRIResource Include="Strings\en\ResizeVirtualHardDiskPage.resw" />
+    <PRIResource Include="Strings\en\CompactVirtualHardDiskWizard.resw" />
+    <PRIResource Include="Strings\en\QuickStartPage.resw" />
+    <PRIResource Include="Strings\en\ReloadConfirmationPage.resw" />
+    <PRIResource Include="Strings\en\SponsorPage.resw" />
+    <PRIResource Include="Strings\zh-Hans\AboutPage.resw" />
+    <PRIResource Include="Strings\zh-Hans\MainWindow.resw" />
+    <PRIResource Include="Strings\zh-Hans\ExitConfirmationPage.resw" />
+    <PRIResource Include="Strings\zh-Hans\MessagePage.resw" />
+    <PRIResource Include="Strings\zh-Hans\Messages.resw" />
+    <PRIResource Include="Strings\zh-Hans\NewVirtualHardDiskPage.resw" />
+    <PRIResource Include="Strings\zh-Hans\ResizeVirtualHardDiskPage.resw" />
+    <PRIResource Include="Strings\zh-Hans\CompactVirtualHardDiskWizard.resw" />
+    <PRIResource Include="Strings\zh-Hans\QuickStartPage.resw" />
+    <PRIResource Include="Strings\zh-Hans\ReloadConfirmationPage.resw" />
+    <PRIResource Include="Strings\zh-Hans\SponsorPage.resw" />
+  </ItemGroup>
+  <Import Sdk="Mile.Project.Configurations" Version="1.0.1622" Project="Mile.Project.Cpp.targets" />
+</Project>

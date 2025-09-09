@@ -1,0 +1,13 @@
+Task Summary: Implemented and tested WMI mode for VM creation and lifecycle operations based on user feedback.
+
+Changes:
+- Updated VmCreationService to use req.Name for VM name in PowerShell creation command to match user-expected friendly name.
+- Tested VM creation via API, confirming VM is created with correct name and visible in Hyper-V Manager.
+- Tested start, stop, pause, resume operations successfully via ServiceController API endpoints.
+- Verified detection using ElementName for consistency.
+
+Issues Resolved:
+- Name mismatch between Id and friendly name preventing detection.
+- Successful creation and startup in WMI mode.
+
+Pending: Full testing of terminate, reset, delete if needed, but core operations verified.

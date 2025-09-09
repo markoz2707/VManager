@@ -1,0 +1,240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AboutButton.AutomationProperties.Name" xml:space="preserve">
+    <value>关于 NanaBox</value>
+    <comment>About NanaBox</comment>
+  </data>
+  <data name="AboutButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>关于 NanaBox</value>
+    <comment>About NanaBox</comment>
+  </data>
+  <data name="CompactVirtualHardDiskButton.AutomationProperties.Name" xml:space="preserve">
+    <value>压缩虚拟磁盘</value>
+    <comment>Compact Virtual Hard Disk</comment>
+  </data>
+  <data name="CompactVirtualHardDiskButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>压缩虚拟磁盘</value>
+    <comment>Compact Virtual Hard Disk</comment>
+  </data>
+  <data name="CreateVirtualHardDiskButton.AutomationProperties.Name" xml:space="preserve">
+    <value>创建虚拟磁盘</value>
+    <comment>Create Virtual Hard Disk</comment>
+  </data>
+  <data name="CreateVirtualHardDiskButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>创建虚拟磁盘</value>
+    <comment>Create Virtual Hard Disk</comment>
+  </data>
+  <data name="DocumentationButton.AutomationProperties.Name" xml:space="preserve">
+    <value>配置文件参考文档</value>
+    <comment>Configuration File Reference Documentation</comment>
+  </data>
+  <data name="DocumentationButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>配置文件参考文档</value>
+    <comment>Configuration File Reference Documentation</comment>
+  </data>
+  <data name="EnhancedSessionButton.AutomationProperties.Name" xml:space="preserve">
+    <value>增强会话</value>
+    <comment>Enhanced Session</comment>
+  </data>
+  <data name="EnhancedSessionButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>增强会话</value>
+    <comment>Enhanced Session</comment>
+  </data>
+  <data name="FullScreenButton.AutomationProperties.Name" xml:space="preserve">
+    <value>全屏</value>
+    <comment>Full Screen</comment>
+  </data>
+  <data name="FullScreenButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>全屏</value>
+    <comment>Full Screen</comment>
+  </data>
+  <data name="PauseVirtualMachineButton.AutomationProperties.Name" xml:space="preserve">
+    <value>暂停虚拟机</value>
+    <comment>Pause Virtual Machine</comment>
+  </data>
+  <data name="PauseVirtualMachineButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>暂停虚拟机</value>
+    <comment>Pause Virtual Machine</comment>
+  </data>
+  <data name="RedirectKeyboardNavigationButton.AutomationProperties.Name" xml:space="preserve">
+    <value>重定向键盘导航</value>
+    <comment>Redirect Keyboard Navigation</comment>
+  </data>
+  <data name="RedirectKeyboardNavigationButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>重定向键盘导航</value>
+    <comment>Redirect Keyboard Navigation</comment>
+  </data>
+  <data name="ReloadVirtualMachineSettingsButton.AutomationProperties.Name" xml:space="preserve">
+    <value>重载虚拟机设置</value>
+    <comment>Reload Virtual Machine Settings</comment>
+  </data>
+  <data name="ReloadVirtualMachineSettingsButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>重载虚拟机设置</value>
+    <comment>Reload Virtual Machine Settings</comment>
+  </data>
+  <data name="ResizeVirtualHardDiskButton.AutomationProperties.Name" xml:space="preserve">
+    <value>调整虚拟磁盘大小</value>
+    <comment>Resize Virtual Hard Disk</comment>
+  </data>
+  <data name="ResizeVirtualHardDiskButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>调整虚拟磁盘大小</value>
+    <comment>Resize Virtual Hard Disk</comment>
+  </data>
+  <data name="RestartVirtualMachineButton.AutomationProperties.Name" xml:space="preserve">
+    <value>重启虚拟机</value>
+    <comment>Restart Virtual Machine</comment>
+  </data>
+  <data name="RestartVirtualMachineButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>重启虚拟机</value>
+    <comment>Restart Virtual Machine</comment>
+  </data>
+  <data name="RestoreVirtualMachineWindowSizeButton.AutomationProperties.Name" xml:space="preserve">
+    <value>还原虚拟机窗口大小</value>
+    <comment>Restore Virtual Machine Window Size</comment>
+  </data>
+  <data name="RestoreVirtualMachineWindowSizeButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>还原虚拟机窗口大小</value>
+    <comment>Restore Virtual Machine Window Size</comment>
+  </data>
+  <data name="SettingsContentText" xml:space="preserve">
+    <value>点击确定后会弹出打开方式对话框，你可以选择你喜爱的编辑器去按照配置文件参考文档编辑你的虚拟机配置文件。</value>
+    <comment>The "Open With" dialog will pop up after you clicking "Confirm", you can choose your favorite editor to follow the "Configuration File Reference Documentation" to edit your virtual machine configuration file.</comment>
+  </data>
+  <data name="SettingsInstructionText" xml:space="preserve">
+    <value>虚拟机设置提示</value>
+    <comment>Virtual Machine Settings Notice</comment>
+  </data>
+  <data name="SponsorButton.AcquireText" xml:space="preserve">
+    <value>赞助 NanaBox</value>
+    <comment>Sponsor NanaBox</comment>
+  </data>
+  <data name="SponsorButton.SponsoredText" xml:space="preserve">
+    <value>感谢您的赞助</value>
+    <comment>Appreciate your sponsorship</comment>
+  </data>
+  <data name="VirtualMachineSettingsButton.AutomationProperties.Name" xml:space="preserve">
+    <value>虚拟机设置</value>
+    <comment>Virtual Machine Settings</comment>
+  </data>
+  <data name="VirtualMachineSettingsButton.ToolTipService.ToolTip" xml:space="preserve">
+    <value>虚拟机设置</value>
+    <comment>Virtual Machine Settings</comment>
+  </data>
+</root>

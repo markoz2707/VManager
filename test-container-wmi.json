@@ -1,0 +1,18 @@
+{
+  "Id": "test-container-wmi",
+  "Name": "test-container-wmi",
+  "Image": "mcr.microsoft.com/windows/nanoserver:ltsc2022",
+  "MemoryMB": 1024,
+  "CpuCount": 2,
+  "StorageSizeGB": 15,
+  "Mode": 1,
+  "Environment": {
+    "WMI_TEST": "wmi_value"
+  },
+  "PortMappings": {
+    "9090": 80
+  },
+  "VolumeMounts": {
+    "C:\\temp\\wmi": "C:\\app"
+  }
+}

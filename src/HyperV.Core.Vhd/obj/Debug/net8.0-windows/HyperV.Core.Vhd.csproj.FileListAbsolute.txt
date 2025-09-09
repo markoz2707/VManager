@@ -1,0 +1,13 @@
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\bin\Debug\net8.0-windows\HyperV.HyperV.Core.Vhd.deps.json
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\bin\Debug\net8.0-windows\HyperV.HyperV.Core.Vhd.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\bin\Debug\net8.0-windows\HyperV.HyperV.Core.Vhd.pdb
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\bin\Debug\net8.0-windows\HyperV.HyperV.Core.Vhd.xml
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\obj\Debug\net8.0-windows\HyperV.Core.Vhd.GeneratedMSBuildEditorConfig.editorconfig
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\obj\Debug\net8.0-windows\HyperV.Core.Vhd.AssemblyInfoInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\obj\Debug\net8.0-windows\HyperV.Core.Vhd.AssemblyInfo.cs
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\obj\Debug\net8.0-windows\HyperV.Core.Vhd.csproj.CoreCompileInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\obj\Debug\net8.0-windows\HyperV.HyperV.Core.Vhd.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\obj\Debug\net8.0-windows\refint\HyperV.HyperV.Core.Vhd.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\obj\Debug\net8.0-windows\HyperV.HyperV.Core.Vhd.xml
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\obj\Debug\net8.0-windows\HyperV.HyperV.Core.Vhd.pdb
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Vhd\obj\Debug\net8.0-windows\ref\HyperV.HyperV.Core.Vhd.dll

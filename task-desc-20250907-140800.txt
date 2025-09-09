@@ -1,0 +1,66 @@
+TASK DESCRIPTION - 2025-09-07 14:08:00
+=====================================
+
+TASK: Create ability to run VM in both modes HCS and WMI
+
+PROBLEM CONTEXT:
+- Original issue: HCN JSON compliance problems causing API call failures
+- Root cause identified: VHD files were created but VMs weren't appearing in Hyper-V Management Console
+- User had administrator privileges but VMs created via HCS API were not visible in Hyper-V Manager
+
+SOLUTION IMPLEMENTED:
+1. Added VmCreationMode enum to CreateVmRequest model:
+   - HCS = 0 (Host Compute System API - container-like, not visible in Hyper-V Manager)
+   - WMI = 1 (Windows Management Instrumentation API - full VM visible in Hyper-V Manager)
+
+2. Updated VmsController to support dual mode operation:
+   - Mode parameter determines which service to use
+   - HCS mode: Uses existing VmService.Create() method
+   - WMI mode: Uses new VmCreationService.CreateHyperVVm() method
+
+3. Implemented comprehensive WMI-based VmCreationService:
+   - Uses root\virtualization\v2 WMI namespace
+   - Proper Hyper-V VM creation with DefineSystem method
+   - WMI job completion handling (return value 4096 = job started)
+   - VHDX creation with PowerShell fallback
+   - VM-to-VHD attachment via SCSI controller
+   - Unique filename generation with timestamps to avoid conflicts
+
+4. Enhanced error handling and debugging:
+   - Added comprehensive logging for troubleshooting
+   - File conflict resolution (delete existing VHDX files)
+   - Job state monitoring and timeout handling
+
+FILES MODIFIED:
+- src/HyperV.Contracts/Models/CreateVmRequest.cs: Added VmCreationMode enum and Mode property
+- src/HyperV.Agent/Controllers/VmsController.cs: Added dual mode support with switch statement
+- src/HyperV.Core.Wmi/Services/VmCreationService.cs: Complete WMI-based VM creation service
+- src/HyperV.Agent/Program.cs: Added VmCreationService to DI container
+- src/HyperV.Core.Wmi/HyperV.Core.Wmi.csproj: Added project reference to HyperV.Contracts
+
+TEST FILES CREATED:
+- test-vm-hcs.json: Test configuration for HCS mode (Mode: 0)
+- test-vm-wmi.json: Test configuration for WMI mode (Mode: 1)
+
+CURRENT STATUS:
+- WMI service successfully creates VHDX files
+- WMI DefineSystem call returns 4096 (job started) but job path debugging needed
+- HCS mode remains functional with existing implementation
+- Application architecture supports both modes seamlessly
+
+TESTING RESULTS:
+- VHDX creation: ✅ Working (PowerShell New-VHD command successful)
+- WMI VM creation: ⚠️ Partial (job starts but completion needs verification)
+- Dual mode switching: ✅ Working (controller properly routes based on Mode parameter)
+
+NEXT STEPS:
+1. Debug WMI job completion to ensure VMs appear in Hyper-V Manager
+2. Test both modes end-to-end
+3. Verify VM visibility in Hyper-V Management Console
+4. Performance comparison between HCS and WMI modes
+
+TECHNICAL NOTES:
+- WMI approach creates proper Hyper-V VMs that should be visible in Hyper-V Manager
+- HCS approach creates compute systems suitable for container-like scenarios
+- Both modes create functional VHD/VHDX files
+- Timestamp-based naming prevents file conflicts during testing

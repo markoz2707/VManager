@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "HyperV.Agent": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://127.0.0.1:8743"
+    }
+  }
+}
