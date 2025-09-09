@@ -31,7 +31,7 @@ builder.Services.AddSingleton<NetworkService>();
 builder.Services.AddSingleton<ReplicationService>();
 builder.Services.AddSingleton<HyperV.Core.Hcs.Services.ContainerService>();
 builder.Services.AddSingleton<HyperV.Core.Wmi.Services.ContainerService>();
-builder.Services.AddSingleton<IStorageService, StorageService>();
+builder.Services.AddSingleton<IStorageService, HyperV.Core.Wmi.Services.StorageService>();
 
 var app = builder.Build();
 app.UseSwagger();

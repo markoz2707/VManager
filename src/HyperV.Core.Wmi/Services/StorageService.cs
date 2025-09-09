@@ -170,7 +170,11 @@ namespace HyperV.Core.Wmi.Services
             using var vhdSettingsClass = new ManagementClass("Msvm_VirtualHardDiskSettingData");
             vhdSettingsClass.Scope = scope;
 
-            var vhdSettings = vhdSettingsClass.CreateInstance()!;
+            var vhdSettings = vhdSettingsClass.CreateInstance();
+            if (vhdSettings == null)
+            {
+                throw new InvalidOperationException("Failed to create VirtualHardDiskSettingData instance");
+            }
 
             vhdSettings["Path"] = request.Path;
             vhdSettings["MaxInternalSize"] = request.MaxInternalSize;
