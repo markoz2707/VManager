@@ -34,13 +34,40 @@
         <member name="M:HyperV.Agent.Controllers.ContainersController.DeleteContainer(System.String)">
             <summary>Deletes a container by ID.</summary>
         </member>
+        <member name="T:HyperV.Agent.Controllers.JobsController">
+            <summary>Operacje na zadaniach związanych z pamięcią masową.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.JobsController.GetStorageJobs">
+            <summary>Pobiera listę wszystkich zadań związanych z pamięcią masową.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.JobsController.GetStorageJob(System.String)">
+            <summary>Pobiera szczegóły konkretnego zadania związanego z pamięcią masową.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.JobsController.GetJobAffectedElements(System.String)">
+            <summary>Pobiera elementy, na które wpływa zadanie.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.JobsController.CancelStorageJob(System.String)">
+            <summary>Anuluje zadanie związane z pamięcią masową.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.JobsController.DeleteStorageJob(System.String)">
+            <summary>Usuwa zakończone zadanie związane z pamięcią masową.</summary>
+        </member>
         <member name="T:HyperV.Agent.Controllers.NetworksController">
             <summary>Operacje sieciowe (HCN).</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.NetworksController.ListNetworks">
+            <summary>Listuje wszystkie sieci HCN i WMI.</summary>
         </member>
         <member name="M:HyperV.Agent.Controllers.NetworksController.CreateNat(System.String,System.String)">
             <summary>Tworzy prostą sieć NAT.</summary>
         </member>
-        <member name="M:HyperV.Agent.Controllers.NetworksController.DeleteNetwork(System.Guid)">
+        <member name="M:HyperV.Agent.Controllers.NetworksController.CreateWmiSwitch(System.String,System.String,System.String)">
+            <summary>Tworzy wirtualny przełącznik WMI.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.NetworksController.UpdateWmiSwitch(System.Guid,System.String,System.String)">
+            <summary>Edytuje wirtualny przełącznik WMI.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.NetworksController.DeleteNetwork(System.Guid,System.String)">
             <summary>Usuwa sieć.</summary>
         </member>
         <member name="M:HyperV.Agent.Controllers.NetworksController.GetNetworkProperties(System.Guid,System.String)">
@@ -120,11 +147,59 @@
         <member name="M:HyperV.Agent.Controllers.VmsController.RevertVmToSnapshot(System.String,System.String)">
             <summary>Przywraca VM do snapshotu.</summary>
         </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmStorageDevices(System.String)">
+            <summary>Pobiera listę urządzeń pamięci masowej w maszynie wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.AddVmStorageDevice(System.String,HyperV.Contracts.Models.AddStorageDeviceRequest)">
+            <summary>Dodaje urządzenie pamięci masowej do maszyny wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.RemoveVmStorageDevice(System.String,System.String)">
+            <summary>Usuwa urządzenie pamięci masowej z maszyny wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmStorageControllers(System.String)">
+            <summary>Pobiera listę kontrolerów pamięci masowej w maszynie wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmStorageDrives(System.String)">
+            <summary>Pobiera listę dysków wirtualnych w maszynie wirtualnej.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmStorageDrive(System.String,System.String)">
+            <summary>Pobiera szczegóły konkretnego dysku wirtualnego.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmStorageDriveState(System.String,System.String)">
+            <summary>Pobiera stan dysku wirtualnego.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ResetVmStorageDrive(System.String,System.String)">
+            <summary>Resetuje dysk wirtualny.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.LockVmStorageDriveMedia(System.String,System.String,HyperV.Agent.Controllers.LockMediaRequest)">
+            <summary>Blokuje/odblokowuje nośnik w dysku wirtualnym.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmStorageDriveCapabilities(System.String,System.String)">
+            <summary>Pobiera możliwości dysku wirtualnego.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ExtractMemoryFromHcsProperties(System.Text.Json.JsonDocument)">
+            <summary>Extracts memory information from HCS properties JSON.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ExtractProcessorsFromHcsProperties(System.Text.Json.JsonDocument)">
+            <summary>Extracts processor information from HCS properties JSON.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetWmiVmResourceSettings(System.String)">
+            <summary>Gets WMI VM resource settings (memory and CPU).</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.LockMediaRequest">
+            <summary>Request model for locking/unlocking media.</summary>
+        </member>
         <member name="T:HyperV.Agent.Controllers.VmConfigurationRequest">
             <summary>Request model for VM configuration.</summary>
         </member>
         <member name="T:HyperV.Agent.Controllers.CreateSnapshotRequest">
             <summary>Request model for creating snapshots.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Services.InMemoryJobService">
+            <summary>
+            Temporary in-memory implementation of IJobService. In a real scenario this would
+            query underlying WMI / VHD APIs or a persistent store for long-running storage jobs.
+            </summary>
         </member>
     </members>
 </doc>

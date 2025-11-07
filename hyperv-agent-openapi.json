@@ -3,7 +3,7 @@
   "info": {
     "title": "Hyper-V Agent API",
     "version": "v1",
-    "description": "REST API exposing Hyper-V host functions (HCS, HCN, WMI, VHD).",
+    "description": "REST API exposing comprehensive Hyper-V host functions (HCS, HCN, WMI, VHD, Storage Management, Jobs).",
     "contact": {
       "name": "HyperV Agent",
       "email": "admin@example.com"
@@ -27,7 +27,7 @@
     "/api/v1/vms": {
       "post": {
         "summary": "Create new VM",
-        "description": "Creates a VM using HCS JSON schema.",
+        "description": "Creates a VM using HCS or WMI API based on Mode parameter.",
         "requestBody": {
           "required": true,
           "content": {
@@ -44,6 +44,421 @@
           },
           "400": {
             "description": "Invalid request"
+          }
+        }
+      },
+      "get": {
+        "summary": "List VMs",
+        "description": "Lists all VMs from both HCS and WMI backends.",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/v1/vms/{name}/present": {
+      "get": {
+        "summary": "Check VM presence",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "VM presence info"
+          }
+        }
+      }
+    },
+    "/api/v1/vms/{name}/storage/devices": {
+      "get": {
+        "summary": "Get VM Storage Devices",
+        "description": "Gets list of storage devices in a VM.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StorageDeviceResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "VM not found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Add VM Storage Device",
+        "description": "Adds a storage device to a VM.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddStorageDeviceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Storage device added successfully"
+          },
+          "404": {
+            "description": "VM not found"
+          }
+        }
+      }
+    },
+    "/api/v1/vms/{name}/storage/drives": {
+      "get": {
+        "summary": "Get VM Storage Drives",
+        "description": "Gets list of virtual drives in a VM.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "404": {
+            "description": "VM not found"
+          }
+        }
+      }
+    },
+    "/api/v1/vms/{name}/storage/drives/{driveId}": {
+      "get": {
+        "summary": "Get VM Storage Drive",
+        "description": "Gets details of a specific virtual drive.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "driveId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "404": {
+            "description": "VM or drive not found"
+          }
+        }
+      }
+    },
+    "/api/v1/vms/{name}/storage/drives/{driveId}/reset": {
+      "post": {
+        "summary": "Reset VM Storage Drive",
+        "description": "Resets a virtual drive.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "driveId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Drive reset successfully"
+          },
+          "404": {
+            "description": "VM or drive not found"
+          }
+        }
+      }
+    },
+    "/api/storage/vhd": {
+      "post": {
+        "tags": ["Storage"],
+        "summary": "Create VHD",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVhdRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "VHD created successfully"
+          }
+        }
+      }
+    },
+    "/api/storage/vhdset/convert": {
+      "post": {
+        "tags": ["Storage"],
+        "summary": "Convert VHD to VHD Set",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertToVhdSetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "VHD Set conversion started successfully"
+          }
+        }
+      }
+    },
+    "/api/storage/vhdset/{vhdSetPath}/info": {
+      "get": {
+        "tags": ["Storage"],
+        "summary": "Get VHD Set Information",
+        "parameters": [
+          {
+            "name": "vhdSetPath",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VhdSetInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/storage/vhdset/{vhdSetPath}/snapshots": {
+      "post": {
+        "tags": ["Storage"],
+        "summary": "Create VHD Snapshot",
+        "parameters": [
+          {
+            "name": "vhdSetPath",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVhdSnapshotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Snapshot created successfully"
+          }
+        }
+      }
+    },
+    "/api/storage/vhd/{vhdPath}/tracking/enable": {
+      "post": {
+        "tags": ["Storage"],
+        "summary": "Enable Change Tracking",
+        "parameters": [
+          {
+            "name": "vhdPath",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Change tracking enabled successfully"
+          }
+        }
+      }
+    },
+    "/api/storage/vhd/{vhdPath}/changes": {
+      "get": {
+        "tags": ["Storage"],
+        "summary": "Get Virtual Disk Changes",
+        "parameters": [
+          {
+            "name": "vhdPath",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "changeTrackingId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VirtualDiskChangesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/storage": {
+      "get": {
+        "tags": ["Jobs"],
+        "summary": "Get Storage Jobs",
+        "description": "Gets list of all storage jobs.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StorageJobResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/storage/{jobId}": {
+      "get": {
+        "tags": ["Jobs"],
+        "summary": "Get Storage Job",
+        "description": "Gets details of a specific storage job.",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageJobResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Jobs"],
+        "summary": "Delete Storage Job",
+        "description": "Deletes a completed storage job.",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Storage job deleted successfully"
+          },
+          "404": {
+            "description": "Job not found"
           }
         }
       }
@@ -73,26 +488,6 @@
         "responses": {
           "200": {
             "description": "Network created"
-          }
-        }
-      }
-    },
-    "/api/v1/service/vm-present/{name}": {
-      "get": {
-        "summary": "Check VM presence",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "VM presence info"
           }
         }
       }
@@ -128,12 +523,174 @@
           "switchName": {
             "type": "string",
             "nullable": true
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["HCS", "WMI"],
+            "description": "Creation mode"
           }
         },
         "required": [
           "id",
           "name"
         ]
+      },
+      "CreateVhdRequest": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "VHD file path"
+          },
+          "maxInternalSize": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum size in bytes"
+          },
+          "type": {
+            "type": "integer",
+            "description": "VHD type"
+          }
+        },
+        "required": ["path", "maxInternalSize"]
+      },
+      "ConvertToVhdSetRequest": {
+        "type": "object",
+        "properties": {
+          "sourcePath": {
+            "type": "string",
+            "description": "Source VHD path"
+          },
+          "destinationPath": {
+            "type": "string",
+            "description": "Destination VHD Set path"
+          },
+          "blockSize": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "required": ["sourcePath", "destinationPath"]
+      },
+      "CreateVhdSnapshotRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Snapshot name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Snapshot description",
+            "nullable": true
+          }
+        },
+        "required": ["name"]
+      },
+      "StorageJobResponse": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": ["Unknown", "New", "Starting", "Running", "Suspended", "ShuttingDown", "Completed", "Terminated", "Killed", "Exception", "Service"]
+          },
+          "percentComplete": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "StorageDeviceResponse": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string"
+          },
+          "deviceType": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AddStorageDeviceRequest": {
+        "type": "object",
+        "properties": {
+          "deviceType": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": ["deviceType", "path"]
+      },
+      "VhdSetInformationResponse": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "virtualSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "physicalSize": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "VirtualDiskChangesResponse": {
+        "type": "object",
+        "properties": {
+          "totalChangedBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hasMoreChanges": {
+            "type": "boolean"
+          }
+        }
+      },
+      "VirtualHardDiskState": {
+        "type": "object",
+        "properties": {
+          "inUse": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "health": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "operationalStatus": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inUseBy": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       }
     }
   }

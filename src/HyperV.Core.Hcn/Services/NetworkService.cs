@@ -5,10 +5,10 @@ using HyperV.Core.Hcn.Interop;
 namespace HyperV.Core.Hcn.Services;
 
 /// <summary>Serwis tworzenia prostych sieci NAT (HCN).</summary>
-public sealed class NetworkService
+public class NetworkService
 {
     /// <summary>Tworzy sieć NAT o podanej nazwie i prefiksie.</summary>
-    public Guid CreateNATNetwork(string name, string addressPrefix = "192.168.100.0/24")
+    public virtual Guid CreateNATNetwork(string name, string addressPrefix = "192.168.100.0/24")
     {
         var id = Guid.NewGuid();
         var json = $@"{{
@@ -22,20 +22,20 @@ public sealed class NetworkService
         finally { if (handle != IntPtr.Zero) HcnNative.HcnCloseNetwork(handle); }
     }
 
-    public void DeleteNetwork(Guid id)
+    public virtual void DeleteNetwork(Guid id)
     {
         var hr = HcnNative.HcnDeleteNetwork(id, out var err);
         if (hr != 0) throw new Win32Exception(hr);
     }
 
-    public IntPtr OpenNetwork(Guid id)
+    public virtual IntPtr OpenNetwork(Guid id)
     {
         var hr = HcnNative.HcnOpenNetwork(id, out var handle, out var err);
         if (hr != 0) throw new Win32Exception(hr);
         return handle;
     }
 
-    public Guid CreateEndpoint(Guid networkId, string name, string ipAddress = "")
+    public virtual Guid CreateEndpoint(Guid networkId, string name, string ipAddress = "")
     {
         var endpointId = Guid.NewGuid();
         var json = string.IsNullOrEmpty(ipAddress) 
@@ -48,13 +48,13 @@ public sealed class NetworkService
         finally { if (handle != IntPtr.Zero) HcnNative.HcnCloseEndpoint(handle); }
     }
 
-    public void DeleteEndpoint(Guid endpointId)
+    public virtual void DeleteEndpoint(Guid endpointId)
     {
         var hr = HcnNative.HcnDeleteEndpoint(endpointId, out var err);
         if (hr != 0) throw new Win32Exception(hr);
     }
 
-    public string QueryEndpointProperties(Guid endpointId, string query = "")
+    public virtual string QueryEndpointProperties(Guid endpointId, string query = "")
     {
         var hr = HcnNative.HcnOpenEndpoint(endpointId, out var handle, out var err);
         if (hr != 0) throw new Win32Exception(hr);
@@ -71,7 +71,7 @@ public sealed class NetworkService
         }
     }
 
-    public string QueryNetworkProperties(Guid networkId, string query = "")
+    public virtual string QueryNetworkProperties(Guid networkId, string query = "")
     {
         var handle = OpenNetwork(networkId);
         try
@@ -84,5 +84,22 @@ public sealed class NetworkService
         {
             if (handle != IntPtr.Zero) HcnNative.HcnCloseNetwork(handle);
         }
+    }
+
+    /// <summary>Listuje wszystkie sieci HCN.</summary>
+    public virtual string ListNetworks()
+    {
+        
+        var hr = HcnNative.HcnEnumerateNetworks("", out var result, out var err);
+        if (hr != 0) throw new Win32Exception(hr);
+        return result ?? "[]";
+    }
+
+    /// <summary>Listuje wszystkie endpointy HCN.</summary>
+    public virtual string ListEndpoints()
+    {
+        var hr = HcnNative.HcnEnumerateEndpoints("", out var result, out var err);
+        if (hr != 0) throw new Win32Exception(hr);
+        return result ?? "[]";
     }
 }

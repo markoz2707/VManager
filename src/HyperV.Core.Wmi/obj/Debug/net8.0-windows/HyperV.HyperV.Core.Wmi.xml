@@ -25,6 +25,12 @@
         <member name="M:HyperV.Core.Wmi.Services.ContainerService.IsContainerPresent(System.String)">
             <summary>Checks if a WMI container exists by name.</summary>
         </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.ListContainers">
+            <summary>Lists all WMI containers.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.GetContainerStatus(System.Management.ManagementObject)">
+            <summary>Gets the status of a WMI container.</summary>
+        </member>
         <member name="M:HyperV.Core.Wmi.Services.ContainerService.StartContainer(System.String)">
             <summary>Starts a WMI container by name.</summary>
         </member>
@@ -51,6 +57,12 @@
         </member>
         <member name="M:HyperV.Core.Wmi.Services.ContainerService.GetContainer(System.String)">
             <summary>Gets a container by name.</summary>
+        </member>
+        <member name="T:HyperV.Core.Wmi.Services.ImageManagementService">
+            <summary>
+            WMI-based implementation of Image Management Service
+            Provides virtual media management operations using Hyper-V WMI APIs
+            </summary>
         </member>
         <member name="T:HyperV.Core.Wmi.Services.ReplicationService">
             <summary>Serwis replikacji maszyn wirtualnych (WMI).</summary>
@@ -168,6 +180,76 @@
         </member>
         <member name="M:HyperV.Core.Wmi.Services.VmService.RevertVmToSnapshot(System.String,System.String)">
             <summary>Reverts a VM to a specific snapshot.</summary>
+        </member>
+        <member name="T:HyperV.Core.Wmi.Services.WmiNetworkService">
+            <summary>
+            WMI Network service for listing Hyper-V virtual switches.
+            Uses Msvm_VirtualEthernetSwitch (Name = GUID, ElementName = display name).
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ListVirtualSwitches">
+            <summary>
+            Lists virtual switches using Msvm_VirtualEthernetSwitch.
+            Returns Id (GUID) and Name (ElementName). Never throws; returns empty on errors.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ListVirtualSwitchesSummary">
+            <summary>
+            Returns a more detailed list with type, notes and basic metadata.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreateVirtualSwitch(System.String,HyperV.Core.Wmi.Services.WmiNetworkService.WmiSwitchType,System.String)">
+            <summary>
+            Creates a virtual switch (Internal/Private/External supported). Returns the switch Guid.
+            Based on Microsoft CreateSwitch sample from Windows-classic-samples.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreatePrivateSwitch(System.String,System.String)">
+            <summary>
+            Creates a private virtual switch (no host access).
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreateInternalSwitch(System.String,System.String)">
+            <summary>
+            Creates an internal virtual switch (with host access).
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreateSwitchInternal(System.String,System.String,System.String[])">
+            <summary>
+            Core method to create the switch with specified ports.
+            Based on Microsoft CreateSwitch sample implementation.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetEthernetSwitchManagementService">
+            <summary>
+            Gets the Ethernet Switch Management Service.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetHostComputerSystem">
+            <summary>
+            Gets the host computer system for internal switch ports.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.DeleteVirtualSwitch(System.Guid)">
+            <summary>
+            Deletes a virtual switch. Based on Microsoft DeleteSwitch sample.
+            Note: This can delete any type of switch. Any ports connected to external or internal resources are also deleted.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.UpdateVirtualSwitch(System.Guid,System.String,System.String)">
+            <summary>
+            Updates basic switch settings (name, notes). Returns true if modified.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ListPhysicalAdapters">
+            <summary>
+            Lists physical adapters (Win32_NetworkAdapter) visible to host that could be used for External switch.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ListInstalledExtensions">
+            <summary>
+            Lists installed Ethernet switch extensions on host.
+            </summary>
         </member>
     </members>
 </doc>

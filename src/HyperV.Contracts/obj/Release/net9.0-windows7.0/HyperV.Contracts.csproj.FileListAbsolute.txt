@@ -1,0 +1,15 @@
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\bin\Release\net9.0-windows7.0\HyperV.HyperV.Contracts.deps.json
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\bin\Release\net9.0-windows7.0\HyperV.HyperV.Contracts.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\bin\Release\net9.0-windows7.0\HyperV.HyperV.Contracts.pdb
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\bin\Release\net9.0-windows7.0\HyperV.HyperV.Contracts.xml
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\HyperV.Contracts.csproj.AssemblyReference.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\HyperV.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\HyperV.Contracts.AssemblyInfoInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\HyperV.Contracts.AssemblyInfo.cs
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\HyperV.Contracts.csproj.CoreCompileInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\HyperV.Contracts.sourcelink.json
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\HyperV.HyperV.Contracts.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\refint\HyperV.HyperV.Contracts.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\HyperV.HyperV.Contracts.xml
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\HyperV.HyperV.Contracts.pdb
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Release\net9.0-windows7.0\ref\HyperV.HyperV.Contracts.dll

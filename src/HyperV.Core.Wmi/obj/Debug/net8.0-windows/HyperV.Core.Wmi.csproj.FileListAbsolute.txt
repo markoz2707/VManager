@@ -10,6 +10,7 @@ I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net8.0-window
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net8.0-windows\HyperV.Core.Wmi.AssemblyInfoInputs.cache
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net8.0-windows\HyperV.Core.Wmi.AssemblyInfo.cs
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net8.0-windows\HyperV.Core.Wmi.csproj.CoreCompileInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net8.0-windows\HyperV.Core.Wmi.sourcelink.json
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net8.0-windows\HyperV.C.C4091BFB.Up2Date
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net8.0-windows\HyperV.HyperV.Core.Wmi.dll
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net8.0-windows\refint\HyperV.HyperV.Core.Wmi.dll

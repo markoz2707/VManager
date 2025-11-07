@@ -1,7 +1,7 @@
 {
   "version": 3,
   "targets": {
-    "net8.0-windows7.0": {
+    "net9.0-windows8.0": {
       "Microsoft.Extensions.ApiDescription.Server/6.0.5": {
         "type": "package",
         "build": {
@@ -108,12 +108,12 @@
       "System.CodeDom/9.0.8": {
         "type": "package",
         "compile": {
-          "lib/net8.0/System.CodeDom.dll": {
+          "lib/net9.0/System.CodeDom.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net8.0/System.CodeDom.dll": {
+          "lib/net9.0/System.CodeDom.dll": {
             "related": ".xml"
           }
         },
@@ -127,12 +127,12 @@
           "System.CodeDom": "9.0.8"
         },
         "compile": {
-          "lib/net8.0/System.Management.dll": {
+          "lib/net9.0/System.Management.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net8.0/System.Management.dll": {
+          "lib/net9.0/System.Management.dll": {
             "related": ".xml"
           }
         },
@@ -140,7 +140,7 @@
           "buildTransitive/net8.0/_._": {}
         },
         "runtimeTargets": {
-          "runtimes/win/lib/net8.0/System.Management.dll": {
+          "runtimes/win/lib/net9.0/System.Management.dll": {
             "assetType": "runtime",
             "rid": "win"
           }
@@ -148,7 +148,7 @@
       },
       "HyperV.HyperV.Contracts/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v8.0",
+        "framework": ".NETCoreApp,Version=v9.0",
         "dependencies": {
           "Swashbuckle.AspNetCore.Annotations": "6.6.2"
         },
@@ -161,7 +161,7 @@
       },
       "HyperV.HyperV.Core.Hcn/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v8.0",
+        "framework": ".NETCoreApp,Version=v9.0",
         "compile": {
           "bin/placeholder/HyperV.HyperV.Core.Hcn.dll": {}
         },
@@ -171,9 +171,10 @@
       },
       "HyperV.HyperV.Core.Hcs/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v8.0",
+        "framework": ".NETCoreApp,Version=v9.0",
         "dependencies": {
-          "HyperV.HyperV.Contracts": "1.0.0"
+          "HyperV.HyperV.Contracts": "1.0.0",
+          "System.Management": "7.0.0"
         },
         "compile": {
           "bin/placeholder/HyperV.HyperV.Core.Hcs.dll": {}
@@ -184,7 +185,10 @@
       },
       "HyperV.HyperV.Core.Vhd/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v8.0",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "HyperV.HyperV.Contracts": "1.0.0"
+        },
         "compile": {
           "bin/placeholder/HyperV.HyperV.Core.Vhd.dll": {}
         },
@@ -194,7 +198,7 @@
       },
       "HyperV.HyperV.Core.Wmi/1.0.0": {
         "type": "project",
-        "framework": ".NETCoreApp,Version=v8.0",
+        "framework": ".NETCoreApp,Version=v9.0",
         "dependencies": {
           "HyperV.HyperV.Contracts": "1.0.0",
           "System.Management": "9.0.8"
@@ -671,7 +675,7 @@
     }
   },
   "projectFileDependencyGroups": {
-    "net8.0-windows7.0": [
+    "net9.0-windows8.0": [
       "HyperV.HyperV.Contracts >= 1.0.0",
       "HyperV.HyperV.Core.Hcn >= 1.0.0",
       "HyperV.HyperV.Core.Hcs >= 1.0.0",
@@ -703,7 +707,7 @@
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        "net8.0-windows"
+        "net9.0-windows8.0"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -711,8 +715,8 @@
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net8.0-windows7.0": {
-          "targetAlias": "net8.0-windows",
+        "net9.0-windows8.0": {
+          "targetAlias": "net9.0-windows8.0",
           "projectReferences": {
             "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
               "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj"
@@ -742,11 +746,11 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
-      "net8.0-windows7.0": {
-        "targetAlias": "net8.0-windows",
+      "net9.0-windows8.0": {
+        "targetAlias": "net9.0-windows8.0",
         "dependencies": {
           "Swashbuckle.AspNetCore": {
             "target": "Package",
@@ -776,7 +780,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-rc.1.25451.107/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

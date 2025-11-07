@@ -1,11 +1,12 @@
+using Microsoft.AspNetCore.Mvc;
 using HyperV.Contracts.Interfaces;
 using HyperV.Contracts.Models;
-using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace HyperV.Agent.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/storage")]
     public class StorageController : ControllerBase
     {
         private readonly IStorageService _storageService;
@@ -15,39 +16,39 @@ namespace HyperV.Agent.Controllers
             _storageService = storageService;
         }
 
-        [HttpPost("vhd")]
-        public IActionResult CreateVhd([FromBody] CreateVhdRequest request)
-        {
-            _storageService.CreateVirtualHardDisk(request);
-            return Ok();
-        }
-
-        [HttpPut("vhd/attach")]
-        public IActionResult AttachVhd([FromQuery] string vmName, [FromQuery] string vhdPath)
+        /// <summary>
+        /// Lists all fixed storage devices with details (name, filesystem, size, used, free).
+        /// </summary>
+        [HttpGet("devices")]
+        public async Task<ActionResult<List<StorageDeviceInfo>>> GetStorageDevices()
         {
             try
             {
-                _storageService.AttachVirtualHardDisk(vmName, vhdPath);
-                return Ok();
+                var devices = await _storageService.ListStorageDevicesAsync();
+                return Ok(devices);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message, details = ex.ToString() });
+                return StatusCode(500, new { error = ex.Message });
             }
         }
 
-        [HttpPut("vhd/detach")]
-        public IActionResult DetachVhd([FromQuery] string vmName, [FromQuery] string vhdPath)
+        /// <summary>
+        /// Gets suitable storage locations for VHDX based on minimum free space.
+        /// </summary>
+        /// <param name="minGb">Minimum free space in GB (default: 10).</param>
+        [HttpGet("locations")]
+        public async Task<ActionResult<List<StorageLocation>>> GetSuitableVhdLocations([FromQuery(Name = "minGb"), Range(1, int.MaxValue)] long minGb = 10)
         {
-            _storageService.DetachVirtualHardDisk(vmName, vhdPath);
-            return Ok();
-        }
-
-        [HttpPut("vhd/resize")]
-        public IActionResult ResizeVhd([FromBody] ResizeVhdRequest request)
-        {
-            _storageService.ResizeVirtualHardDisk(request);
-            return Ok();
+            try
+            {
+                var locations = await _storageService.GetSuitableVhdLocationsAsync(minGb);
+                return Ok(locations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
     }
 }

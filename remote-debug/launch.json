@@ -1,0 +1,68 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Remote Debug HyperV Agent",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeProgram": "powershell",
+                "pipeArgs": [
+                    "-Command",
+                    "ssh administrator@192.168.7.63 'C:\\Program Files\\dotnet\\dotnet --version > nul && echo dotnet available || echo dotnet not found'"
+                ],
+                "debuggerPath": "C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App\\8.0.0\\dotnet.exe",
+                "pipeCwd": "${workspaceFolder}",
+                "quoteArgs": false
+            },
+            "justMyCode": false,
+            "requireExactSource": false,
+            "logging": {
+                "moduleLoad": false,
+                "engineLogging": true
+            }
+        },
+        {
+            "name": "Launch Remote HyperV Agent",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "dotnet",
+            "args": ["C:\\HyperV-Agent\\HyperV.Agent.dll"],
+            "cwd": "C:\\HyperV-Agent",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "pipeTransport": {
+                "pipeProgram": "powershell",
+                "pipeArgs": [
+                    "-Command",
+                    "$session = New-PSSession -ComputerName 192.168.7.63 -Credential (New-Object System.Management.Automation.PSCredential('administrator', (ConvertTo-SecureString 'Zaq1@wsx' -AsPlainText -Force))); Invoke-Command -Session $session -ScriptBlock { param($cmd, $args, $cwd) Set-Location $cwd; & $cmd $args } -ArgumentList 'dotnet', 'C:\\HyperV-Agent\\HyperV.Agent.dll', 'C:\\HyperV-Agent'"
+                ],
+                "debuggerPath": "vsdbg",
+                "pipeCwd": "${workspaceFolder}",
+                "quoteArgs": false
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://0.0.0.0:8743"
+            },
+            "justMyCode": false
+        },
+        {
+            "name": "Debug Remote Process (Manual)",
+            "type": "coreclr",
+            "request": "attach",
+            "processName": "HyperV.Agent",
+            "pipeTransport": {
+                "pipeProgram": "powershell",
+                "pipeArgs": [
+                    "-Command",
+                    "Enter-PSSession -ComputerName 192.168.7.63 -Credential (New-Object System.Management.Automation.PSCredential('administrator', (ConvertTo-SecureString 'Zaq1@wsx' -AsPlainText -Force)))"
+                ],
+                "debuggerPath": "vsdbg",
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "justMyCode": false
+        }
+    ]
+}

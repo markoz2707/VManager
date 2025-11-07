@@ -8,120 +8,96 @@ using HyperV.Contracts.Models;
 namespace HyperV.Core.Wmi.Services;
 
 /// <summary>VM Creation Service using Hyper-V WMI API for proper VM registration.</summary>
-public sealed class VmCreationService
+// Made non-sealed and methods virtual to allow Moq-based unit tests to create substitutes.
+public class VmCreationService
 {
-    /// <summary>Creates a VM using Hyper-V WMI API that appears in Hyper-V Manager.</summary>
-    public string CreateHyperVVm(string id, CreateVmRequest req)
+    /// <summary>Creates a VM using pure Hyper-V WMI API based on Microsoft samples.</summary>
+    public virtual string CreateHyperVVm(string id, CreateVmRequest req)
     {
         try
         {
-            Console.WriteLine($"Creating Hyper-V VM using PowerShell fallback: {id}");
+            Console.WriteLine($"Creating Hyper-V VM using pure WMI: {req.Name}");
             
-            // Determine VHD path - use provided path or create default
-            var vhdPath = req.VhdPath;
-            if (string.IsNullOrEmpty(vhdPath))
-            {
-                var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
-                vhdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), 
-                    "HyperV.Agent", "VHDs", $"{id}-{timestamp}.vhdx");
-            }
-            
-            // Create VHD if it doesn't exist
-            if (!File.Exists(vhdPath))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(vhdPath)!);
-                CreateVhdWithPowerShell(vhdPath, (uint)req.DiskSizeGB);
-            }
-            
-            // Use PowerShell to create the VM with enhanced parameters
-            var vmName = req.Name;
-            var memoryBytes = (ulong)req.MemoryMB * 1024 * 1024;
-            var cpuCount = req.CpuCount;
-            var generation = req.Generation;
-            
-            // Build PowerShell command step by step
-            var psCommands = new List<string>();
-            
-            // Create VM without VHD initially, then add it manually for better control
-            psCommands.Add($"New-VM -Name '{vmName}' -MemoryStartupBytes {memoryBytes} -Generation {generation} -NoVHD");
-            
-            // Add the VHD to the VM
-            psCommands.Add($"Add-VMHardDiskDrive -VMName '{vmName}' -Path '{vhdPath}'");
-            
-            // Set CPU count
-            psCommands.Add($"Set-VMProcessor -VMName '{vmName}' -Count {cpuCount}");
-            
-            // Configure Secure Boot for Generation 2 VMs
-            if (generation == 2)
-            {
-                var secureBootState = req.SecureBoot ? "On" : "Off";
-                psCommands.Add($"Set-VMFirmware -VMName '{vmName}' -EnableSecureBoot {secureBootState}");
-            }
-            
-            // Remove default network adapter and add custom one if switch specified
-            psCommands.Add($"Remove-VMNetworkAdapter -VMName '{vmName}' -Name 'Network Adapter'");
-            if (!string.IsNullOrEmpty(req.SwitchName))
-            {
-                psCommands.Add($"Add-VMNetworkAdapter -VMName '{vmName}' -SwitchName '{req.SwitchName}' -Name 'Network Adapter'");
-            }
-            
-            // Add notes if specified
-            if (!string.IsNullOrEmpty(req.Notes))
-            {
-                var escapedNotes = req.Notes.Replace("'", "''").Replace("`", "``");
-                psCommands.Add($"Set-VM -VMName '{vmName}' -Notes '{escapedNotes}'");
-            }
-            
-            var psCommand = string.Join("; ", psCommands);
-            
-            var startInfo = new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = "powershell.exe",
-                Arguments = $"-Command \"{psCommand}\"",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
-            };
-
-            using var process = System.Diagnostics.Process.Start(startInfo);
-            if (process != null)
-            {
-                process.WaitForExit(60000);
-                
-                var output = process.StandardOutput.ReadToEnd();
-                var error = process.StandardError.ReadToEnd();
-                
-                if (process.ExitCode != 0)
-                {
-                    throw new InvalidOperationException($"PowerShell VM creation failed: {error}\nOutput: {output}");
-                }
-                
-                Console.WriteLine($"PowerShell VM creation output: {output}");
-            }
-            
-            // Connect to WMI to get VM path for consistency
             var scope = new ManagementScope(@"root\virtualization\v2");
             scope.Connect();
             
-            var vmPath = FindVmByName(scope, vmName);
+            // Create VM using Microsoft pattern from Generation2VM sample
+            using var managementService = WmiUtilities.GetVirtualMachineManagementService(scope);
             
+            // Create VM settings based on Microsoft sample
+            var vmSettingsText = CreateVmSettingsText(req.Name, req.Generation, req.Notes);
+            
+            using var inParams = managementService.GetMethodParameters("DefineSystem");
+            inParams["SystemSettings"] = vmSettingsText;
+            inParams["ReferenceConfiguration"] = null;
+            inParams["ResourceSettings"] = Array.Empty<string>();
+            
+            using var outParams = managementService.InvokeMethod("DefineSystem", inParams, null);
+            WmiUtilities.ValidateOutput(outParams, scope, true, true);
+
+            // Get the VM that was created from the DefineSystem result
+            string? vmPath = null;
+
+            // First try to get from the direct result
+            if (outParams["ResultingSystem"] != null)
+            {
+                vmPath = outParams["ResultingSystem"].ToString();
+            }
+
+            // If not available, try to get from the job result (for async operations)
+            if (string.IsNullOrEmpty(vmPath) && (uint)outParams["ReturnValue"] == 4096)
+            {
+                using var job = new ManagementObject(outParams["Job"].ToString());
+                job.Scope = scope;
+                job.Get();
+
+                // Get the resulting system from the job
+                if (job["ResultingSystem"] != null)
+                {
+                    vmPath = job["ResultingSystem"].ToString();
+                }
+            }
+
             if (string.IsNullOrEmpty(vmPath))
             {
-                throw new InvalidOperationException("VM was created but could not be found via WMI");
+                // Fallback to querying by name if path not available
+                Console.WriteLine("VM path not found in DefineSystem result, falling back to name query");
+                using var vmFromQuery = WmiUtilities.GetVirtualMachine(req.Name, scope);
+                vmPath = vmFromQuery.Path.Path;
             }
-            
-            Console.WriteLine($"VM created successfully: {vmPath}");
-            
-            return System.Text.Json.JsonSerializer.Serialize(new
+
+            var vm = new ManagementObject(vmPath);
+            vm.Scope = scope;
+            using (vm)
             {
-                Id = id,
-                Name = req.Name,
-                Status = "Created Successfully",
-                VhdPath = vhdPath,
-                VmPath = vmPath,
-                Note = "VM created using PowerShell and should be visible in Hyper-V Manager"
-            });
+                // Configure VM resources using WMI
+                ConfigureVmResourcesWmi(scope, vm, req);
+                
+                // Create and attach VHD if needed
+                if (!string.IsNullOrEmpty(req.VhdPath) || req.DiskSizeGB > 0)
+                {
+                    var vhdPath = req.VhdPath;
+                    if (string.IsNullOrEmpty(vhdPath))
+                    {
+                        var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+                        vhdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                            "HyperV.Agent", "VHDs", $"{id}-{timestamp}.vhdx");
+                    }
+                    
+                    CreateAndAttachVhd(scope, vm, vhdPath, req.DiskSizeGB);
+                }
+                
+                Console.WriteLine($"VM {req.Name} created successfully using pure WMI");
+                
+                return System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    Id = id,
+                    Name = req.Name,
+                    Status = "Created Successfully",
+                    VmPath = vm.Path.Path,
+                    Note = "VM created using pure WMI and should be visible in Hyper-V Manager"
+                });
+            }
         }
         catch (Exception ex)
         {
@@ -130,70 +106,55 @@ public sealed class VmCreationService
         }
     }
     
-    private string CreateVmSettingsXml(string name, int memoryMB, int cpuCount)
+    /// <summary>
+    /// Creates VM settings text in WMI DTD format based on Microsoft Generation2VM sample.
+    /// </summary>
+    private string CreateVmSettingsText(string name, int generation, string? notes)
     {
-        // Minimal WMI VM settings - only essential properties
-        return $@"
-<INSTANCE CLASSNAME=""Msvm_VirtualSystemSettingData"">
-    <PROPERTY NAME=""ElementName"" TYPE=""string"">
-        <VALUE>{name}</VALUE>
-    </PROPERTY>
-    <PROPERTY NAME=""VirtualSystemType"" TYPE=""string"">
-        <VALUE>Microsoft:Hyper-V:System:Realized</VALUE>
-    </PROPERTY>
-</INSTANCE>";
+        var scope = new ManagementScope(@"root\virtualization\v2");
+        scope.Connect();
+        
+        using var virtualSystemSettingClass = new ManagementClass(scope, new ManagementPath("Msvm_VirtualSystemSettingData"), null);
+        using var virtualSystemSetting = virtualSystemSettingClass.CreateInstance();
+        
+        virtualSystemSetting["ElementName"] = name;
+        virtualSystemSetting["ConfigurationDataRoot"] = @"C:\ProgramData\Microsoft\Windows\Hyper-V\";
+        
+        // Set generation - based on Microsoft Generation2VM sample
+        if (generation == 2)
+        {
+            virtualSystemSetting["VirtualSystemSubtype"] = "Microsoft:Hyper-V:SubType:2";
+        }
+        else
+        {
+            virtualSystemSetting["VirtualSystemSubtype"] = "Microsoft:Hyper-V:SubType:1";
+        }
+        
+        if (!string.IsNullOrEmpty(notes))
+        {
+            virtualSystemSetting["Notes"] = new string[] { notes };
+        }
+        
+        return virtualSystemSetting.GetText(TextFormat.WmiDtd20);
     }
     
-    private void ConfigureVmResources(ManagementScope scope, ManagementObject vm, int memoryMB, int cpuCount)
+    /// <summary>
+    /// Configures VM resources using Microsoft WMI patterns.
+    /// </summary>
+    private void ConfigureVmResourcesWmi(ManagementScope scope, ManagementObject vm, CreateVmRequest req)
     {
         try
         {
-            Console.WriteLine($"Configuring VM resources: Memory={memoryMB}MB, CPU={cpuCount}");
+            Console.WriteLine($"Configuring VM resources: Memory={req.MemoryMB}MB, CPU={req.CpuCount}");
             
-            // Get VM settings
-            var settingsQuery = $"ASSOCIATORS OF {{{vm.Path}}} WHERE AssocClass = Msvm_SettingsDefineState ResultClass = Msvm_VirtualSystemSettingData";
-            using var settingsSearcher = new ManagementObjectSearcher(scope, new ObjectQuery(settingsQuery));
+            using var managementService = WmiUtilities.GetVirtualMachineManagementService(scope);
+            using var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
             
-            ManagementObject? vmSettings = null;
-            foreach (ManagementObject obj in settingsSearcher.Get())
-            {
-                vmSettings = obj;
-                break;
-            }
+            // Configure memory using ModifyResourceSettings
+            ConfigureMemoryResource(scope, managementService, vmSettings, req.MemoryMB);
             
-            if (vmSettings == null)
-            {
-                Console.WriteLine("Could not find VM settings to configure resources");
-                return;
-            }
-            
-            // Configure memory
-            var memoryQuery = $"ASSOCIATORS OF {{{vmSettings.Path}}} WHERE AssocClass = Msvm_VirtualSystemSettingDataComponent ResultClass = Msvm_MemorySettingData";
-            using var memorySearcher = new ManagementObjectSearcher(scope, new ObjectQuery(memoryQuery));
-            
-            foreach (ManagementObject memorySettings in memorySearcher.Get())
-            {
-                memorySettings["VirtualQuantity"] = (ulong)memoryMB;
-                memorySettings["Reservation"] = (ulong)memoryMB;
-                memorySettings["Limit"] = (ulong)memoryMB;
-                memorySettings.Put();
-                Console.WriteLine($"Memory configured to {memoryMB}MB");
-                break;
-            }
-            
-            // Configure CPU
-            var cpuQuery = $"ASSOCIATORS OF {{{vmSettings.Path}}} WHERE AssocClass = Msvm_VirtualSystemSettingDataComponent ResultClass = Msvm_ProcessorSettingData";
-            using var cpuSearcher = new ManagementObjectSearcher(scope, new ObjectQuery(cpuQuery));
-            
-            foreach (ManagementObject cpuSettings in cpuSearcher.Get())
-            {
-                cpuSettings["VirtualQuantity"] = (ulong)cpuCount;
-                cpuSettings["Reservation"] = (ulong)cpuCount;
-                cpuSettings["Limit"] = (ulong)cpuCount;
-                cpuSettings.Put();
-                Console.WriteLine($"CPU configured to {cpuCount} cores");
-                break;
-            }
+            // Configure CPU using ModifyResourceSettings
+            ConfigureCpuResource(scope, managementService, vmSettings, req.CpuCount);
         }
         catch (Exception ex)
         {
@@ -202,58 +163,164 @@ public sealed class VmCreationService
         }
     }
     
-    private void AttachVhdToVm(ManagementScope scope, ManagementObject vm, string vhdPath)
+    private void ConfigureMemoryResource(ManagementScope scope, ManagementObject managementService, ManagementObject vmSettings, int memoryMB)
     {
         try
         {
-            Console.WriteLine($"Attaching VHD to VM: {vhdPath}");
+            using var memoryCollection = vmSettings.GetRelated("Msvm_MemorySettingData", "Msvm_VirtualSystemSettingDataComponent",
+                null, null, null, null, false, null);
             
-            // Get VM's SCSI controller
-            var scsiQuery = $"ASSOCIATORS OF {{{vm.Path}}} WHERE AssocClass = Msvm_SystemDevice ResultClass = Msvm_ResourceAllocationSettingData";
-            using var scsiSearcher = new ManagementObjectSearcher(scope, new ObjectQuery(scsiQuery));
-            
-            ManagementObject? scsiController = null;
-            foreach (ManagementObject obj in scsiSearcher.Get())
+            foreach (ManagementObject memory in memoryCollection)
             {
-                if (obj["ResourceSubType"]?.ToString() == "Microsoft:Hyper-V:Synthetic SCSI Controller")
+                using (memory)
                 {
-                    scsiController = obj;
+                    memory["VirtualQuantity"] = (ulong)memoryMB;
+                    memory["Reservation"] = (ulong)memoryMB;
+                    memory["Limit"] = (ulong)memoryMB;
+                    
+                    using var inParams = managementService.GetMethodParameters("ModifyResourceSettings");
+                    inParams["ResourceSettings"] = new string[] { memory.GetText(TextFormat.WmiDtd20) };
+                    
+                    using var result = managementService.InvokeMethod("ModifyResourceSettings", inParams, null);
+                    WmiUtilities.ValidateOutput(result, scope, false, true); // Don't throw on failure
+                    
+                    Console.WriteLine($"Memory configured to {memoryMB}MB");
                     break;
                 }
-            }
-            
-            if (scsiController == null)
-            {
-                Console.WriteLine("No SCSI controller found, VM created without disk attachment");
-                return;
-            }
-            
-            // Create VHD attachment settings
-            using var managementService = new ManagementClass(scope, new ManagementPath("Msvm_VirtualSystemManagementService"), null);
-            using var managementServiceInstance = managementService.GetInstances().Cast<ManagementObject>().First();
-            
-            var diskSettings = CreateDiskSettingsXml(vhdPath, scsiController["InstanceID"]?.ToString());
-            
-            var inParams = managementServiceInstance.GetMethodParameters("AddResourceSettings");
-            inParams["AffectedSystem"] = vm.Path.Path;
-            inParams["ResourceSettings"] = new string[] { diskSettings };
-            
-            var result = managementServiceInstance.InvokeMethod("AddResourceSettings", inParams, null);
-            var returnValue = (uint)result["ReturnValue"];
-            
-            if (returnValue == 0)
-            {
-                Console.WriteLine("VHD attached successfully to VM");
-            }
-            else
-            {
-                Console.WriteLine($"Failed to attach VHD. Return value: {returnValue}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error attaching VHD: {ex.Message}");
+            Console.WriteLine($"Warning: Failed to configure memory: {ex.Message}");
         }
+    }
+    
+    private void ConfigureCpuResource(ManagementScope scope, ManagementObject managementService, ManagementObject vmSettings, int cpuCount)
+    {
+        try
+        {
+            using var cpuCollection = vmSettings.GetRelated("Msvm_ProcessorSettingData", "Msvm_VirtualSystemSettingDataComponent",
+                null, null, null, null, false, null);
+            
+            foreach (ManagementObject cpu in cpuCollection)
+            {
+                using (cpu)
+                {
+                    cpu["VirtualQuantity"] = (ulong)cpuCount;
+                    cpu["Reservation"] = (ulong)cpuCount;
+                    cpu["Limit"] = (ulong)cpuCount;
+                    
+                    using var inParams = managementService.GetMethodParameters("ModifyResourceSettings");
+                    inParams["ResourceSettings"] = new string[] { cpu.GetText(TextFormat.WmiDtd20) };
+                    
+                    using var result = managementService.InvokeMethod("ModifyResourceSettings", inParams, null);
+                    WmiUtilities.ValidateOutput(result, scope, false, true); // Don't throw on failure
+                    
+                    Console.WriteLine($"CPU configured to {cpuCount} cores");
+                    break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Failed to configure CPU: {ex.Message}");
+        }
+    }
+    
+    /// <summary>
+    /// Creates and attaches VHD using pure WMI based on Microsoft Storage samples.
+    /// </summary>
+    private void CreateAndAttachVhd(ManagementScope scope, ManagementObject vm, string vhdPath, int sizeGB)
+    {
+        try
+        {
+            Console.WriteLine($"Creating and attaching VHD: {vhdPath}");
+            
+            // Create VHD directory if needed
+            Directory.CreateDirectory(Path.GetDirectoryName(vhdPath)!);
+            
+            // Create VHD using WMI (based on Microsoft Storage samples)
+            CreateVhdWmi(scope, vhdPath, sizeGB);
+            
+            // Attach VHD to VM
+            AttachVhdToVmWmi(scope, vm, vhdPath);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating/attaching VHD: {ex.Message}");
+            throw;
+        }
+    }
+    
+    private void CreateVhdWmi(ManagementScope scope, string vhdPath, int sizeGB)
+    {
+        try
+        {
+            Console.WriteLine($"Creating VHD using WMI: {vhdPath}, size: {sizeGB}GB");
+            
+            // Get Image Management Service
+            using var imageServiceClass = new ManagementClass(scope, new ManagementPath("Msvm_ImageManagementService"), null);
+            using var imageService = imageServiceClass.GetInstances().Cast<ManagementObject>().First();
+            
+            using var inParams = imageService.GetMethodParameters("CreateVirtualHardDisk");
+            inParams["Path"] = vhdPath;
+            inParams["Type"] = 3; // Dynamic VHD
+            inParams["Format"] = 3; // VHDX
+            inParams["MaxInternalSize"] = (ulong)sizeGB * 1024 * 1024 * 1024;
+            
+            using var result = imageService.InvokeMethod("CreateVirtualHardDisk", inParams, null);
+            WmiUtilities.ValidateOutput(result, scope, true, true);
+            
+            Console.WriteLine($"VHD created successfully: {vhdPath}");
+        }
+        catch (Exception ex)
+        {
+            // Fallback to PowerShell if WMI fails
+            Console.WriteLine($"WMI VHD creation failed, falling back to PowerShell: {ex.Message}");
+            CreateVhdWithPowerShell(vhdPath, (uint)sizeGB);
+        }
+    }
+    
+    private void AttachVhdToVmWmi(ManagementScope scope, ManagementObject vm, string vhdPath)
+    {
+        try
+        {
+            Console.WriteLine($"Attaching VHD to VM using WMI: {vhdPath}");
+            
+            using var managementService = WmiUtilities.GetVirtualMachineManagementService(scope);
+            using var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
+            
+            // Create storage allocation setting data
+            var diskSettingsText = CreateStorageAllocationSettingData(scope, vhdPath);
+            
+            using var inParams = managementService.GetMethodParameters("AddResourceSettings");
+            inParams["AffectedSystem"] = vm.Path.Path;
+            inParams["ResourceSettings"] = new string[] { diskSettingsText };
+            
+            using var result = managementService.InvokeMethod("AddResourceSettings", inParams, null);
+            WmiUtilities.ValidateOutput(result, scope, true, true);
+            
+            Console.WriteLine("VHD attached successfully to VM");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error attaching VHD: {ex.Message}");
+            throw;
+        }
+    }
+    
+    private string CreateStorageAllocationSettingData(ManagementScope scope, string vhdPath)
+    {
+        using var storageClass = new ManagementClass(scope, new ManagementPath("Msvm_StorageAllocationSettingData"), null);
+        using var storageSettings = storageClass.CreateInstance();
+        
+        storageSettings["ElementName"] = Path.GetFileNameWithoutExtension(vhdPath);
+        storageSettings["ResourceType"] = (ushort)31; // Logical Disk
+        storageSettings["ResourceSubType"] = "Microsoft:Hyper-V:Virtual Hard Disk";
+        storageSettings["HostResource"] = new string[] { vhdPath };
+        storageSettings["Address"] = "0"; // First slot
+        
+        return storageSettings.GetText(TextFormat.WmiDtd20);
     }
     
     private string CreateDiskSettingsXml(string vhdPath, string? parentInstanceId)

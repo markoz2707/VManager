@@ -22,8 +22,43 @@ namespace HyperV.Core.Wmi
         CompletedWithWarnings = 32768
     }
 
+    public static class VirtualSystemTypeNames
+    {
+        public const string RealizedVM = "Microsoft:Hyper-V:System:Realized";
+        public const string PlannedVM = "Microsoft:Hyper-V:System:Planned";
+        public const string RealizedSnapshot = "Microsoft:Hyper-V:Snapshot:Realized";
+        public const string RecoverySnapshot = "Microsoft:Hyper-V:Snapshot:Recovery";
+        public const string PlannedSnapshot = "Microsoft:Hyper-V:Snapshot:Planned";
+        public const string MissingSnapshot = "Microsoft:Hyper-V:Snapshot:Missing";
+        public const string ReplicaStandardRecoverySnapshot = "Microsoft:Hyper-V:Snapshot:Replica:Standard";
+        public const string ReplicaApplicationConsistentRecoverySnapshot = "Microsoft:Hyper-V:Snapshot:Replica:ApplicationConsistent";
+        public const string ReplicaPlannedRecoverySnapshot = "Microsoft:Hyper-V:Snapshot:Replica:PlannedFailover";
+        public const string ReplicaSettings = "Microsoft:Hyper-V:Replica";
+    }
+
     public static class WmiUtilities
     {
+        /// <summary>
+        /// Gets the Msvm_ComputerSystem instance that matches the host computer system.
+        /// </summary>
+        /// <param name="scope">The ManagementScope to use to connect to WMI.</param>
+        /// <returns>The Msvm_ComputerSystem instance for the host computer system.</returns>
+        public static ManagementObject GetHostComputerSystem(ManagementScope scope)
+        {
+            return GetVirtualMachine(Environment.MachineName, scope);
+        }
+
+        /// <summary>
+        /// Gets the Msvm_ComputerSystem instance for the host computer system with name hostName.
+        /// </summary>
+        /// <param name="hostName">Host computer system name.</param>
+        /// <param name="scope">The ManagementScope to use to connect to WMI.</param>
+        /// <returns>The Msvm_ComputerSystem instance for the host computer system.</returns>
+        public static ManagementObject GetHostComputerSystem(string hostName, ManagementScope scope)
+        {
+            return GetVirtualMachine(hostName, scope);
+        }
+
         public static bool ValidateOutput(ManagementBaseObject outputParameters, ManagementScope scope)
         {
             return ValidateOutput(outputParameters, scope, true, false);
@@ -89,7 +124,8 @@ namespace HyperV.Core.Wmi
             {
                 if ((uint)outParams["ReturnValue"] != 0)
                 {
-                    throw new ManagementException("GetErrorEx() call on the job failed");
+                    throw new ManagementException(string.Format(CultureInfo.CurrentCulture,
+                                                                "GetErrorEx() call on the job failed"));
                 }
 
                 errorList = (string[])outParams["Errors"];
@@ -202,11 +238,6 @@ namespace HyperV.Core.Wmi
             }
         }
 
-        public static ManagementObject GetHostComputerSystem(ManagementScope scope)
-        {
-            return GetVirtualMachine(Environment.MachineName, scope);
-        }
-
         public static ManagementObject GetResourcePool(string resourceType, string resourceSubtype, string poolId, ManagementScope scope)
         {
             string poolQueryWql;
@@ -309,7 +340,7 @@ namespace HyperV.Core.Wmi
 
             if (sasdList.Count == 0)
             {
-            return null!;
+                return null!;
             }
             else
             {
@@ -371,7 +402,7 @@ namespace HyperV.Core.Wmi
                 return managementObject;
             }
 
-            return null;
+            return null!;
         }
 
         public static string EscapeObjectPath(string objectPath)

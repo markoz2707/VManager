@@ -10,6 +10,7 @@ I:\AI Projects\VManager\hyperv-agent\src\HyperV.LocalShell\obj\Debug\net8.0-wind
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.LocalShell\obj\Debug\net8.0-windows\HyperV.LocalShell.AssemblyInfoInputs.cache
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.LocalShell\obj\Debug\net8.0-windows\HyperV.LocalShell.AssemblyInfo.cs
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.LocalShell\obj\Debug\net8.0-windows\HyperV.LocalShell.csproj.CoreCompileInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.LocalShell\obj\Debug\net8.0-windows\HyperV.LocalShell.sourcelink.json
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.LocalShell\obj\Debug\net8.0-windows\HyperV.L.BEF478B4.Up2Date
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.LocalShell\obj\Debug\net8.0-windows\HyperV.HyperV.LocalShell.dll
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.LocalShell\obj\Debug\net8.0-windows\refint\HyperV.HyperV.LocalShell.dll

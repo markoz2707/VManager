@@ -8,7 +8,7 @@ using HyperV.Contracts.Models;
 namespace HyperV.Core.Wmi.Services;
 
 /// <summary>Container Service using WMI for Hyper-V isolated containers.</summary>
-public sealed class ContainerService
+public class ContainerService
 {
     private readonly ManagementScope _scope;
 
@@ -19,7 +19,7 @@ public sealed class ContainerService
     }
 
     /// <summary>Creates a Hyper-V isolated container using WMI.</summary>
-    public string Create(string id, CreateContainerRequest req)
+    public virtual string Create(string id, CreateContainerRequest req)
     {
         try
         {
@@ -196,7 +196,7 @@ public sealed class ContainerService
     }
 
     /// <summary>Checks if a WMI container exists by name.</summary>
-    public bool IsContainerPresent(string containerName)
+    public virtual bool IsContainerPresent(string containerName)
     {
         try
         {
@@ -210,38 +210,114 @@ public sealed class ContainerService
         }
     }
 
+    /// <summary>Lists all WMI containers.</summary>
+    public virtual List<Dictionary<string, object>> ListContainers()
+    {
+        var containers = new List<Dictionary<string, object>>();
+
+        try
+        {
+            // Query for all virtual machines that are containers
+            // Containers have VirtualSystemType containing "Container"
+            var query = new ObjectQuery("SELECT * FROM Msvm_ComputerSystem WHERE Caption = 'Virtual Machine'");
+            var searcher = new ManagementObjectSearcher(_scope, query);
+
+            foreach (ManagementObject vm in searcher.Get())
+            {
+                try
+                {
+                    // Get the virtual system setting data to check if it's a container
+                    var settingsQuery = $"ASSOCIATORS OF {{{vm.Path}}} WHERE AssocClass=Msvm_SettingsDefineState ResultClass=Msvm_VirtualSystemSettingData";
+                    var settingsSearcher = new ManagementObjectSearcher(_scope, new ObjectQuery(settingsQuery));
+
+                    foreach (ManagementObject settings in settingsSearcher.Get())
+                    {
+                        var virtualSystemType = settings["VirtualSystemType"]?.ToString();
+                        if (virtualSystemType != null && virtualSystemType.Contains("Container"))
+                        {
+                            // This is a container
+                            var containerInfo = new Dictionary<string, object>
+                            {
+                                ["Id"] = vm["Name"]?.ToString() ?? "Unknown",
+                                ["Name"] = vm["ElementName"]?.ToString() ?? "Unknown",
+                                ["Backend"] = "WMI",
+                                ["Status"] = GetContainerStatus(vm),
+                                ["VirtualSystemType"] = virtualSystemType,
+                                ["Description"] = settings["Description"]?.ToString() ?? ""
+                            };
+                            containers.Add(containerInfo);
+                            break; // Only add once per container
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error processing WMI VM {vm["Name"]}: {ex.Message}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error listing WMI containers: {ex.Message}");
+        }
+
+        return containers;
+    }
+
+    /// <summary>Gets the status of a WMI container.</summary>
+    private string GetContainerStatus(ManagementObject container)
+    {
+        try
+        {
+            var enabledState = Convert.ToUInt16(container["EnabledState"]);
+            return enabledState switch
+            {
+                2 => "Running",
+                3 => "Stopped",
+                9 => "Paused",
+                6 => "Stopping",
+                10 => "Starting",
+                _ => $"Unknown ({enabledState})"
+            };
+        }
+        catch
+        {
+            return "Unknown";
+        }
+    }
+
     /// <summary>Starts a WMI container by name.</summary>
-    public void StartContainer(string containerName)
+    public virtual void StartContainer(string containerName)
     {
         ExecuteContainerStateChange(containerName, 2, "start");
     }
 
     /// <summary>Stops a WMI container by name.</summary>
-    public void StopContainer(string containerName)
+    public virtual void StopContainer(string containerName)
     {
         ExecuteContainerStateChange(containerName, 3, "stop");
     }
 
     /// <summary>Terminates a WMI container by name.</summary>
-    public void TerminateContainer(string containerName)
+    public virtual void TerminateContainer(string containerName)
     {
         ExecuteContainerStateChange(containerName, 3, "terminate");
     }
 
     /// <summary>Pauses a WMI container by name.</summary>
-    public void PauseContainer(string containerName)
+    public virtual void PauseContainer(string containerName)
     {
         ExecuteContainerStateChange(containerName, 9, "pause");
     }
 
     /// <summary>Resumes a WMI container by name.</summary>
-    public void ResumeContainer(string containerName)
+    public virtual void ResumeContainer(string containerName)
     {
         ExecuteContainerStateChange(containerName, 2, "resume");
     }
 
     /// <summary>Gets properties of a WMI container by name.</summary>
-    public string GetContainerProperties(string containerName)
+    public virtual string GetContainerProperties(string containerName)
     {
         var container = GetContainer(containerName);
         if (container == null) 
@@ -257,7 +333,7 @@ public sealed class ContainerService
     }
 
     /// <summary>Modifies a WMI container by name.</summary>
-    public void ModifyContainer(string containerName, string configuration)
+    public virtual void ModifyContainer(string containerName, string configuration)
     {
         // WMI container modification would require specific implementation
         // based on what aspects need to be modified

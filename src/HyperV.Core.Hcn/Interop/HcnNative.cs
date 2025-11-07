@@ -33,4 +33,10 @@ internal static class HcnNative
 
     [DllImport("computenetwork.dll", CharSet = CharSet.Unicode)]
     internal static extern int HcnQueryNetworkProperties(IntPtr network, string query, out string result, out IntPtr errorRecord);
+
+    [DllImport("computenetwork.dll", CharSet = CharSet.Unicode)]
+    internal static extern int HcnEnumerateNetworks(string query, out string networks, out IntPtr errorRecord);
+
+    [DllImport("computenetwork.dll", CharSet = CharSet.Unicode)]
+    internal static extern int HcnEnumerateEndpoints(string query, out string endpoints, out IntPtr errorRecord);
 }

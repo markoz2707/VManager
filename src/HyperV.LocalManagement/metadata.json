@@ -1,0 +1,5 @@
+{
+  "name": "Hyper-V Unified Management Console",
+  "description": "A web-based user interface for managing Windows Server Hyper-V resources, including virtual machines, containers, networks, storage, and hypervisor settings via the Hyper-V Agent REST API.",
+  "requestFramePermissions": []
+}

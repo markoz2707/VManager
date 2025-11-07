@@ -1,0 +1,298 @@
+# Task Description: Comprehensive WMI API Coverage Analysis and Missing Implementation Report
+**Date:** September 9, 2025, 23:07:00 (Europe/Warsaw)
+**Task:** Analyze all .md files in HyperV_v2 folder and identify missing WMI method implementations
+
+## Executive Summary
+After analyzing the extensive Hyper-V WMI documentation in the HyperV_v2 folder and comparing it with the current project implementation, I have identified significant gaps in API coverage. The project currently implements only a small fraction of the available Hyper-V WMI services and methods.
+
+## Current Implementation Status
+
+### ✅ Currently Implemented Services
+1. **Virtual Machine Management** (Partial)
+   - Basic VM lifecycle operations (create, start, stop, pause, resume, terminate)
+   - VM property retrieval and modification
+   - Snapshot operations (create, delete, revert)
+   - VM configuration management
+
+2. **Storage Management** (Enhanced)
+   - VHD operations (create, attach, detach, resize)
+   - Enhanced storage service with VirtDisk API integration
+   - Differencing disk operations
+   - VHD metadata manipulation
+   - Virtual Floppy Disk operations
+   - Storage device management
+
+3. **Container Management** (Basic)
+   - Container lifecycle operations
+   - Basic container configuration
+
+4. **Network Management** (Basic)
+   - NAT network creation
+   - Endpoint management
+   - Basic network operations
+
+5. **Service Management** (Minimal)
+   - Health checks
+   - Basic service information
+
+## Major Missing WMI Services and Methods
+
+### 🔴 Msvm_ImageManagementService (Partially Implemented)
+**Current Coverage:** ~30% of methods implemented
+**Missing Critical Methods:**
+- `ConvertVirtualHardDisk` - Convert VHD formats
+- `ConvertVirtualHardDiskToVHDSet` - Convert to VHD Set format
+- `DeleteVHDSnapshot` - Delete VHD snapshots
+- `FindMountedStorageImageInstance` - Find mounted storage
+- `GetVHDSetInformation` - Get VHD Set information
+- `GetVHDSnapshotInformation` - Get snapshot information
+- `GetVirtualDiskChanges` - Get disk changes for backup
+- `OptimizeVHDSet` - Optimize VHD Set files
+- `SetVHDSnapshotInformation` - Set snapshot information
+- `ValidatePersistentReservationSupport` - Validate PR support
+
+### 🔴 Msvm_VirtualSystemManagementService (Partially Implemented)
+**Current Coverage:** ~25% of methods implemented
+**Missing Critical Methods:**
+- `AddBootSourceSettings` - Configure boot sources
+- `AddFeatureSettings` - Add Ethernet features
+- `AddFibreChannelChap` - Configure Fibre Channel
+- `AddGuestServiceSettings` - Configure guest services
+- `AddKvpItems` - Add key-value pairs
+- `AddSystemComponentSettings` - Add system components
+- `DefinePlannedSystem` - Define planned VMs
+- `DiagnoseNetworkConnection` - Network diagnostics
+- `ExportSystemDefinition` - Export VMs
+- `FormatError` - Format error messages
+- `GenerateWwpn` - Generate WWPNs
+- `GetCurrentWwpnFromGenerator` - Get current WWPN
+- `GetDefinitionFileSummaryInformation` - Get definition info
+- `GetSizeOfSystemFiles` - Get system file sizes
+- `GetSummaryInformation` - Get VM summary
+- `GetVirtualSystemThumbnailImage` - Get VM thumbnails
+- `ImportSnapshotDefinitions` - Import snapshots
+- `ImportSystemDefinition` - Import VMs
+- `ModifyDiskMergeSettings` - Modify disk merge
+- `ModifyFeatureSettings` - Modify features
+- `ModifyGuestServiceSettings` - Modify guest services
+- `ModifyKvpItems` - Modify key-value pairs
+- `ModifyServiceSettings` - Modify service settings
+- `ModifySystemComponentSettings` - Modify components
+- `RealizePlannedSystem` - Realize planned VMs
+- `RemoveBootSourceSettings` - Remove boot sources
+- `RemoveFeatureSettings` - Remove features
+- `RemoveFibreChannelChap` - Remove Fibre Channel
+- `RemoveGuestServiceSettings` - Remove guest services
+- `RemoveKvpItems` - Remove key-value pairs
+- `RemoveSystemComponentSettings` - Remove components
+- `SetGuestNetworkAdapterConfiguration` - Configure guest network
+- `SetInitialMachineConfigurationData` - Set initial config
+- `TestNetworkConnection` - Test network connectivity
+- `UpgradeSystemVersion` - Upgrade VM version
+- `ValidatePlannedSystem` - Validate planned VMs
+
+### 🔴 Msvm_VirtualSystemSnapshotService (Not Implemented)
+**Current Coverage:** 0% - Service not implemented
+**Missing Methods:**
+- `ApplySnapshot` - Apply snapshots
+- `ClearSnapshotState` - Clear snapshot state
+- `CreateSnapshot` - Create snapshots (different from current implementation)
+- `DestroySnapshot` - Destroy snapshots
+- `DestroySnapshotTree` - Destroy snapshot trees
+
+### 🔴 Msvm_ReplicationService (Not Implemented)
+**Current Coverage:** 0% - Service not implemented
+**Missing Methods:**
+- `AddAuthorizationEntry` - Add replication authorization
+- `ChangeReplicationModeToPrimary` - Change to primary
+- `CommitFailover` - Commit failover
+- `CreateReplicationRelationship` - Create replication
+- `GetReplicationStatistics` - Get replication stats
+- `GetReplicationStatisticsEx` - Get extended stats
+- `GetSystemCertificates` - Get certificates
+- `ImportInitialReplica` - Import initial replica
+- `InitiateFailback` - Initiate failback
+- `InitiateFailover` - Initiate failover
+- `ModifyAuthorizationEntry` - Modify authorization
+- `ModifyReplicationSettings` - Modify replication
+- `ModifyServiceSettings` - Modify service settings
+- `RemoveAuthorizationEntry` - Remove authorization
+- `RemoveReplicationRelationship` - Remove replication
+- `RemoveReplicationRelationshipEx` - Remove replication extended
+- `ResetReplicationStatistics` - Reset statistics
+- `ResetReplicationStatisticsEx` - Reset extended statistics
+- `Resynchronize` - Resynchronize
+- `ReverseReplicationRelationship` - Reverse replication
+- `RevertFailover` - Revert failover
+- `SetAuthorizationEntry` - Set authorization
+- `SetFailoverNetworkAdapterSettings` - Set failover network
+- `StartReplication` - Start replication
+- `TestReplicaSystem` - Test replica system
+- `TestReplicationConnection` - Test replication connection
+
+### 🔴 Msvm_VirtualEthernetSwitchManagementService (Not Implemented)
+**Current Coverage:** 0% - Service not implemented
+**Missing Methods:**
+- `AddFeatureSettings` - Add switch features
+- `AddResourceSettings` - Add switch resources
+- `DefineSystem` - Define virtual switch
+- `DestroySystem` - Destroy virtual switch
+- `ModifyFeatureSettings` - Modify switch features
+- `ModifyResourceSettings` - Modify switch resources
+- `ModifySystemSettings` - Modify switch settings
+- `RemoveFeatureSettings` - Remove switch features
+- `RemoveResourceSettings` - Remove switch resources
+
+### 🔴 Msvm_VirtualSystemMigrationService (Not Implemented)
+**Current Coverage:** 0% - Service not implemented
+**Missing Methods:**
+- `AddNetworkSettings` - Add migration network settings
+- `CheckSystemCompatibilityInfo` - Check compatibility
+- `CheckVirtualSystemIsMigratable` - Check if migratable
+- `CheckVirtualSystemIsMigratableToHost` - Check host migration
+- `CheckVirtualSystemIsMigratableToSystem` - Check system migration
+- `GetSystemCompatibilityInfo` - Get compatibility info
+- `GetSystemCompatibilityVectors` - Get compatibility vectors
+- `MigrateVirtualSystemToHost` - Migrate to host
+- `MigrateVirtualSystemToSystem` - Migrate to system
+- `ModifyNetworkSettings` - Modify network settings
+- `ModifyServiceSettings` - Modify service settings
+- `RemoveNetworkSettings` - Remove network settings
+
+### 🔴 Msvm_ResourcePoolConfigurationService (Not Implemented)
+**Current Coverage:** 0% - Service not implemented
+**Missing Methods:**
+- `CreatePool` - Create resource pools
+- `DeletePool` - Delete resource pools
+- `ModifyPoolResources` - Modify pool resources
+- `ModifyPoolSettings` - Modify pool settings
+
+### 🔴 Msvm_MetricService (Not Implemented)
+**Current Coverage:** 0% - Service not implemented
+**Missing Methods:**
+- `ControlMetrics` - Control metrics collection
+- `ControlMetricsByClass` - Control metrics by class
+- `ModifyServiceSettings` - Modify metric service settings
+
+### 🔴 Additional Missing Services
+1. **Msvm_GuestFileService** - Guest file operations
+2. **Msvm_GuestService** - Guest service management
+3. **Msvm_Synthetic3DService** - 3D graphics service
+4. **Msvm_TerminalService** - Terminal service management
+5. **Msvm_TransparentBridgingService** - Network bridging
+6. **Msvm_CollectionManagementService** - Collection management
+7. **Msvm_CollectionReferencePointService** - Reference points
+8. **Msvm_CollectionSnapshotService** - Collection snapshots
+9. **Msvm_GuestCommunicationService** - Guest communication
+10. **Msvm_VirtualSystemReferencePointService** - VM reference points
+11. **Msvm_VssService** - Volume Shadow Copy Service
+12. **Msvm_AssignableDeviceService** - Device assignment
+13. **Msvm_SecurityService** - Security management
+
+## Implementation Priority Recommendations
+
+### 🟡 High Priority (Critical for Production)
+1. **Complete Msvm_ImageManagementService implementation**
+   - VHD conversion and optimization methods
+   - VHD Set operations
+   - Mounted storage management
+
+2. **Implement Msvm_VirtualSystemSnapshotService**
+   - Professional snapshot management
+   - Snapshot tree operations
+   - Snapshot state management
+
+3. **Expand Msvm_VirtualSystemManagementService**
+   - VM import/export functionality
+   - Guest service integration
+   - Network diagnostics
+   - VM summary information
+
+4. **Implement Msvm_VirtualEthernetSwitchManagementService**
+   - Virtual switch management
+   - Switch feature configuration
+   - Network resource management
+
+### 🟠 Medium Priority (Important for Enterprise)
+1. **Implement Msvm_ReplicationService**
+   - VM replication capabilities
+   - Disaster recovery features
+   - Failover management
+
+2. **Implement Msvm_VirtualSystemMigrationService**
+   - Live migration support
+   - Migration compatibility checks
+   - Migration network configuration
+
+3. **Implement Msvm_ResourcePoolConfigurationService**
+   - Resource pool management
+   - Resource allocation optimization
+
+### 🟢 Low Priority (Nice to Have)
+1. **Implement Msvm_MetricService**
+   - Performance monitoring
+   - Metrics collection
+
+2. **Implement Guest Services**
+   - Guest file operations
+   - Guest communication
+   - Guest service management
+
+## Technical Implementation Approach
+
+### 1. Service Architecture Pattern
+Each WMI service should follow the established pattern:
+```
+src/HyperV.Contracts/Interfaces/I[ServiceName].cs
+src/HyperV.Core.Wmi/Services/[ServiceName].cs
+src/HyperV.Core.Hcs/Services/[ServiceName].cs (if applicable)
+src/HyperV.Agent/Controllers/[ServiceName]Controller.cs
+```
+
+### 2. Model Classes
+Create comprehensive model classes for:
+- Request/Response objects
+- Configuration data structures
+- Status and state enumerations
+- Error handling classes
+
+### 3. REST API Endpoints
+Design RESTful endpoints following established patterns:
+- GET for retrieval operations
+- POST for creation operations
+- PUT for modification operations
+- DELETE for removal operations
+
+### 4. Error Handling
+Implement consistent error handling:
+- WMI exception mapping
+- Detailed error messages
+- Proper HTTP status codes
+- Structured error responses
+
+## Estimated Implementation Effort
+
+### Phase 1: Critical Services (8-10 weeks)
+- Complete ImageManagementService: 2 weeks
+- Implement VirtualSystemSnapshotService: 2 weeks
+- Expand VirtualSystemManagementService: 3 weeks
+- Implement VirtualEthernetSwitchManagementService: 2-3 weeks
+
+### Phase 2: Enterprise Services (6-8 weeks)
+- Implement ReplicationService: 3-4 weeks
+- Implement VirtualSystemMigrationService: 2-3 weeks
+- Implement ResourcePoolConfigurationService: 1-2 weeks
+
+### Phase 3: Additional Services (4-6 weeks)
+- Implement MetricService: 2 weeks
+- Implement Guest Services: 2-3 weeks
+- Implement remaining services: 1-2 weeks
+
+## Conclusion
+The current project implements approximately 15-20% of the available Hyper-V WMI API surface. To achieve comprehensive Hyper-V management capabilities, significant additional development is required. The identified missing services represent critical functionality for enterprise virtualization environments.
+
+**Total Missing Methods:** 150+ WMI methods across 15+ services
+**Current Implementation:** ~30 methods across 5 services
+**Coverage Gap:** ~80-85% of WMI API surface area
+
+This analysis provides a roadmap for expanding the project to achieve full Hyper-V WMI API coverage and enterprise-grade virtualization management capabilities.

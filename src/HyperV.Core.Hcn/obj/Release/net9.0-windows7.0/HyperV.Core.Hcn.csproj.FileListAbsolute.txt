@@ -1,0 +1,14 @@
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\bin\Release\net9.0-windows7.0\HyperV.HyperV.Core.Hcn.deps.json
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\bin\Release\net9.0-windows7.0\HyperV.HyperV.Core.Hcn.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\bin\Release\net9.0-windows7.0\HyperV.HyperV.Core.Hcn.pdb
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\bin\Release\net9.0-windows7.0\HyperV.HyperV.Core.Hcn.xml
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\HyperV.Core.Hcn.GeneratedMSBuildEditorConfig.editorconfig
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\HyperV.Core.Hcn.AssemblyInfoInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\HyperV.Core.Hcn.AssemblyInfo.cs
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\HyperV.Core.Hcn.csproj.CoreCompileInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\HyperV.Core.Hcn.sourcelink.json
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\HyperV.HyperV.Core.Hcn.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\refint\HyperV.HyperV.Core.Hcn.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\HyperV.HyperV.Core.Hcn.xml
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\HyperV.HyperV.Core.Hcn.pdb
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Release\net9.0-windows7.0\ref\HyperV.HyperV.Core.Hcn.dll

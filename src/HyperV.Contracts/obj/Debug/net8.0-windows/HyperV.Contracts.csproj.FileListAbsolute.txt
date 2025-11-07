@@ -7,6 +7,7 @@ I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Debug\net8.0-windo
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Debug\net8.0-windows\HyperV.Contracts.AssemblyInfoInputs.cache
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Debug\net8.0-windows\HyperV.Contracts.AssemblyInfo.cs
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Debug\net8.0-windows\HyperV.Contracts.csproj.CoreCompileInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Debug\net8.0-windows\HyperV.Contracts.sourcelink.json
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Debug\net8.0-windows\HyperV.HyperV.Contracts.dll
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Debug\net8.0-windows\refint\HyperV.HyperV.Contracts.dll
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Contracts\obj\Debug\net8.0-windows\HyperV.HyperV.Contracts.xml

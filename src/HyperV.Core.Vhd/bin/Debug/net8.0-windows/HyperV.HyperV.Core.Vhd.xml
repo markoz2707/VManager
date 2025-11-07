@@ -5,7 +5,40 @@
     </assembly>
     <members>
         <member name="T:HyperV.Core.Vhd.Services.VhdService">
-            <summary>Operacje VHD/VHDX (do uzupełnienia: virtdisk.dll).</summary>
+            <summary>
+            VHD/VHDX operations using simplified Virtual Disk API
+            Provides basic VHD manipulation capabilities without complex P/Invoke structures
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Vhd.Services.VhdService.CreateVirtualDisk(HyperV.Contracts.Models.CreateVhdRequest)">
+            <summary>
+            Creates a new VHD/VHDX file
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Vhd.Services.VhdService.AttachVirtualDisk(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Attaches a VHD/VHDX file to the system
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Vhd.Services.VhdService.DetachVirtualDisk(System.String)">
+            <summary>
+            Detaches a VHD/VHDX file from the system
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Vhd.Services.VhdService.ResizeVirtualDisk(System.String,System.UInt64)">
+            <summary>
+            Resizes a VHD/VHDX file
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Vhd.Services.VhdService.CompactVirtualDisk(System.String)">
+            <summary>
+            Compacts a VHD/VHDX file
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Vhd.Services.VhdService.GetVirtualDiskInfo(System.String)">
+            <summary>
+            Gets information about a VHD/VHDX file using basic file information
+            </summary>
         </member>
     </members>
 </doc>

@@ -1,0 +1,40 @@
+TASK DESCRIPTION: Implement missing Msvm_ImageManagementService methods
+======================================================================
+
+Date: 2025-09-10 09:42:00
+Task: Implement all missing implementations described in task-desc-20250909-200711.txt based on proper md file inside HyperV_v2 folder
+
+CHANGES IMPLEMENTED:
+====================
+
+1.  **Implemented `CompactVirtualHardDisk`:**
+    *   Added `VhdCompactMode` enum and `CompactVhdRequest` model to `HyperV.Contracts`.
+    *   Added `CompactVirtualHardDiskAsync` to `IImageManagementService` and its implementation in `ImageManagementService`.
+    *   Exposed the functionality via a new `POST /api/storage/vhd/compact` endpoint in `StorageController`.
+    *   Documented the new endpoint in `hyperv-agent-openapi.json`.
+
+2.  **Implemented `ConvertVirtualHardDisk`:**
+    *   Updated `ImageManagementService` to correctly use the `ConvertVhdRequest` model and construct the `Msvm_VirtualHardDiskSettingData` string.
+    *   Added a `POST /api/storage/vhd/convert` endpoint to `StorageController`.
+    *   Documented the new endpoint in `hyperv-agent-openapi.json`.
+
+3.  **Implemented `MergeVirtualHardDisk`:**
+    *   Updated the `MergeDiskRequest` model to include `DestinationPath`.
+    *   Added `MergeVirtualHardDiskAsync` to `IImageManagementService` and its implementation in `ImageManagementService`.
+    *   Added a `POST /api/storage/vhd/merge` endpoint to `StorageController`.
+    *   Documented the new endpoint in `hyperv-agent-openapi.json`.
+
+4.  **Implemented `GetVirtualHardDiskSettingData`:**
+    *   Created the `VirtualHardDiskSettingData` response model.
+    *   Added `GetVirtualHardDiskSettingDataAsync` to `IImageManagementService` and its implementation in `ImageManagementService`.
+    *   Added a `GET /api/storage/vhd/settings` endpoint to `StorageController`.
+    *   Documented the new endpoint in `hyperv-agent-openapi.json`.
+
+5.  **Implemented `GetVirtualHardDiskState`:**
+    *   Created the `VirtualHardDiskState` response model.
+    *   Added `GetVirtualHardDiskStateAsync` to `IImageManagementService` and its implementation in `ImageManagementService`.
+    *   Added a `GET /api/storage/vhd/state` endpoint to `StorageController`.
+    *   Documented the new endpoint in `hyperv-agent-openapi.json`.
+
+6.  **Dependency Injection:**
+    *   Registered `IImageManagementService` in `Program.cs` to resolve dependencies in `StorageController`.

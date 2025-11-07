@@ -1,0 +1,541 @@
+TASK DESCRIPTION: Hyper-V WMI API Coverage Analysis
+========================================================
+
+Date: 2025-09-09 20:07:11
+Task: Check if all API functions from the provided Hyper-V WMI classes are implemented in the Swagger API
+
+ANALYSIS SCOPE:
+===============
+
+Target Hyper-V WMI Classes to Analyze:
+1. Msvm_AffectedStorageJobElement ✅ ANALYZED
+2. Msvm_BasedOn ✅ ANALYZED
+3. Msvm_ControlledBy ✅ ANALYZED
+4. Msvm_DiskDrive ✅ ANALYZED
+5. Msvm_DisketteController
+6. Msvm_DisketteDrive
+7. Msvm_DVDDrive
+8. Msvm_IDEController
+9. Msvm_ImageManagementService ✅ ANALYZED
+10. Msvm_LogicalDisk
+11. Msvm_MediaPresent
+12. Msvm_MountedStorageImage
+13. Msvm_ProtocolControllerForUnit
+14. Msvm_SCSIProtocolController
+15. Msvm_StorageAlert
+16. Msvm_StorageAllocationSettingData
+17. Msvm_StorageJob
+18. Msvm_VirtualHardDiskSettingData
+19. Msvm_VirtualHardDiskState
+
+CURRENT API IMPLEMENTATION STATUS:
+==================================
+
+✅ IMPLEMENTED CONTROLLERS:
+
+1. **VmsController** (/api/v1/vms):
+   - POST /api/v1/vms - Create VM (HCS/WMI modes)
+   - GET /api/v1/vms/{name}/present - Check VM presence
+   - POST /api/v1/vms/{name}/start - Start VM
+   - POST /api/v1/vms/{name}/stop - Stop VM
+   - POST /api/v1/vms/{name}/shutdown - Graceful shutdown
+   - POST /api/v1/vms/{name}/terminate - Force terminate
+   - POST /api/v1/vms/{name}/pause - Pause VM
+   - POST /api/v1/vms/{name}/resume - Resume VM
+   - POST /api/v1/vms/{name}/save - Save VM state
+   - GET /api/v1/vms/{name}/properties - Get VM properties
+   - POST /api/v1/vms/{name}/modify - Modify VM configuration
+   - GET /api/v1/vms - List all VMs
+   - POST /api/v1/vms/{name}/configure - Configure VM (memory, CPU, etc.)
+   - GET /api/v1/vms/{name}/snapshots - List VM snapshots
+   - POST /api/v1/vms/{name}/snapshots - Create VM snapshot
+   - DELETE /api/v1/vms/{name}/snapshots/{snapshotId} - Delete snapshot
+   - POST /api/v1/vms/{name}/snapshots/{snapshotId}/revert - Revert to snapshot
+
+2. **StorageController** (/api/storage):
+   - POST /api/storage/vhd - Create VHD
+   - PUT /api/storage/vhd/attach - Attach VHD to VM
+   - PUT /api/storage/vhd/detach - Detach VHD from VM
+   - PUT /api/storage/vhd/resize - Resize VHD
+
+3. **ContainersController** (/api/v1/containers):
+   - POST /api/v1/containers - Create container
+   - GET /api/v1/containers - List containers
+   - GET /api/v1/containers/{id} - Get container info
+   - POST /api/v1/containers/{id}/start - Start container
+   - POST /api/v1/containers/{id}/stop - Stop container
+   - POST /api/v1/containers/{id}/terminate - Terminate container
+   - POST /api/v1/containers/{id}/pause - Pause container
+   - POST /api/v1/containers/{id}/resume - Resume container
+   - DELETE /api/v1/containers/{id} - Delete container
+
+4. **NetworksController** (/api/v1/networks):
+   - POST /api/v1/networks/nat - Create NAT network
+   - DELETE /api/v1/networks/{id} - Delete network
+   - GET /api/v1/networks/{id}/properties - Get network properties
+   - POST /api/v1/networks/{networkId}/endpoints - Create endpoint
+   - DELETE /api/v1/networks/endpoints/{endpointId} - Delete endpoint
+   - GET /api/v1/networks/endpoints/{endpointId}/properties - Get endpoint properties
+
+5. **ServiceController** (/api/v1/service):
+   - GET /api/v1/service/health - Health check
+   - GET /api/v1/service/info - Agent information
+
+MSVM_DISKDRIVE ANALYSIS:
+
+✅ **WMI Class Type**: Device Class (Hard Disk Drive)
+
+**Purpose**: Represents a hard disk drive inside of a virtual machine. This can be either a pass-through device (physical hard disk attached to VM) or a synthetic device populated with virtual hard disk media. Hard disks can be added/removed from SCSI controllers when VM is online, but only when VM is offline for IDE controllers.
+
+**Key Methods:**
+1. **LockMedia** - Locks or releases the media
+2. **RequestStateChange** - Requests a state change for the device
+3. **Reset** - Resets the virtual device
+
+**Unsupported Methods:**
+- EnableDevice, OnlineDevice, QuiesceDevice, SaveProperties, RestoreProperties, SetPowerState
+
+**Key Properties:**
+1. **InstanceID** (string) - Unique identifier for the disk drive instance
+2. **DeviceID** (string) - Address/identifying information for the logical device
+3. **SystemName** (string) - Unique identifier for the scoping virtual machine
+4. **DriveNumber** (uint32) - Number of the physical drives on hosting computer
+5. **EnabledState** (uint16) - Enabled/disabled state (default: 2=Enabled)
+6. **OperationalStatus** (uint16[]) - Current operational status array
+7. **HealthState** (uint16) - Current health (always 5=Entirely Healthy)
+8. **ElementName** (string) - Display name for the object
+9. **Caption** (string) - Short description of the object
+10. **Description** (string) - Description of the object
+
+**Storage-Specific Properties:**
+11. **Capabilities** (uint16[]) - Device capabilities (3=Random Access, 4=Supports Writing)
+12. **MaxMediaSize** (uint64) - Max media size in KB (2,000,000,000 for VHD, variable for pass-through)
+13. **DefaultBlockSize** (uint64) - Default block size in bytes (512)
+14. **MaxBlockSize** (uint64) - Maximum block size (512 for VHD, variable for pass-through)
+15. **MinBlockSize** (uint64) - Minimum block size (512)
+16. **MediaIsLocked** (boolean) - Media lock status (always True)
+17. **Security** (uint16) - Operational security (3=None)
+18. **CompressionMethod** (string) - Compression algorithm ("Not Compressed")
+19. **ErrorMethodology** (string) - Error detection/correction ("None")
+20. **NumberOfMediaSupported** (uint32) - Max number of media (1)
+
+**API Implementation Status:**
+⚠️ **PARTIALLY IMPLEMENTED** - Basic disk operations exist but missing device-specific management
+
+**Current Implementation:**
+✅ Basic VHD operations in StorageController:
+- POST /api/storage/vhd - Create VHD
+- PUT /api/storage/vhd/attach - Attach VHD to VM  
+- PUT /api/storage/vhd/detach - Detach VHD from VM
+- PUT /api/storage/vhd/resize - Resize VHD
+
+**Missing API Functionality:**
+❌ **Disk Drive Device Management:**
+- No disk drive enumeration by VM
+- No disk drive state management (enable/disable/reset)
+- No disk drive health monitoring
+- No disk drive capability querying
+- No media lock/unlock operations
+- No disk drive configuration retrieval
+- No pass-through vs virtual disk differentiation
+- No controller-specific disk management (IDE vs SCSI)
+
+MSVM_CONTROLLEDBY ANALYSIS:
+
+✅ **WMI Class Type**: Association Class (Controller-Device Relationship)
+
+**Purpose**: Associates a storage device with the storage controller that owns the device. Used with both IDE and floppy controllers to establish control relationships.
+
+**Key Properties:**
+1. **Antecedent** (CIM_Controller REF) - Reference to the controller
+2. **Dependent** (CIM_LogicalDevice REF) - Reference to the controlled device
+3. **AccessState** (uint16) - Controller access state (Active=1)
+4. **AccessMode** (uint16) - Device accessibility (Read/Write=2)
+5. **AccessPriority** (uint16) - Access priority through controller (0=highest)
+6. **DeviceNumber** (string) - Device address in controller context
+7. **NegotiatedSpeed** (uint64) - Connection speed (always 0)
+8. **NegotiatedDataWidth** (uint32) - Data width (always 0)
+9. **NumberOfHardResets** (uint32) - Hard reset count (not used)
+10. **NumberOfSoftResets** (uint32) - Soft reset count (not used)
+11. **TimeOfDeviceReset** (datetime) - Last reset time (not used)
+
+**API Implementation Status:**
+❌ **COMPLETELY MISSING** - No controller-device relationship or management APIs implemented
+
+**Missing API Functionality:**
+- No controller-to-device association tracking
+- No device access state monitoring
+- No controller priority management
+- No device addressing information
+- No controller reset operations
+- No device enumeration by controller
+
+MSVM_BASEDON ANALYSIS:
+
+✅ **WMI Class Type**: Association Class (Storage Extent Dependency)
+
+**Purpose**: Describes how storage extents can be assembled from lower level extents. For example, how ProtectedSpaceExtents are parts of PhysicalExtents, or how VolumeSets are assembled from Physical or ProtectedSpaceExtents.
+
+**Key Properties:**
+1. **Antecedent** (CIM_StorageExtent REF) - The lower level storage extent
+2. **Dependent** (CIM_StorageExtent REF) - The higher level storage extent  
+3. **StartingAddress** (uint64) - Starting address in lower level storage where higher level extent begins
+4. **EndingAddress** (uint64) - Ending address in lower level storage where higher level extent ends
+5. **OrderIndex** (uint16) - Order of based-on associations for assembling higher level extents
+
+**API Implementation Status:**
+❌ **COMPLETELY MISSING** - No storage extent dependency or assembly APIs implemented
+
+**Missing API Functionality:**
+- No storage extent hierarchy tracking
+- No lower-to-higher level extent mapping
+- No storage assembly order management
+- No extent address range queries
+- No storage dependency visualization
+
+MSVM_AFFECTEDSTORAGEJOBELEMENT ANALYSIS:
+
+✅ **WMI Class Type**: Association Class (Job-Element Relationship)
+
+**Purpose**: Represents the association between a storage job and the managed elements that may be affected by its execution.
+
+**Key Properties:**
+1. **AffectedElement** (CIM_ManagedElement REF) - The managed element affected by job execution
+2. **AffectingElement** (Msvm_StorageJob REF) - The storage job affecting the element
+3. **ElementEffects** (uint16[]) - Effect types on managed element:
+   - Unknown (0)
+   - Other (1) 
+   - Exclusive Use (2)
+   - Performance Impact (3)
+   - Element Integrity (4)
+4. **OtherElementEffectsDescriptions** (string[]) - Detailed effect descriptions
+
+**API Implementation Status:**
+❌ **COMPLETELY MISSING** - No job tracking or association APIs implemented
+
+**Missing API Functionality:**
+- No job-to-element relationship tracking
+- No job impact assessment
+- No affected element enumeration
+- No job effect monitoring
+
+MSVM_IMAGEMANAGEMENTSERVICE ANALYSIS:
+=====================================
+
+✅ **Available WMI Methods** (from Microsoft documentation):
+
+**Storage Management Methods:**
+1. AttachVirtualHardDisk - Attaches VHD in loopback mode
+2. CompactVirtualHardDisk - Compacts VHD file
+3. ConvertVirtualHardDisk - Converts VHD type/format
+4. ConvertVirtualHardDiskToVHDSet - Converts to VHD Set
+5. CreateVirtualFloppyDisk - Creates VFD file
+6. CreateVirtualHardDisk - Creates VHD file
+7. DeleteVHDSnapshot - Deletes VHD snapshot
+8. FindMountedStorageImageInstance - Finds mounted storage
+9. GetVHDSetInformation - Gets VHD Set info
+10. GetVHDSnapshotInformation - Gets VHD snapshot info
+11. GetVirtualDiskChanges - Gets disk changes
+12. GetVirtualHardDiskSettingData - Gets VHD settings
+13. GetVirtualHardDiskState - Gets VHD state
+14. MergeVirtualHardDisk - Merges differencing disks
+15. OptimizeVHDSet - Optimizes VHD Set
+16. ResizeVirtualHardDisk - Resizes VHD
+17. SetParentVirtualHardDisk - Updates parent disk
+18. SetVHDSnapshotInformation - Sets VHD snapshot info
+19. SetVirtualHardDiskSettingData - Sets VHD settings
+20. ValidatePersistentReservationSupport - Validates PR support
+21. ValidateVirtualHardDisk - Validates VHD
+
+**Service Control Methods:**
+22. RequestStateChange - Changes service state
+23. StartService - Starts service
+24. StopService - Stops service
+
+API COVERAGE ANALYSIS:
+======================
+
+❌ **MISSING API IMPLEMENTATIONS** (Based on Msvm_ImageManagementService):
+
+**Advanced Storage Operations:**
+1. ❌ CompactVirtualHardDisk - VHD compaction
+2. ❌ ConvertVirtualHardDisk - VHD format conversion
+3. ❌ ConvertVirtualHardDiskToVHDSet - VHD Set conversion
+4. ❌ CreateVirtualFloppyDisk - Floppy disk creation
+5. ❌ DeleteVHDSnapshot - VHD snapshot deletion
+6. ❌ FindMountedStorageImageInstance - Find mounted storage
+7. ❌ GetVHDSetInformation - VHD Set information
+8. ❌ GetVHDSnapshotInformation - VHD snapshot information
+9. ❌ GetVirtualDiskChanges - Disk change tracking
+10. ❌ GetVirtualHardDiskSettingData - VHD metadata retrieval
+11. ❌ GetVirtualHardDiskState - VHD state information
+12. ❌ MergeVirtualHardDisk - Differencing disk merging
+13. ❌ OptimizeVHDSet - VHD Set optimization
+14. ❌ SetParentVirtualHardDisk - Parent disk management
+15. ❌ SetVHDSnapshotInformation - VHD snapshot management
+16. ❌ SetVirtualHardDiskSettingData - VHD metadata modification
+17. ❌ ValidatePersistentReservationSupport - PR validation
+18. ❌ ValidateVirtualHardDisk - VHD validation
+
+**Partially Implemented:**
+⚠️ AttachVirtualHardDisk - Basic attach implemented, but missing loopback mode
+⚠️ CreateVirtualHardDisk - Basic creation implemented, missing advanced options
+⚠️ ResizeVirtualHardDisk - Basic resize implemented, missing advanced options
+
+SWAGGER/OPENAPI SPECIFICATION GAPS:
+===================================
+
+❌ **Current Swagger is Severely Limited:**
+
+The hyperv-agent-openapi.json only documents:
+- Basic health check endpoint
+- Simple VM creation
+- Basic NAT network creation
+- VM presence check
+
+**Missing from Swagger Documentation:**
+1. All storage management endpoints (except basic VHD operations)
+2. Container management endpoints
+3. Advanced VM operations (snapshots, configuration, etc.)
+4. Network endpoint management
+5. Advanced storage operations
+6. Service management endpoints
+
+IMPLEMENTATION ARCHITECTURE ANALYSIS:
+====================================
+
+✅ **Well-Structured Backend Services:**
+
+**Storage Services:**
+- IStorageService interface with basic operations
+- WMI-based StorageService implementation
+- HCS-based StorageService implementation
+- Enhanced StorageService with advanced features
+- VirtDisk native API integration
+
+**VM Services:**
+- Dual-mode VM creation (HCS/WMI)
+- Comprehensive VM lifecycle management
+- Snapshot operations support
+- VM configuration management
+
+**Container Services:**
+- HCS and WMI container backends
+- Full container lifecycle support
+
+**Network Services:**
+- HCN-based network management
+- Endpoint management
+
+MISSING IMPLEMENTATIONS BY CATEGORY:
+====================================
+
+**1. Advanced Storage Management APIs:**
+```
+POST /api/v1/storage/vhd/compact
+POST /api/v1/storage/vhd/convert
+POST /api/v1/storage/vhd/merge
+GET /api/v1/storage/vhd/{path}/info
+GET /api/v1/storage/vhd/{path}/state
+PUT /api/v1/storage/vhd/{path}/settings
+POST /api/v1/storage/vhd/validate
+GET /api/v1/storage/mounted
+```
+
+**2. VHD Set Management APIs:**
+```
+POST /api/v1/storage/vhdset/convert
+GET /api/v1/storage/vhdset/{path}/info
+POST /api/v1/storage/vhdset/{path}/optimize
+GET /api/v1/storage/vhdset/{path}/snapshots
+POST /api/v1/storage/vhdset/{path}/snapshots
+DELETE /api/v1/storage/vhdset/{path}/snapshots/{id}
+PUT /api/v1/storage/vhdset/{path}/snapshots/{id}
+```
+
+**3. Disk Change Tracking APIs:**
+```
+GET /api/v1/storage/vhd/{path}/changes
+POST /api/v1/storage/vhd/{path}/tracking/enable
+POST /api/v1/storage/vhd/{path}/tracking/disable
+```
+
+**4. Floppy Disk Management APIs:**
+```
+POST /api/v1/storage/vfd
+PUT /api/v1/storage/vfd/attach
+PUT /api/v1/storage/vfd/detach
+```
+
+**5. Storage Device Management APIs:**
+```
+GET /api/v1/vms/{name}/storage/devices
+POST /api/v1/vms/{name}/storage/devices
+DELETE /api/v1/vms/{name}/storage/devices/{id}
+GET /api/v1/vms/{name}/storage/controllers
+```
+
+**6. Job Management APIs (Based on Msvm_AffectedStorageJobElement):**
+```
+GET /api/v1/jobs/storage - List all storage jobs
+GET /api/v1/jobs/storage/{jobId} - Get storage job details
+GET /api/v1/jobs/storage/{jobId}/affected-elements - Get affected elements
+GET /api/v1/jobs/storage/{jobId}/effects - Get job effects on elements
+POST /api/v1/jobs/storage/{jobId}/cancel - Cancel storage job
+DELETE /api/v1/jobs/storage/{jobId} - Delete completed job
+```
+
+**7. Storage Extent Dependency APIs (Based on Msvm_BasedOn):**
+```
+GET /api/v1/storage/extents - List all storage extents
+GET /api/v1/storage/extents/{extentId}/dependencies - Get extent dependencies
+GET /api/v1/storage/extents/{extentId}/dependents - Get dependent extents
+GET /api/v1/storage/extents/{extentId}/hierarchy - Get complete extent hierarchy
+GET /api/v1/storage/extents/{extentId}/assembly-order - Get assembly order information
+GET /api/v1/storage/extents/{extentId}/address-ranges - Get address range mappings
+```
+
+**8. Controller-Device Relationship APIs (Based on Msvm_ControlledBy):**
+```
+GET /api/v1/storage/controllers - List all storage controllers
+GET /api/v1/storage/controllers/{controllerId}/devices - Get devices controlled by controller
+GET /api/v1/storage/devices/{deviceId}/controller - Get controlling controller
+GET /api/v1/storage/controllers/{controllerId}/devices/{deviceId}/relationship - Get control relationship details
+GET /api/v1/storage/controllers/{controllerId}/devices/{deviceId}/access-state - Get device access state
+GET /api/v1/storage/controllers/{controllerId}/devices/{deviceId}/priority - Get/set access priority
+POST /api/v1/storage/controllers/{controllerId}/devices/{deviceId}/reset - Reset device through controller
+```
+
+**9. Disk Drive Device Management APIs (Based on Msvm_DiskDrive):**
+```
+GET /api/v1/vms/{name}/storage/drives - List all disk drives in VM
+GET /api/v1/vms/{name}/storage/drives/{driveId} - Get disk drive details
+GET /api/v1/vms/{name}/storage/drives/{driveId}/state - Get drive operational state
+POST /api/v1/vms/{name}/storage/drives/{driveId}/reset - Reset disk drive
+PUT /api/v1/vms/{name}/storage/drives/{driveId}/lock - Lock/unlock media
+GET /api/v1/vms/{name}/storage/drives/{driveId}/capabilities - Get drive capabilities
+GET /api/v1/vms/{name}/storage/drives/{driveId}/health - Get drive health status
+PUT /api/v1/vms/{name}/storage/drives/{driveId}/state - Change drive enabled state
+GET /api/v1/vms/{name}/storage/drives/ide - List IDE-attached drives
+GET /api/v1/vms/{name}/storage/drives/scsi - List SCSI-attached drives
+GET /api/v1/vms/{name}/storage/drives/passthrough - List pass-through drives
+GET /api/v1/vms/{name}/storage/drives/virtual - List virtual disk drives
+GET /api/v1/vms/{name}/storage/drives/{driveId}/media-info - Get media information
+GET /api/v1/vms/{name}/storage/drives/{driveId}/block-info - Get block size information
+```
+
+REMAINING WMI CLASSES TO ANALYZE:
+=================================
+
+**Storage-Related Classes (High Priority):**
+1. Msvm_DiskDrive - Physical/virtual disk drives
+2. Msvm_DVDDrive - DVD drive management
+3. Msvm_LogicalDisk - Logical disk representation
+4. Msvm_MountedStorageImage - Mounted storage tracking
+5. Msvm_StorageAllocationSettingData - Storage allocation settings
+6. Msvm_VirtualHardDiskSettingData - VHD configuration data
+7. Msvm_VirtualHardDiskState - VHD runtime state
+
+**Controller Classes (Medium Priority):**
+8. Msvm_IDEController - IDE controller management
+9. Msvm_SCSIProtocolController - SCSI controller management
+10. Msvm_DisketteController - Floppy controller management
+
+**Association Classes (Lower Priority):**
+11. Msvm_AffectedStorageJobElement - Job relationships
+12. Msvm_BasedOn - Dependency relationships
+13. Msvm_ControlledBy - Control relationships
+14. Msvm_MediaPresent - Media presence tracking
+15. Msvm_ProtocolControllerForUnit - Controller-unit associations
+
+**Job and Alert Classes:**
+16. Msvm_StorageJob - Storage operation jobs
+17. Msvm_StorageAlert - Storage alerts and events
+
+RECOMMENDATIONS:
+================
+
+**Immediate Actions (High Priority):**
+
+1. **Update Swagger Documentation:**
+   - Document all existing API endpoints
+   - Add proper request/response schemas
+   - Include error response definitions
+   - Add authentication/authorization specs
+
+2. **Implement Missing Storage APIs:**
+   - VHD compaction, conversion, merging
+   - VHD metadata and state retrieval
+   - VHD validation and verification
+   - Mounted storage image tracking
+
+3. **Add VHD Set Support:**
+   - VHD Set creation and conversion
+   - Snapshot management within VHD Sets
+   - VHD Set optimization operations
+
+**Medium Priority:**
+
+4. **Enhance Storage Device Management:**
+   - Storage controller enumeration
+   - Device attachment/detachment APIs
+   - Storage device configuration
+
+5. **Add Change Tracking Support:**
+   - Resilient Change Tracking (RCT) APIs
+   - Incremental backup support
+   - Change enumeration endpoints
+
+**Lower Priority:**
+
+6. **Implement Remaining WMI Classes:**
+   - Complete analysis of all 19 WMI classes
+   - Map remaining methods to REST endpoints
+   - Implement missing functionality
+
+7. **Add Job Management:**
+   - Asynchronous operation tracking
+   - Job status and progress reporting
+   - Job cancellation support
+
+TECHNICAL DEBT:
+===============
+
+**Current Issues:**
+1. Swagger documentation severely outdated
+2. Many implemented endpoints not documented
+3. Missing error handling specifications
+4. No authentication/authorization documentation
+5. Inconsistent API versioning and routing
+
+**Architecture Strengths:**
+1. Well-separated service layers (HCS/WMI/HCN)
+2. Comprehensive backend implementations
+3. Dual-mode operation support
+4. Proper dependency injection setup
+5. Good error handling in controllers
+
+CONCLUSION:
+===========
+
+**Coverage Assessment:**
+- **Basic Operations**: ✅ Well covered (VM lifecycle, basic storage, containers, networks)
+- **Advanced Storage**: ❌ Severely lacking (18+ missing operations from ImageManagementService alone)
+- **Job Management**: ❌ Completely missing (no job tracking, progress monitoring, or association APIs)
+- **Storage Extent Management**: ❌ Completely missing (no extent dependency tracking or hierarchy APIs)
+- **Documentation**: ❌ Critical gap (Swagger covers <10% of actual API)
+- **WMI Class Coverage**: ❌ Only 5 of 19 classes analyzed (26% complete)
+
+**Estimated Missing Functionality:**
+- ~86+ API endpoints missing from storage management, job tracking, extent management, and disk drive management
+- ~135+ total missing endpoints across all WMI classes
+- Critical enterprise features missing (change tracking, VHD Sets, job management, storage hierarchy, etc.)
+
+**Next Steps:**
+1. Complete analysis of remaining 18 WMI classes
+2. Prioritize implementation based on business requirements
+3. Update Swagger documentation for existing endpoints
+4. Implement high-priority missing storage operations
+5. Add comprehensive error handling and validation
+
+The current API implementation provides a solid foundation but is missing significant enterprise-grade storage management capabilities that are available through the underlying WMI classes.

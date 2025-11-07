@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>HYPERV-AGENT-API-FULL-DOCUMENTATION.md</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+html,footer,header{
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Custom MD PDF CSS
+ */
+html,footer,header{
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+
+ }
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+<link rel="stylesheet" href="file:///r%3A/2.Travail/1.Enseignement/Cours/_1.Outils/2.Developpement/1.SCSS/main.css" type="text/css"><link rel="stylesheet" href="file:///d%3A/rdaros/Cours/_1.Outils/2.Developpement/1.SCSS/main.css" type="text/css">
+</head>
+
+<body>
+    <h1 id="hyper-v-agent-api-documentation">Hyper-V Agent API Documentation</h1>
+<h2 id="1-overview-of-the-api">1. Overview of the API</h2>
+<p>The Hyper-V Agent is a RESTful API service built on ASP.NET Core, designed to manage Hyper-V environments on Windows hosts. It provides a unified interface for virtual machine (VM) lifecycle operations, networking, storage, and metrics collection. The API supports dual backends:</p>
+<ul>
+<li><strong>WMI V2 (Windows Management Instrumentation)</strong>: Leverages CIM (Common Information Model) classes like <code>Msvm_VirtualSystemManagementService</code>, <code>Msvm_ComputerSystem</code>, and <code>Msvm_ResourceAllocationSettingData</code> for traditional Hyper-V management. This backend is compatible with Hyper-V on Windows Server and uses asynchronous job polling for long-running operations.</li>
+<li><strong>HCS (Host Compute Service)</strong>: Integrates with the Host Compute Service API (part of Windows Containers and Hyper-V isolation) for enhanced containerized VM management, storage, and networking. HCS calls are synchronous where possible and provide finer-grained control for modern workloads.</li>
+</ul>
+<p><strong>Key Features</strong>:</p>
+<ul>
+<li><strong>Base URL</strong>: <code>/api/v1</code></li>
+<li><strong>Authentication</strong>: Bearer token (JWT) or Windows Authentication (configurable via <code>appsettings.json</code>).</li>
+<li><strong>Content-Type</strong>: JSON for requests/responses.</li>
+<li><strong>Versioning</strong>: Semantic versioning; current version is v1.0.</li>
+<li><strong>Error Handling</strong>: Standardized HTTP status codes with JSON error bodies (see Section 5).</li>
+<li><strong>Async Operations</strong>: WMI-based operations return job IDs for polling status via <code>/api/v1/jobs/{id}</code>.</li>
+</ul>
+<p>The API abstracts backend differences, allowing clients to switch between WMI and HCS via a query parameter (<code>?backend=wmi</code> or <code>?backend=hcs</code>; defaults to WMI). This documentation synthesizes existing implementations from controllers (e.g., <code>VmsController.cs</code>, <code>NetworksController.cs</code>, <code>StorageController.cs</code>) with references to Hyper-V WMI samples (e.g., VM creation in Generation2VM) and v2 API descriptions (e.g., <code>Msvm_VirtualSystemManagementService.DefineSystem</code>).</p>
+<h2 id="2-current-apis">2. Current APIs</h2>
+<p>APIs are categorized by functionality. Each endpoint includes HTTP method, path, description, request/response schemas (with JSON examples), and backend details with cross-references.</p>
+<h3 id="vms-category-vmscontrollercs">VMs Category (VmsController.cs)</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Description</th>
+<th>Request Schema</th>
+<th>Response Schema</th>
+<th>Backend Details &amp; Cross-References</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/vms</code></td>
+<td>POST</td>
+<td>Create a new VM (supports HCS for containers or WMI for traditional VMs).</td>
+<td>Body: <code>CreateVmRequest</code> { &quot;id&quot;: &quot;string&quot;, &quot;name&quot;: &quot;string&quot;, &quot;mode&quot;: &quot;HCS|WMI&quot;, &quot;memoryMB&quot;: int, &quot;cpuCount&quot;: int, &quot;diskSizeGB&quot;: int, &quot;notes&quot;: &quot;string&quot; }</td>
+<td>200: { &quot;id&quot;: &quot;string&quot;, &quot;status&quot;: &quot;string&quot;, &quot;vhdPath&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>Msvm_VirtualSystemManagementService.DefineSystem</code> (cross-ref: Hyper-V/ Generation2VM sample, v2 DefineSystem). HCS: <code>HcsCreateComputeSystem</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/present</code></td>
+<td>GET</td>
+<td>Check if VM exists (searches HCS and WMI).</td>
+<td>Path: <code>name</code> (string)</td>
+<td>200: { &quot;present&quot;: bool, &quot;hcs&quot;: bool, &quot;wmi&quot;: bool }</td>
+<td>WMI: Query <code>Msvm_ComputerSystem</code> by ElementName. HCS: Internal dict check.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/start</code></td>
+<td>POST</td>
+<td>Start the VM.</td>
+<td>Path: <code>name</code> (string)</td>
+<td>200: OK</td>
+<td>WMI: <code>Msvm_ComputerSystem.RequestStateChange(2)</code>. HCS: <code>HcsStartComputeSystem</code> (cross-ref: Hyper-V/ VmOperations sample).</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/stop</code></td>
+<td>POST</td>
+<td>Graceful stop/shutdown VM.</td>
+<td>Path: <code>name</code> (string)</td>
+<td>200: OK</td>
+<td>WMI: <code>RequestStateChange(3)</code>. HCS: <code>HcsShutDownComputeSystem</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/terminate</code></td>
+<td>POST</td>
+<td>Force terminate VM.</td>
+<td>Path: <code>name</code> (string)</td>
+<td>200: OK</td>
+<td>WMI: <code>RequestStateChange(32768)</code>. HCS: <code>HcsTerminateComputeSystem</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/pause</code></td>
+<td>POST</td>
+<td>Pause VM.</td>
+<td>Path: <code>name</code> (string)</td>
+<td>200: OK</td>
+<td>WMI: <code>RequestStateChange(9)</code>. HCS: <code>HcsPauseComputeSystem</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/resume</code></td>
+<td>POST</td>
+<td>Resume paused VM.</td>
+<td>Path: <code>name</code> (string)</td>
+<td>200: OK</td>
+<td>WMI: <code>RequestStateChange(2)</code>. HCS: <code>HcsResumeComputeSystem</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/save</code></td>
+<td>POST</td>
+<td>Save VM state (WMI only).</td>
+<td>Path: <code>name</code> (string)</td>
+<td>200: OK (501 for HCS)</td>
+<td>WMI: <code>Msvm_VirtualSystemManagementService.RequestStateChange(6)</code> (cross-ref: Hyper-V/ VmOperations).</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/properties</code></td>
+<td>GET</td>
+<td>Get VM properties (memory, CPU, state).</td>
+<td>Path: <code>name</code> (string)</td>
+<td>200: { &quot;backend&quot;: &quot;string&quot;, &quot;properties&quot;: { &quot;memory&quot;: int, &quot;processors&quot;: int, &quot;state&quot;: &quot;string&quot; } }</td>
+<td>WMI: Query <code>Msvm_MemorySettingData</code>/<code>Msvm_ProcessorSettingData</code>. HCS: <code>HcsGetComputeSystemProperties</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/modify</code></td>
+<td>POST</td>
+<td>Modify VM configuration via JSON/XML.</td>
+<td>Path: <code>name</code> (string), Body: <code>configuration</code> (string)</td>
+<td>200: OK</td>
+<td>WMI: <code>Msvm_VirtualSystemManagementService.ModifySystemSettings</code> (cross-ref: v2 ModifySystemSettings). HCS: <code>HcsModifyComputeSystem</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms</code></td>
+<td>GET</td>
+<td>List all VMs.</td>
+<td>None</td>
+<td>200: { &quot;hcs&quot;: [VM[]], &quot;wmi&quot;: [VM[]] } where VM = { &quot;id&quot;: &quot;string&quot;, &quot;name&quot;: &quot;string&quot;, &quot;state&quot;: &quot;string&quot; }</td>
+<td>WMI: Query <code>Msvm_ComputerSystem</code>. HCS: Internal list.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/configure</code></td>
+<td>POST</td>
+<td>Configure VM (memory, CPU, notes; WMI only).</td>
+<td>Path: <code>name</code>, Body: <code>VmConfigurationRequest</code> { &quot;startupMemoryMB&quot;: int?, &quot;cpuCount&quot;: int? }</td>
+<td>200: OK</td>
+<td>WMI: <code>ModifyResourceSettings</code> on <code>Msvm_MemorySettingData</code> (cross-ref: Hyper-V/ DynamicMemory sample).</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/snapshots</code></td>
+<td>GET/POST</td>
+<td>List/create VM snapshots (WMI only).</td>
+<td>GET: Path <code>name</code>. POST: Body <code>CreateSnapshotRequest</code> { &quot;snapshotName&quot;: &quot;string&quot;, &quot;notes&quot;: &quot;string?&quot; }</td>
+<td>GET: 200 [Snapshot[]]. POST: 200 { &quot;snapshotId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>Msvm_VirtualMachineSnapshotService.CreateSnapshot</code> (cross-ref: v2 ApplySnapshot).</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/snapshots/{snapshotId}</code></td>
+<td>DELETE/POST (revert)</td>
+<td>Delete/revert snapshot (WMI only).</td>
+<td>Path: <code>name</code>, <code>snapshotId</code></td>
+<td>200: OK</td>
+<td>WMI: <code>DestroySnapshot</code>/<code>ApplySnapshot</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/storage/devices</code></td>
+<td>GET/POST/DELETE</td>
+<td>List/add/remove storage devices.</td>
+<td>GET: Path <code>name</code>. POST: Body <code>AddStorageDeviceRequest</code> { &quot;path&quot;: &quot;string&quot; }</td>
+<td>GET: 200 [Device[]]. POST/DELETE: 200 OK</td>
+<td>WMI: Query/Add/Remove <code>Msvm_ResourceAllocationSettingData</code> (ResourceType=19). HCS: <code>HcsModifyComputeSystem</code> with storage settings.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/migrate</code></td>
+<td>POST</td>
+<td>Migrate VM to another host.</td>
+<td>Path: <code>name</code>, Body: <code>MigrateRequest</code> { &quot;destinationHost&quot;: &quot;string&quot;, &quot;live&quot;: bool, &quot;storage&quot;: bool }</td>
+<td>202: { &quot;jobId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>MigrateVirtualSystemToHost</code> (cross-ref: Hyper-V/ Migration sample, v2 MigrateVirtualSystemToHost).</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/apphealth</code></td>
+<td>GET</td>
+<td>Get application health status of the VM.</td>
+<td>Path: <code>name</code></td>
+<td>200: <code>AppHealthResponse</code> { &quot;status&quot;: &quot;string&quot;, &quot;appStatus&quot;: &quot;string&quot; }</td>
+<td>WMI: Query <code>Msvm_HeartbeatComponent</code> (cross-ref: Hyper-V/ AppHealth sample).</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{name}/guestfilecopy</code></td>
+<td>POST</td>
+<td>Copy file to guest OS.</td>
+<td>Path: <code>name</code>, Body: <code>GuestFileRequest</code> { &quot;sourcePath&quot;: &quot;string&quot;, &quot;destPath&quot;: &quot;string&quot;, &quot;overwrite&quot;: bool? }</td>
+<td>200: { &quot;jobId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>Msvm_GuestFileService.CopyFilesToGuest</code> (cross-ref: v2 integration services).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="networks-category-networkscontrollercs-wminetworkservicecs">Networks Category (NetworksController.cs, WmiNetworkService.cs)</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Description</th>
+<th>Request Schema</th>
+<th>Response Schema</th>
+<th>Backend Details &amp; Cross-References</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/networks</code></td>
+<td>GET</td>
+<td>List virtual switches.</td>
+<td>None</td>
+<td>200: [SwitchInfo[]] { &quot;id&quot;: &quot;guid&quot;, &quot;name&quot;: &quot;string&quot;, &quot;type&quot;: &quot;External|Internal|Private&quot; }</td>
+<td>WMI: Query <code>Msvm_VirtualEthernetSwitch</code>. HCS: HCN list (cross-ref: Hyper-V/ Networking CreateSwitch).</td>
+</tr>
+<tr>
+<td><code>/api/v1/networks/nat</code></td>
+<td>POST</td>
+<td>Create NAT switch.</td>
+<td>Body: { &quot;name&quot;: &quot;string&quot;, &quot;subnet&quot;: &quot;string&quot; }</td>
+<td>200: { &quot;id&quot;: &quot;guid&quot; }</td>
+<td>HCS: HCN NAT namespace.</td>
+</tr>
+<tr>
+<td><code>/api/v1/networks/wmi</code></td>
+<td>POST</td>
+<td>Create WMI switch (internal/private/external).</td>
+<td>Body: { &quot;name&quot;: &quot;string&quot;, &quot;type&quot;: &quot;enum&quot;, &quot;notes&quot;: &quot;string?&quot;, &quot;externalAdapterName&quot;: &quot;string?&quot;, &quot;allowManagementOS&quot;: bool }</td>
+<td>200: { &quot;id&quot;: &quot;guid&quot; }</td>
+<td>WMI: <code>Msvm_VirtualEthernetSwitchManagementService.DefineSystem</code> (cross-ref: Hyper-V/ Networking sample, v2 networking overview).</td>
+</tr>
+<tr>
+<td><code>/api/v1/networks/{id}</code></td>
+<td>DELETE</td>
+<td>Delete switch.</td>
+<td>Path: <code>id</code> (guid)</td>
+<td>200: OK</td>
+<td>WMI: <code>DestroySystem</code>. HCS: HCN delete.</td>
+</tr>
+<tr>
+<td><code>/api/v1/networks/extensions</code></td>
+<td>GET</td>
+<td>List installed extensions.</td>
+<td>None</td>
+<td>200: [ExtensionInfo[]] { &quot;name&quot;: &quot;string&quot;, &quot;vendor&quot;: &quot;string&quot;, &quot;type&quot;: &quot;enum&quot; }</td>
+<td>WMI: Query <code>Msvm_EthernetSwitchExtension</code> (cross-ref: Hyper-V/ Networking).</td>
+</tr>
+<tr>
+<td><code>/api/v1/networks/{switchName}/extensions/{extensionName}/enabled</code></td>
+<td>PUT</td>
+<td>Enable/disable extension.</td>
+<td>Path: <code>switchName</code>, <code>extensionName</code>, Body: { &quot;enabled&quot;: bool }</td>
+<td>200: OK</td>
+<td>WMI: <code>RequestStateChange(2\|3)</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{vmName}/connect/{switchName}</code></td>
+<td>POST</td>
+<td>Connect VM to switch.</td>
+<td>Path: <code>vmName</code>, <code>switchName</code></td>
+<td>200: OK</td>
+<td>WMI: <code>AddResourceSettings</code> on <code>Msvm_SyntheticEthernetPort</code> (cross-ref: Hyper-V/ Networking ConnectVmToSwitch).</td>
+</tr>
+<tr>
+<td><code>/api/v1/fibrechannel/san</code></td>
+<td>POST</td>
+<td>Create Fibre Channel SAN pool.</td>
+<td>Body: <code>CreateSanRequest</code> { &quot;sanName&quot;: &quot;string&quot;, &quot;wwpnArray&quot;: &quot;string[]&quot;, &quot;wwnnArray&quot;: &quot;string[]&quot;, &quot;notes&quot;: &quot;string?&quot; }</td>
+<td>200: { &quot;poolId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>Msvm_ResourcePoolConfigurationService.CreatePool</code> (cross-ref: Hyper-V/ FibreChannel sample, v2 FibreChannel).</td>
+</tr>
+<tr>
+<td><code>/api/v1/fibrechannel/san/{poolId}</code></td>
+<td>DELETE</td>
+<td>Delete Fibre Channel SAN pool.</td>
+<td>Path: <code>poolId</code></td>
+<td>200: OK</td>
+<td>WMI: <code>DestroyPool</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/fibrechannel/san/{poolId}</code></td>
+<td>GET</td>
+<td>Get Fibre Channel SAN pool info.</td>
+<td>Path: <code>poolId</code></td>
+<td>200: <code>SanInfoResponse</code> { &quot;poolId&quot;: &quot;string&quot;, &quot;name&quot;: &quot;string&quot;, &quot;notes&quot;: &quot;string&quot;, &quot;allocations&quot;: &quot;string[]&quot; }</td>
+<td>WMI: Query <code>Msvm_ResourcePool</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{vmName}/fibrechannel/port</code></td>
+<td>POST</td>
+<td>Add Fibre Channel port to VM.</td>
+<td>Path: <code>vmName</code>, Body: <code>CreateFcPortRequest</code> { &quot;sanPoolId&quot;: &quot;string&quot;, &quot;wwpn&quot;: &quot;string&quot;, &quot;wwnn&quot;: &quot;string&quot; }</td>
+<td>200: { &quot;portId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>AddResourceSettings</code> on <code>Msvm_FibreChannelVirtualPortAllocationSettingData</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="storage-category-storagecontrollercs-storageservicecs">Storage Category (StorageController.cs, StorageService.cs)</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Description</th>
+<th>Request Schema</th>
+<th>Response Schema</th>
+<th>Backend Details &amp; Cross-References</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/storage/vhd</code></td>
+<td>POST</td>
+<td>Create VHD/VHDX.</td>
+<td>Body: <code>CreateVhdRequest</code> { &quot;path&quot;: &quot;string&quot;, &quot;maxInternalSize&quot;: ulong, &quot;type&quot;: &quot;Fixed|Dynamic&quot;, &quot;format&quot;: &quot;VHD|VHDX&quot; }</td>
+<td>200: OK</td>
+<td>WMI: <code>Msvm_ImageManagementService.CreateVirtualHardDisk</code> (cross-ref: Hyper-V/ Storage CreateVirtualHardDisk, v2 CreateVirtualHardDisk). HCS: <code>VirtDiskNative.CreateVirtualDisk</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/storage/vhd/attach</code></td>
+<td>PUT</td>
+<td>Attach VHD to VM.</td>
+<td>Query: <code>vmName</code>, <code>vhdPath</code></td>
+<td>200: OK</td>
+<td>WMI: <code>AddResourceSettings</code> on <code>Msvm_StorageAllocationSettingData</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/storage/vhd/detach</code></td>
+<td>PUT</td>
+<td>Detach VHD from VM.</td>
+<td>Query: <code>vmName</code>, <code>vhdPath</code></td>
+<td>200: OK</td>
+<td>WMI: <code>RemoveResourceSettings</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/storage/vhd/resize</code></td>
+<td>PUT</td>
+<td>Resize VHD.</td>
+<td>Body: <code>ResizeVhdRequest</code> { &quot;path&quot;: &quot;string&quot;, &quot;maxInternalSize&quot;: ulong }</td>
+<td>200: OK</td>
+<td>WMI: <code>Msvm_ImageManagementService.ExpandVirtualHardDisk</code> (cross-ref: Hyper-V/ Storage resize).</td>
+</tr>
+<tr>
+<td><code>/api/v1/storage/vhd/metadata</code></td>
+<td>GET/PUT</td>
+<td>Get/update VHD metadata.</td>
+<td>GET: Query <code>vhdPath</code>. PUT: Body <code>VhdMetadataUpdate</code> { &quot;uniqueId&quot;: &quot;guid?&quot;, &quot;parentPath&quot;: &quot;string?&quot; }</td>
+<td>200: <code>VhdMetadata</code> { &quot;path&quot;: &quot;string&quot;, &quot;size&quot;: ulong } or OK</td>
+<td>WMI: Query/update <code>Msvm_VirtualHardDiskSettingData</code> (cross-ref: v2 GetVirtualHardDiskSettingData).</td>
+</tr>
+<tr>
+<td><code>/api/v1/storage/vhd/compact</code></td>
+<td>POST</td>
+<td>Compact VHD (async).</td>
+<td>Body: <code>CompactVhdRequest</code> { &quot;path&quot;: &quot;string&quot; }</td>
+<td>202: { &quot;jobId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>CompactVirtualHardDisk</code> (cross-ref: Hyper-V/ Storage).</td>
+</tr>
+<tr>
+<td><code>/api/v1/storage/vhdset/{vhdSetPath}/info</code></td>
+<td>GET</td>
+<td>Get VHD Set info.</td>
+<td>Path: <code>vhdSetPath</code></td>
+<td>200: <code>VhdSetInformationResponse</code></td>
+<td>WMI: <code>GetVHDSetInformation</code> (cross-ref: v2 VHDSet-specific).</td>
+</tr>
+<tr>
+<td><code>/api/v1/storage/extents</code></td>
+<td>GET</td>
+<td>List storage extents.</td>
+<td>None</td>
+<td>200: [Extent[]] { &quot;extentId&quot;: &quot;string&quot;, &quot;name&quot;: &quot;string&quot; }</td>
+<td>WMI: Query <code>Msvm_StorageAllocationSettingData</code> (ResourceType=31).</td>
+</tr>
+<tr>
+<td><code>/api/v1/qos</code></td>
+<td>POST</td>
+<td>Create Storage QoS policy.</td>
+<td>Body: <code>CreateQoSRequest</code> { &quot;policyId&quot;: &quot;string&quot;, &quot;maxIops&quot;: int?, &quot;maxBandwidth&quot;: int?, &quot;description&quot;: &quot;string?&quot; }</td>
+<td>200: { &quot;policyId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>CreateQoSPolicy</code> on <code>Msvm_StorageQoSResourceAllocationSettingData</code> (cross-ref: Hyper-V/ StorageQoS).</td>
+</tr>
+<tr>
+<td><code>/api/v1/qos/{policyId}</code></td>
+<td>DELETE</td>
+<td>Delete Storage QoS policy.</td>
+<td>Path: <code>policyId</code></td>
+<td>200: OK</td>
+<td>WMI: <code>DeleteQoSPolicy</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/qos/{policyId}</code></td>
+<td>GET</td>
+<td>Get Storage QoS policy info.</td>
+<td>Path: <code>policyId</code></td>
+<td>200: <code>QoSInfoResponse</code> { &quot;policyId&quot;: &quot;string&quot;, &quot;maxIops&quot;: int, &quot;maxBandwidth&quot;: int, &quot;description&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>GetQoSPolicyInfo</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/{vmName}/qos/{policyId}</code></td>
+<td>POST</td>
+<td>Apply Storage QoS policy to VM.</td>
+<td>Path: <code>vmName</code>, <code>policyId</code></td>
+<td>200: OK</td>
+<td>WMI: <code>ModifyResourceSettings</code> to <code>ApplyQoSPolicyToVm</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="replication-category-replicationcontrollercs">Replication Category (ReplicationController.cs)</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Description</th>
+<th>Request Schema</th>
+<th>Response Schema</th>
+<th>Backend Details &amp; Cross-References</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/replication/relationships</code></td>
+<td>POST</td>
+<td>Create replication relationship.</td>
+<td>Body: <code>CreateReplicationRequest</code> { &quot;sourceVm&quot;: &quot;string&quot;, &quot;targetHost&quot;: &quot;string&quot;, &quot;authMode&quot;: &quot;string?&quot; }</td>
+<td>200: { &quot;relationshipId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>Msvm_ReplicationService.CreateReplicationRelationship</code> (cross-ref: Hyper-V/ Replica sample, v2 CreateReplicationRelationship).</td>
+</tr>
+<tr>
+<td><code>/api/v1/replication/{vmName}/start</code></td>
+<td>POST</td>
+<td>Start replication for VM.</td>
+<td>Path: <code>vmName</code></td>
+<td>202: { &quot;jobId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>Msvm_ReplicationService.StartReplication</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/replication/{vmName}/failover</code></td>
+<td>POST</td>
+<td>Initiate failover for VM.</td>
+<td>Path: <code>vmName</code>, Body: <code>FailoverRequest</code> { &quot;mode&quot;: &quot;'Planned' | 'Test' | 'Live'&quot; }</td>
+<td>202: { &quot;jobId&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>Msvm_ReplicationService.InitiateFailover</code> (cross-ref: v2 InitiateFailover).</td>
+</tr>
+<tr>
+<td><code>/api/v1/replication/{vmName}/reverse</code></td>
+<td>PUT</td>
+<td>Reverse replication direction.</td>
+<td>Path: <code>vmName</code></td>
+<td>200: OK</td>
+<td>WMI: <code>Msvm_ReplicationService.ReverseReplication</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/replication/{vmName}/state</code></td>
+<td>GET</td>
+<td>Get replication state for VM.</td>
+<td>Path: <code>vmName</code></td>
+<td>200: { &quot;state&quot;: &quot;string&quot;, &quot;relationshipId&quot;: &quot;string&quot; }</td>
+<td>WMI: Query <code>Msvm_ReplicationService</code> state.</td>
+</tr>
+<tr>
+<td><code>/api/v1/replication/{relationshipId}/authorization</code></td>
+<td>PUT</td>
+<td>Update replication authorization.</td>
+<td>Path: <code>relationshipId</code>, Body: { &quot;authMode&quot;: &quot;string&quot;, &quot;credentials&quot;: &quot;object?&quot; }</td>
+<td>200: OK</td>
+<td>WMI: <code>Msvm_ReplicationService.UpdateAuthorization</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="metrics-category-vmscontrollercs-metricsservicecs">Metrics Category (VmsController.cs, MetricsService.cs)</h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Description</th>
+<th>Request Schema</th>
+<th>Response Schema</th>
+<th>Backend Details &amp; Cross-References</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/vms/{name}/metrics/discrete</code></td>
+<td>GET</td>
+<td>Enumerate discrete metrics for VM.</td>
+<td>Path: <code>name</code></td>
+<td>200: [Metric[]] { &quot;name&quot;: &quot;string&quot;, &quot;type&quot;: &quot;string&quot; }</td>
+<td>WMI: <code>Msvm_MetricService.EnumerateDiscreteMetrics</code> (cross-ref: Hyper-V/ Metrics ControlMetrics, v2 Msvm_MetricsService).</td>
+</tr>
+<tr>
+<td><code>/api/v1/vms/metrics/pool</code></td>
+<td>GET</td>
+<td>Enumerate metrics for resource pool.</td>
+<td>Query: <code>resourceType</code>, <code>subType</code>, <code>poolId</code></td>
+<td>200: [Metric[]]</td>
+<td>WMI: <code>EnumerateMetricsForResourcePool</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Other categories (e.g., Jobs: <code>/api/v1/jobs/{id}</code> GET for status) follow similar patterns.</p>
+<h2 id="3-implemented-extensions">3. Implemented Extensions</h2>
+<p>Based on gap analysis (now 100% coverage for prioritized features), the following expansions have been implemented using WMI for unsupported HCS areas. All gaps in replication, migration, Fibre Channel, and QoS have been filled to achieve full Hyper-V parity for enterprise use (DR, migration, SAN).</p>
+<ul>
+<li><strong>ReplicationController</strong>: Full endpoints for relationship creation, start, failover, reverse, state, and authorization (WMI-only).</li>
+<li><strong>VmsController Enhancements</strong>: Migration, app health, and guest file copy endpoints.</li>
+<li><strong>NetworksController Enhancements</strong>: Fibre Channel SAN creation, deletion, query, and VM port addition.</li>
+<li><strong>StorageController Enhancements</strong>: QoS policy creation, deletion, query, and VM application.</li>
+</ul>
+<p>Implementation complete: Services (e.g., ReplicationService.cs, FibreChannelService.cs, StorageQoSService.cs) added; controllers updated; types defined; tests integrated with Hyper-V samples.</p>
+<h2 id="4-usage-examples">4. Usage Examples</h2>
+<p>Adapted from Hyper-V/ samples to API calls (using curl):</p>
+<ul>
+<li>
+<p><strong>Create VM</strong> (from Generation2VM sample):</p>
+<pre class="hljs"><code><div>curl -X POST http://localhost:5000/api/v1/vms \
+-H &quot;Content-Type: application/json&quot; \
+-d '{
+  &quot;name&quot;: &quot;MyVM&quot;,
+  &quot;memoryMB&quot;: 2048,
+  &quot;cpuCount&quot;: 2,
+  &quot;diskSizeGB&quot;: 40
+}'
+</div></code></pre>
+</li>
+<li>
+<p><strong>Start VM</strong>:</p>
+<pre class="hljs"><code><div>curl -X POST http://localhost:5000/api/v1/vms/MyVM/start
+</div></code></pre>
+</li>
+<li>
+<p><strong>Create and Attach VHD</strong>:</p>
+<pre class="hljs"><code><div>curl -X POST http://localhost:5000/api/v1/storage/vhd \
+-H &quot;Content-Type: application/json&quot; \
+-d '{&quot;path&quot;: &quot;C:\\VMs\\MyVM.vhdx&quot;, &quot;maxInternalSize&quot;: 42949672960, &quot;type&quot;: &quot;Dynamic&quot;, &quot;format&quot;: &quot;VHDX&quot;}'
+
+curl -X PUT &quot;http://localhost:5000/api/v1/storage/vhd/attach?vmName=MyVM&amp;vhdPath=C:\\VMs\\MyVM.vhdx&quot;
+</div></code></pre>
+</li>
+<li>
+<p><strong>List Networks and Connect VM</strong>:</p>
+<pre class="hljs"><code><div>curl http://localhost:5000/api/v1/networks
+
+curl -X POST http://localhost:5000/api/v1/vms/MyVM/connect/MySwitch
+</div></code></pre>
+</li>
+</ul>
+<p>For full async job polling: Use GET <code>/api/v1/jobs/{jobId}</code> until status is &quot;Completed&quot;.</p>
+<h2 id="5-error-handling">5. Error Handling</h2>
+<p>All endpoints return standard HTTP status codes:</p>
+<ul>
+<li><strong>200 OK</strong>: Success.</li>
+<li><strong>201 Created</strong>: Resource created.</li>
+<li><strong>202 Accepted</strong>: Async job started (body: <code>{ &quot;jobId&quot;: &quot;string&quot; }</code>).</li>
+<li><strong>400 Bad Request</strong>: Invalid input (body: <code>{ &quot;error&quot;: &quot;string&quot;, &quot;details&quot;: &quot;string&quot; }</code>).</li>
+<li><strong>401 Unauthorized</strong>: Auth failed.</li>
+<li><strong>404 Not Found</strong>: Resource not found.</li>
+<li><strong>500 Internal Server Error</strong>: Backend failure (body: <code>{ &quot;error&quot;: &quot;string&quot;, &quot;backend&quot;: &quot;WMI\|HCS&quot; }</code>).</li>
+<li><strong>501 Not Implemented</strong>: Feature unsupported in backend.</li>
+</ul>
+<p>WMI errors include CIM status codes (e.g., WBEM_E_NOT_FOUND). HCS errors map to HRESULT.</p>
+<h2 id="6-references">6. References</h2>
+<ul>
+<li><strong>WMI V2 Documentation</strong>: <a href="https://docs.microsoft.com/en-us/windows/win32/hyperv_v2/">Hyper-V WMI Provider</a> - Classes: <code>Msvm_*</code>.</li>
+<li><strong>HCS API</strong>: <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/hyper-v-container">Host Compute Service</a> - HCN for networking, VirtDisk for storage.</li>
+<li><strong>Samples</strong>: GitHub <a href="https://github.com/Microsoft/Windows-classic-samples/tree/main/Samples/HyperV">Hyper-V Samples</a> - VM creation, networking, storage.</li>
+<li><strong>Tools</strong>: PowerShell <code>Get-WmiObject</code>, <code>Invoke-WmiMethod</code>; HCS via P/Invoke or wrappers.</li>
+<li><strong>Schemas</strong>: OpenAPI/Swagger at <code>/swagger</code> (auto-generated from controllers).</li>
+</ul>
+
+</body>
+
+</html>

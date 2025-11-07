@@ -6,6 +6,7 @@ I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Debug\net8.0-window
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Debug\net8.0-windows\HyperV.Core.Hcn.AssemblyInfoInputs.cache
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Debug\net8.0-windows\HyperV.Core.Hcn.AssemblyInfo.cs
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Debug\net8.0-windows\HyperV.Core.Hcn.csproj.CoreCompileInputs.cache
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Debug\net8.0-windows\HyperV.Core.Hcn.sourcelink.json
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Debug\net8.0-windows\HyperV.HyperV.Core.Hcn.dll
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Debug\net8.0-windows\refint\HyperV.HyperV.Core.Hcn.dll
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcn\obj\Debug\net8.0-windows\HyperV.HyperV.Core.Hcn.xml

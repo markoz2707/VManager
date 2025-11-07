@@ -4,5 +4,361 @@
         <name>HyperV.HyperV.Tests</name>
     </assembly>
     <members>
+        <member name="T:HyperV.Tests.Controllers.ContainersControllerTests">
+            <summary>
+            Testy jednostkowe dla ContainersController
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Controllers.JobsControllerTests">
+            <summary>
+            Testy jednostkowe dla JobsController
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Controllers.NetworksControllerTests">
+            <summary>
+            Testy jednostkowe dla NetworksController
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Controllers.ServiceControllerTests">
+            <summary>
+            Testy jednostkowe dla ServiceController
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Controllers.StorageControllerTests">
+            <summary>
+            Testy jednostkowe dla StorageController
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Controllers.VmsControllerTests">
+            <summary>
+            Template testów dla VmsController - przykład implementacji
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.EndToEnd.BasicEndpointsE2ETests">
+            <summary>
+            Testy end-to-end dla podstawowych endpointów API
+            UWAGA: Te testy wymagają uruchomionego serwera API na porcie 8743
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.BasicEndpointsE2ETests.CompleteApiCheck_ShouldVerifyAllBasicEndpoints">
+            <summary>
+            Test kompleksowego scenariusza - sprawdzenie wszystkich podstawowych endpointów
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.EndToEnd.EndToEndTestBase">
+            <summary>
+            Klasa bazowa dla testów end-to-end
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.WaitForServerAvailability(System.Int32)">
+            <summary>
+            Czeka, aż serwer będzie dostępny
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.GetAsync(System.String)">
+            <summary>
+            Wysyła żądanie GET i zwraca odpowiedź
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.PostAsync``1(System.String,``0)">
+            <summary>
+            Wysyła żądanie POST z JSON body i zwraca odpowiedź
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.PutAsync``1(System.String,``0)">
+            <summary>
+            Wysyła żądanie PUT z JSON body i zwraca odpowiedź
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.DeleteAsync(System.String)">
+            <summary>
+            Wysyła żądanie DELETE i zwraca odpowiedź
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.AssertStatusCode(System.Net.Http.HttpResponseMessage,System.Net.HttpStatusCode)">
+            <summary>
+            Weryfikuje, czy odpowiedź ma oczekiwany kod statusu
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.GetJsonResponseAsync(System.Net.Http.HttpResponseMessage)">
+            <summary>
+            Pobiera i deserializuje JSON z odpowiedzi
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.IsServerAvailableAsync">
+            <summary>
+            Sprawdza, czy serwer API jest dostępny
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.WaitAsync(System.Int32)">
+            <summary>
+            Czeka określoną ilość czasu
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.VerifyJsonEndpoint(System.String,System.Net.HttpStatusCode)">
+            <summary>
+            Weryfikuje, czy endpoint zwraca JSON
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.EndToEnd.EndToEndTestBase.CleanupTestDataAsync">
+            <summary>
+            Czyści dane testowe (do implementacji w klasach dziedziczących)
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Helpers.ApiResponseVerifier">
+            <summary>
+            Klasa do weryfikacji odpowiedzi API
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifySuccessResponse(System.Net.Http.HttpResponseMessage,System.Net.HttpStatusCode)">
+            <summary>
+            Weryfikuje, czy odpowiedź HTTP ma oczekiwany kod statusu
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyErrorResponse(System.Net.Http.HttpResponseMessage,System.Net.HttpStatusCode)">
+            <summary>
+            Weryfikuje, czy odpowiedź HTTP ma kod błędu
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyJsonResponse(System.String)">
+            <summary>
+            Weryfikuje, czy odpowiedź zawiera prawidłowy JSON
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyJsonProperty(System.Text.Json.JsonElement,System.String,System.Text.Json.JsonValueKind)">
+            <summary>
+            Weryfikuje, czy JSON zawiera oczekiwane pole
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyJsonPropertyValue``1(System.Text.Json.JsonElement,System.String,``0)">
+            <summary>
+            Weryfikuje, czy JSON zawiera oczekiwane pole z określoną wartością
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyHealthResponse(System.Text.Json.JsonElement)">
+            <summary>
+            Weryfikuje odpowiedź dla endpointu health
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyInfoResponse(System.Text.Json.JsonElement)">
+            <summary>
+            Weryfikuje odpowiedź dla endpointu info
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyVmPresentResponse(System.Text.Json.JsonElement,System.Boolean)">
+            <summary>
+            Weryfikuje odpowiedź dla sprawdzania obecności VM
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyVmListResponse(System.Text.Json.JsonElement)">
+            <summary>
+            Weryfikuje odpowiedź z listą VM
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyErrorResponse(System.Text.Json.JsonElement,System.String)">
+            <summary>
+            Weryfikuje odpowiedź błędu z oczekiwanym komunikatem
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyJsonArrayMinCount(System.Text.Json.JsonElement,System.String,System.Int32)">
+            <summary>
+            Weryfikuje, czy JSON zawiera tablicę z określoną minimalną liczbą elementów
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyContentTypeJson(System.Net.Http.HttpResponseMessage)">
+            <summary>
+            Weryfikuje, czy Content-Type jest application/json
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyStorageJobsResponse(System.Text.Json.JsonElement)">
+            <summary>
+            Weryfikuje odpowiedź dla listy zadań pamięci masowej
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ApiResponseVerifier.VerifyStorageJobResponse(System.Text.Json.JsonElement)">
+            <summary>
+            Weryfikuje odpowiedź dla szczegółów zadania pamięci masowej
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Helpers.BaseTestClass">
+            <summary>
+            Bazowa klasa testowa z wspólnymi funkcjonalnościami dla testów API
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.BaseTestClass.ResetMocks">
+            <summary>
+            Reset all mocks before each test
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Helpers.ServiceMocks">
+            <summary>
+            Klasa do konfigurowania mocków serwisów
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureStorageServiceMock">
+            <summary>
+            Konfiguruje mock dla IStorageService
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureImageManagementServiceMock">
+            <summary>
+            Konfiguruje mock dla IImageManagementService
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureJobServiceMock">
+            <summary>
+            Konfiguruje mock dla IJobService
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureHcsVmServiceMock">
+            <summary>
+            Konfiguruje mock dla HCS VmService
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureWmiVmServiceMock">
+            <summary>
+            Konfiguruje mock dla WMI VmService
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureVmCreationServiceMock">
+            <summary>
+            Konfiguruje mock dla VmCreationService
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureReplicationServiceMock">
+            <summary>
+            Konfiguruje mock dla ReplicationService
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureNetworkServiceMock">
+            <summary>
+            Konfiguruje mock dla NetworkService
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureHcsContainerServiceMock">
+            <summary>
+            Konfiguruje mock dla HCS ContainerService
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.ServiceMocks.ConfigureWmiContainerServiceMock">
+            <summary>
+            Konfiguruje mock dla WMI ContainerService
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Helpers.TestDataGenerator">
+            <summary>
+            Klasa do generowania przykładowych danych testowych
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateVmRequest(System.String,System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},HyperV.Contracts.Models.VmCreationMode)">
+            <summary>
+            Generuje przykładowe żądanie utworzenia VM
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateContainerRequest(System.String,System.String,System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},HyperV.Contracts.Models.ContainerCreationMode)">
+            <summary>
+            Generuje przykładowe żądanie utworzenia kontenera
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateVhdRequest(System.String,System.Nullable{System.UInt64},System.String,System.String)">
+            <summary>
+            Generuje przykładowe żądanie utworzenia VHD
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateResizeVhdRequest(System.String,System.Nullable{System.UInt64})">
+            <summary>
+            Generuje przykładowe żądanie zmiany rozmiaru VHD
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateAddStorageDeviceRequest(System.String,System.String,System.Boolean,System.String)">
+            <summary>
+            Generuje przykładowe żądanie dodania urządzenia pamięci masowej
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateDifferencingDiskRequest(System.String,System.String)">
+            <summary>
+            Generuje przykładowe żądanie utworzenia dysku różnicowego
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateMergeDiskRequest(System.String,System.String,System.UInt32)">
+            <summary>
+            Generuje przykładowe żądanie łączenia dysków
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateConvertVhdRequest(System.String,System.String,HyperV.Contracts.Models.VirtualDiskFormat)">
+            <summary>
+            Generuje przykładowe żądanie konwersji VHD
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateVhdSnapshotRequest(System.String,System.String)">
+            <summary>
+            Generuje przykładowe żądanie utworzenia snapshotu VHD
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateVhdValidationRequest(System.String)">
+            <summary>
+            Generuje przykładowe żądanie walidacji VHD
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.CreateConvertToVhdSetRequest(System.String,System.String)">
+            <summary>
+            Generuje przykładowe żądanie konwersji VHD Set
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.GenerateId">
+            <summary>
+            Generuje losowy identyfikator GUID jako string
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.GenerateVmName">
+            <summary>
+            Generuje losową nazwę VM dla testów
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.GenerateContainerName">
+            <summary>
+            Generuje losową nazwę kontenera dla testów
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.GenerateContainerId">
+            <summary>
+            Generuje losowy identyfikator kontenera dla testów
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.GenerateVhdPath">
+            <summary>
+            Generuje losową ścieżkę do pliku VHD dla testów
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.GenerateNetworkId">
+            <summary>
+            Generuje losowy identyfikator sieci
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.GenerateNetworkName">
+            <summary>
+            Generuje losową nazwę sieci dla testów
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.GenerateEndpointName">
+            <summary>
+            Generuje losową nazwę endpointu dla testów
+            </summary>
+        </member>
+        <member name="M:HyperV.Tests.Helpers.TestDataGenerator.GenerateJobId">
+            <summary>
+            Generuje losowy identyfikator zadania
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Helpers.TestWebApplicationFactory">
+            <summary>
+            Custom WebApplicationFactory dla testów HyperV.Agent
+            </summary>
+        </member>
+        <member name="T:HyperV.Tests.Helpers.TestStartup">
+            <summary>
+            Test Startup class dla aplikacji testowej
+            </summary>
+        </member>
     </members>
 </doc>

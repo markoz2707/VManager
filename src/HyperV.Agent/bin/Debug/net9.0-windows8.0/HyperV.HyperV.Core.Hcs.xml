@@ -1,0 +1,396 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HyperV.HyperV.Core.Hcs</name>
+    </assembly>
+    <members>
+        <member name="T:HyperV.Core.Hcs.Interop.HcsNative">
+            <summary>Interop z Host Compute System (HCS).</summary>
+        </member>
+        <member name="T:HyperV.Core.Hcs.Interop.VirtDiskNative">
+            <summary>
+            Native interop for virtdisk.dll - Windows Virtual Disk API
+            Used for direct VHD/VHDX manipulation without WMI overhead
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.CreateVirtualDisk(HyperV.Core.Hcs.Interop.VIRTUAL_STORAGE_TYPE@,System.String,HyperV.Core.Hcs.Interop.VIRTUAL_DISK_ACCESS_MASK,System.IntPtr,HyperV.Core.Hcs.Interop.CREATE_VIRTUAL_DISK_FLAG,System.UInt32,HyperV.Core.Hcs.Interop.CREATE_VIRTUAL_DISK_PARAMETERS@,System.IntPtr,System.IntPtr@)">
+            <summary>
+            Creates a virtual hard disk (VHD) image file.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.OpenVirtualDisk(HyperV.Core.Hcs.Interop.VIRTUAL_STORAGE_TYPE@,System.String,HyperV.Core.Hcs.Interop.VIRTUAL_DISK_ACCESS_MASK,HyperV.Core.Hcs.Interop.OPEN_VIRTUAL_DISK_FLAG,HyperV.Core.Hcs.Interop.OPEN_VIRTUAL_DISK_PARAMETERS@,System.IntPtr@)">
+            <summary>
+            Opens a virtual hard disk (VHD) for use.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.AttachVirtualDisk(System.IntPtr,System.IntPtr,HyperV.Core.Hcs.Interop.ATTACH_VIRTUAL_DISK_FLAG,System.UInt32,HyperV.Core.Hcs.Interop.ATTACH_VIRTUAL_DISK_PARAMETERS@,System.IntPtr)">
+            <summary>
+            Attaches a virtual hard disk (VHD) by locating an appropriate VHD provider to accomplish the attachment.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.DetachVirtualDisk(System.IntPtr,HyperV.Core.Hcs.Interop.DETACH_VIRTUAL_DISK_FLAG,System.UInt32)">
+            <summary>
+            Detaches a virtual hard disk (VHD) by locating an appropriate VHD provider to accomplish the detachment.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.ResizeVirtualDisk(System.IntPtr,HyperV.Core.Hcs.Interop.RESIZE_VIRTUAL_DISK_FLAG,HyperV.Core.Hcs.Interop.RESIZE_VIRTUAL_DISK_PARAMETERS@,System.IntPtr)">
+            <summary>
+            Resizes a virtual hard disk (VHD).
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.GetVirtualDiskInformation(System.IntPtr,System.UInt32@,System.IntPtr,System.UInt32@)">
+            <summary>
+            Retrieves information about a VHD.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.CloseHandle(System.IntPtr)">
+            <summary>
+            Closes a handle to a virtual disk.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.GetLastError">
+            <summary>
+            Gets the last Win32 error code.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.SetVirtualDiskInformation(System.IntPtr,HyperV.Core.Hcs.Interop.SET_VIRTUAL_DISK_INFO@)">
+            <summary>
+            Sets information for a virtual disk.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.GetVirtualDiskPhysicalPath(System.IntPtr,System.UInt32@,System.IntPtr)">
+            <summary>
+            Gets the physical path of an attached virtual disk.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.MergeVirtualDisk(System.IntPtr,HyperV.Core.Hcs.Interop.MERGE_VIRTUAL_DISK_FLAG,HyperV.Core.Hcs.Interop.MERGE_VIRTUAL_DISK_PARAMETERS@,System.IntPtr)">
+            <summary>
+            Merges a child virtual hard disk in a differencing chain with parent disks in the chain.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.CreateVirtualDiskFromSource(HyperV.Core.Hcs.Interop.VIRTUAL_STORAGE_TYPE@,System.String,System.String,HyperV.Core.Hcs.Interop.VIRTUAL_DISK_ACCESS_MASK,System.IntPtr,HyperV.Core.Hcs.Interop.CREATE_VIRTUAL_DISK_FLAG,System.UInt32,HyperV.Core.Hcs.Interop.CREATE_VIRTUAL_DISK_PARAMETERS@,System.IntPtr,System.IntPtr@)">
+            <summary>
+            Creates a differencing virtual hard disk file.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.CompactVirtualDisk(System.IntPtr,HyperV.Core.Hcs.Interop.COMPACT_VIRTUAL_DISK_FLAG,HyperV.Core.Hcs.Interop.COMPACT_VIRTUAL_DISK_PARAMETERS@,System.IntPtr)">
+            <summary>
+            Compacts a virtual hard disk file.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.BreakMirrorVirtualDisk(System.IntPtr)">
+            <summary>
+            Breaks a parent-child relationship between VHD files.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.ApplySnapshotVhdSet(System.IntPtr,HyperV.Core.Hcs.Interop.APPLY_SNAPSHOT_VHDSET_PARAMETERS@,HyperV.Core.Hcs.Interop.APPLY_SNAPSHOT_VHDSET_FLAG)">
+            <summary>
+            Applies a snapshot to a VHD Set file.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Interop.VirtDiskNative.DeleteSnapshotVhdSet(System.IntPtr,HyperV.Core.Hcs.Interop.DELETE_SNAPSHOT_VHDSET_PARAMETERS@,HyperV.Core.Hcs.Interop.DELETE_SNAPSHOT_VHDSET_FLAG)">
+            <summary>
+            Deletes a snapshot from a VHD Set file.
+            </summary>
+        </member>
+        <member name="T:HyperV.Core.Hcs.Services.BasicStorageService">
+            <summary>
+            Basic HCS-based storage service implementation using virtdisk.dll
+            Provides direct VHD/VHDX manipulation without WMI overhead
+            This is a legacy implementation kept for reference - use EnhancedStorageService instead
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.BasicStorageService.CreateVirtualHardDisk(HyperV.Contracts.Models.CreateVhdRequest)">
+            <summary>
+            Creates a virtual hard disk using the Windows Virtual Disk API (virtdisk.dll)
+            This approach bypasses WMI and provides direct access to the underlying Windows API
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.BasicStorageService.AttachVirtualHardDisk(System.String,System.String)">
+            <summary>
+            Attaches a VHD/VHDX file to the system using virtdisk.dll
+            Note: This attaches the VHD as a disk to the host system, not to a specific VM
+            For VM attachment, use the WMI-based StorageService instead
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.BasicStorageService.DetachVirtualHardDisk(System.String,System.String)">
+            <summary>
+            Detaches a VHD/VHDX file from the system using virtdisk.dll
+            Note: This detaches the VHD from the host system, not from a specific VM
+            For VM detachment, use the WMI-based StorageService instead
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.BasicStorageService.ResizeVirtualHardDisk(HyperV.Contracts.Models.ResizeVhdRequest)">
+            <summary>
+            Resizes a VHD/VHDX file using virtdisk.dll
+            This provides direct access to the Windows Virtual Disk API for resizing operations
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.BasicStorageService.GetStorageTypeFromPath(System.String)">
+            <summary>
+            Determines the storage type based on the file path extension
+            </summary>
+            <param name="vhdPath">Path to the VHD/VHDX file</param>
+            <returns>VIRTUAL_STORAGE_TYPE structure for the file format</returns>
+        </member>
+        <member name="T:HyperV.Core.Hcs.Services.ContainerService">
+            <summary>Container Service using Host Compute System (HCS) API for lightweight containers.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.Create(System.String,HyperV.Contracts.Models.CreateContainerRequest)">
+            <summary>Creates a container using HCS API with container-specific configuration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.CreateContainerConfiguration(System.String,HyperV.Contracts.Models.CreateContainerRequest,System.String)">
+            <summary>Creates HCS container configuration optimized for containers.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.StartContainer(System.IntPtr)">
+            <summary>Starts a container using HCS API.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.IsContainerPresent(System.String)">
+            <summary>Checks if an HCS container exists by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.ListContainers">
+            <summary>Lists all HCS containers.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.StartContainer(System.String)">
+            <summary>Starts an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.StopContainer(System.String)">
+            <summary>Stops an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.TerminateContainer(System.String)">
+            <summary>Terminates an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.PauseContainer(System.String)">
+            <summary>Pauses an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.ResumeContainer(System.String)">
+            <summary>Resumes an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.GetContainerProperties(System.String)">
+            <summary>Gets properties of an HCS container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.ContainerService.ModifyContainer(System.String,System.String)">
+            <summary>Modifies an HCS container by name.</summary>
+        </member>
+        <member name="T:HyperV.Core.Hcs.Services.EnhancedStorageService">
+            <summary>
+            Enhanced HCS-based storage service with advanced features:
+            - VM-specific attachment logic using HCS APIs
+            - Container integration support
+            - Differencing disk operations
+            - Advanced VHD metadata manipulation
+            - Asynchronous operation support
+            - Progress reporting for long-running operations
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.CreateVirtualHardDisk(HyperV.Contracts.Models.CreateVhdRequest)">
+            <summary>
+            Creates a virtual hard disk with enhanced options including differencing disk support
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.AttachVirtualHardDisk(System.String,System.String)">
+            <summary>
+            Attaches a VHD to a VM using HCS APIs for VM-specific attachment
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.DetachVirtualHardDisk(System.String,System.String)">
+            <summary>
+            Detaches a VHD from a VM using HCS APIs
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.ResizeVirtualHardDisk(HyperV.Contracts.Models.ResizeVhdRequest)">
+            <summary>
+            Resizes a VHD with progress reporting support
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.CreateVirtualHardDiskAsync(HyperV.Contracts.Models.CreateVhdRequest,System.Threading.CancellationToken,System.IProgress{HyperV.Contracts.Models.VirtualDiskProgress})">
+            <summary>
+            Creates a virtual hard disk asynchronously with progress reporting
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.AttachVirtualHardDiskAsync(System.String,System.String,System.Threading.CancellationToken,System.IProgress{HyperV.Contracts.Models.VirtualDiskProgress})">
+            <summary>
+            Attaches a VHD to a VM using HCS APIs with VM-specific logic
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.DetachVirtualHardDiskAsync(System.String,System.String,System.Threading.CancellationToken,System.IProgress{HyperV.Contracts.Models.VirtualDiskProgress})">
+            <summary>
+            Detaches a VHD from a VM using HCS APIs
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.ResizeVirtualHardDiskAsync(HyperV.Contracts.Models.ResizeVhdRequest,System.Threading.CancellationToken,System.IProgress{HyperV.Contracts.Models.VirtualDiskProgress})">
+            <summary>
+            Resizes a VHD asynchronously with progress reporting
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.CreateDifferencingDiskAsync(System.String,System.String,System.Threading.CancellationToken,System.IProgress{HyperV.Contracts.Models.VirtualDiskProgress})">
+            <summary>
+            Creates a differencing VHD that references a parent VHD
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.MergeDifferencingDiskAsync(System.String,System.UInt32,System.Threading.CancellationToken,System.IProgress{HyperV.Contracts.Models.VirtualDiskProgress})">
+            <summary>
+            Merges a differencing disk with its parent
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.GetVhdMetadataAsync(System.String)">
+            <summary>
+            Gets comprehensive information about a VHD file
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.SetVhdMetadataAsync(System.String,HyperV.Contracts.Models.VhdMetadataUpdate)">
+            <summary>
+            Sets VHD metadata properties
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.CompactVhdAsync(System.String,System.Threading.CancellationToken,System.IProgress{HyperV.Contracts.Models.VirtualDiskProgress})">
+            <summary>
+            Compacts a VHD file to reduce its size
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.GetVhdStateAsync(System.String)">
+            <summary>
+            Gets the current state of a VHD file
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.ValidateVhdAsync(HyperV.Contracts.Models.VhdValidationRequest,System.Threading.CancellationToken)">
+            <summary>
+            Validates a VHD file
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.ConvertVhdAsync(System.String,System.String,System.String,System.Threading.CancellationToken,System.IProgress{HyperV.Contracts.Models.VirtualDiskProgress})">
+            <summary>
+            Converts a VHD from one format to another
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.CreateVirtualFloppyDiskAsync(HyperV.Contracts.Models.CreateVfdRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates a virtual floppy disk
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.AttachVirtualFloppyDiskAsync(HyperV.Contracts.Models.VfdAttachRequest)">
+            <summary>
+            Attaches a virtual floppy disk to a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.DetachVirtualFloppyDiskAsync(System.String,System.String)">
+            <summary>
+            Detaches a virtual floppy disk from a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.GetMountedStorageImagesAsync">
+            <summary>
+            Gets list of mounted storage images
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.EnableChangeTrackingAsync(System.String)">
+            <summary>
+            Enables change tracking for a VHD
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.DisableChangeTrackingAsync(System.String)">
+            <summary>
+            Disables change tracking for a VHD
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.GetVirtualDiskChangesAsync(System.String,System.String)">
+            <summary>
+            Gets virtual disk changes for incremental backup
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.GetVmStorageDevicesAsync(System.String)">
+            <summary>
+            Gets storage devices attached to a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.GetVmStorageControllersAsync(System.String)">
+            <summary>
+            Gets storage controllers for a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.AddStorageDeviceToVmAsync(System.String,HyperV.Contracts.Models.AddStorageDeviceRequest)">
+            <summary>
+            Adds a storage device to a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.RemoveStorageDeviceFromVmAsync(System.String,System.String)">
+            <summary>
+            Removes a storage device from a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.ListStorageDevicesAsync">
+            <summary>
+            Lists all fixed storage devices (local drives) with their details.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.EnhancedStorageService.GetSuitableVhdLocationsAsync(System.Int64)">
+            <summary>
+            Browses filesystems to find suitable locations for VHDX storage.
+            Returns drives with sufficient free space and suggested paths.
+            </summary>
+        </member>
+        <member name="T:HyperV.Core.Hcs.Services.VmService">
+            <summary>VM Service using Host Compute System (HCS) API for real Hyper-V integration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.Create(System.String,HyperV.Contracts.Models.CreateVmRequest)">
+            <summary>Creates a VM using HCS API with comprehensive configuration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.CreateVmConfiguration(System.String,HyperV.Contracts.Models.CreateVmRequest,System.String)">
+            <summary>Creates proper Hyper-V VM configuration for HCS based on NanaBox sample.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.StartVm(System.IntPtr)">
+            <summary>Starts a VM using HCS API.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.GenerateMacAddress">
+            <summary>Generates a random MAC address for the VM.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.GetCurrentUserSid">
+            <summary>Gets the current user's SID for HCS access control.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.SafeCloseOperation(System.IntPtr@)">
+            <summary>Safely closes an HCS operation handle, preventing access violations.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.SafeCloseComputeSystem(System.IntPtr@)">
+            <summary>Safely closes an HCS compute system handle, preventing access violations.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.ListVms">
+            <summary>Lists all HCS VMs.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.IsVmPresent(System.String)">
+            <summary>Checks if an HCS VM exists by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.StartVm(System.String)">
+            <summary>Starts an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.StopVm(System.String)">
+            <summary>Stops an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.TerminateVm(System.String)">
+            <summary>Terminates an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.PauseVm(System.String)">
+            <summary>Pauses an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.ResumeVm(System.String)">
+            <summary>Resumes an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.GetVmProperties(System.String)">
+            <summary>Gets properties of an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.ModifyVm(System.String,System.String)">
+            <summary>Modifies an HCS VM by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.ListVmSnapshots(System.String)">
+            <summary>Lists snapshots for an HCS VM (not supported - returns empty list).</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.CreateVmSnapshot(System.String,System.String,System.String)">
+            <summary>Creates a snapshot for an HCS VM (not supported).</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.DeleteVmSnapshot(System.String,System.String)">
+            <summary>Deletes a snapshot for an HCS VM (not supported).</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcs.Services.VmService.RevertVmToSnapshot(System.String,System.String)">
+            <summary>Reverts an HCS VM to a snapshot (not supported).</summary>
+        </member>
+    </members>
+</doc>

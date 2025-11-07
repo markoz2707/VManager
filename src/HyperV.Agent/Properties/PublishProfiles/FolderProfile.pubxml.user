@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\bin\Release\net9.0-windows8.0\publish\</_PublishTargetUrl>
+    <History>True|2025-09-21T21:44:24.8084378Z||;True|2025-09-21T23:39:07.3637028+02:00||;True|2025-09-21T22:40:53.0648401+02:00||;True|2025-09-21T22:32:15.6412979+02:00||;True|2025-09-21T22:30:52.7043009+02:00||;True|2025-09-21T22:25:23.1981599+02:00||;True|2025-09-21T22:20:18.8139668+02:00||;True|2025-09-21T22:02:06.9716987+02:00||;True|2025-09-21T21:24:15.9470555+02:00||;True|2025-09-21T20:59:57.4621781+02:00||;True|2025-09-18T11:43:26.8648960+02:00||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+</Project>

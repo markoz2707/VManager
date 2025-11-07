@@ -1,6 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>HyperV.Core.Wmi</RootNamespace>
+    <TargetFramework>net9.0-windows7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Management" Version="9.0.8" />

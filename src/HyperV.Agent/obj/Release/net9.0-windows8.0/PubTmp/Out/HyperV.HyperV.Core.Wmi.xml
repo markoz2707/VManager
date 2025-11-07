@@ -1,0 +1,506 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HyperV.HyperV.Core.Wmi</name>
+    </assembly>
+    <members>
+        <member name="T:HyperV.Core.Wmi.Services.ContainerService">
+            <summary>Container Service using WMI for Hyper-V isolated containers.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.Create(System.String,HyperV.Contracts.Models.CreateContainerRequest)">
+            <summary>Creates a Hyper-V isolated container using WMI.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.CreateContainerConfiguration(HyperV.Contracts.Models.CreateContainerRequest)">
+            <summary>Creates WMI container configuration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.CreateContainerResourceSettings(HyperV.Contracts.Models.CreateContainerRequest)">
+            <summary>Creates container resource settings.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.GetVirtualSystemManagementService">
+            <summary>Gets the virtual system management service.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.WaitForJob(System.Management.ManagementObject)">
+            <summary>Waits for a WMI job to complete.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.IsContainerPresent(System.String)">
+            <summary>Checks if a WMI container exists by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.ListContainers">
+            <summary>Lists all WMI containers.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.GetContainerStatus(System.Management.ManagementObject)">
+            <summary>Gets the status of a WMI container.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.StartContainer(System.String)">
+            <summary>Starts a WMI container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.StopContainer(System.String)">
+            <summary>Stops a WMI container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.TerminateContainer(System.String)">
+            <summary>Terminates a WMI container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.PauseContainer(System.String)">
+            <summary>Pauses a WMI container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.ResumeContainer(System.String)">
+            <summary>Resumes a WMI container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.GetContainerProperties(System.String)">
+            <summary>Gets properties of a WMI container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.ModifyContainer(System.String,System.String)">
+            <summary>Modifies a WMI container by name.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.ExecuteContainerStateChange(System.String,System.UInt32,System.String)">
+            <summary>Executes a state change operation on a container.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ContainerService.GetContainer(System.String)">
+            <summary>Gets a container by name.</summary>
+        </member>
+        <member name="T:HyperV.Core.Wmi.Services.HostInfoService">
+            <summary>
+            Service for retrieving host information, hardware, system, performance, and recent tasks.
+            Uses WMI queries to gather data for the Host dashboard.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.HostInfoService.GetHostHardwareInfoAsync">
+            <summary>
+            Retrieves hardware information for the host.
+            </summary>
+            <returns>Host hardware details.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.HostInfoService.GetSystemInfoAsync">
+            <summary>
+            Retrieves system information (OS details).
+            </summary>
+            <returns>System information.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.HostInfoService.GetPerformanceSummaryAsync">
+            <summary>
+            Retrieves current performance summary (CPU, Memory, Storage usage).
+            </summary>
+            <returns>Performance summary.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.HostInfoService.GetRecentTasksAsync(System.Int32)">
+            <summary>
+            Retrieves recent Hyper-V tasks/jobs.
+            </summary>
+            <param name="limit">Number of recent tasks to return (default: 10).</param>
+            <returns>List of recent tasks.</returns>
+        </member>
+        <member name="T:HyperV.Core.Wmi.Services.ImageManagementService">
+            <summary>
+            WMI-based implementation of Image Management Service
+            Provides virtual media management operations using Hyper-V WMI APIs
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.MetricsService.QueryMetricCollectionEnabled(System.String,System.String)">
+            <summary>
+            Queries whether metric collection is enabled for a given VM and metric definition.
+            Based on Microsoft Metrics/EnumerateMetrics.cs QueryMetricCollectionEnabledForVirtualMachine.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.MetricsService.EnumerateDiscreteMetricsForVm(System.String)">
+            <summary>
+            Enumerates discrete metrics that compose aggregate metrics for a VM.
+            Based on Microsoft Metrics/EnumerateMetrics.cs EnumerateDiscreteMetricsForVm.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.MetricsService.EnumerateMetricsForResourcePool(System.String,System.String,System.String)">
+            <summary>
+            Enumerates metrics for a given resource pool.
+            Based on Microsoft Metrics/EnumerateMetrics.cs EnumerateMetricsForResourcePool.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.MetricsService.EnableMetricsCollection(System.String,System.String[])">
+            <summary>
+            Enables metric collection for a VM using the Msvm_MetricService::ControlMetrics method.
+            Based on Microsoft Metrics/ControlMetrics.cs EnableMetricsForVirtualMachine.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.MetricsService.ControlMetrics(System.String,System.String,System.UInt32,System.Management.ManagementScope)">
+            <summary>
+            Acts as a wrapper around the MetricService::ControlMetrics WMI method. It is used to 
+            enable, disable, or reset metrics.
+            Based on Microsoft Metrics/ControlMetrics.cs ControlMetrics method.
+            </summary>
+            <param name="managedElementPath">The path to the managed element for which to control
+            metrics. This can be the path to a Cim_ResourceAllocationSettingData derived class, a
+            Msvm_ComputerSystem, or a Cim_ResourcePool derived class. Null indicates all virtual 
+            machines.</param>
+            <param name="metricDefinitionPath">The path to the metric definition to control metrics
+            for. Null indicates all definitions.</param>
+            <param name="operation">The MetricOperation (2=Enable, 3=Disable, 4=Reset).</param>
+            <param name="scope">The ManagementScope to use to connect to WMI.</param>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.MetricsService.GetMetricService(System.Management.ManagementScope)">
+            <summary>
+            Gets the metric service.
+            Based on Microsoft Metrics/MetricUtilities.cs GetMetricService method.
+            </summary>
+            <param name="scope">The ManagementScope to use to connect to WMI.</param>
+            <returns>The metric service management object.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ReplicationService.IsVmPresent(System.String)">
+            <summary>Checks if a VM exists for replication operations.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ReplicationService.SaveVm(System.String)">
+            <summary>Saves VM state.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ReplicationService.ModifyVm(System.String,System.String)">
+            <summary>Modifies VM configuration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ResourcePoolsService.ListResourcePools">
+            <summary>
+            Lists all resource pools with basic information.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ResourcePoolsService.GetResourcePool(System.String,System.String,System.String)">
+            <summary>
+            Gets detailed information for a specific resource pool.
+            Based on Microsoft ResourcePools/MsvmResourcePool.cs DisplayResourcePool and DisplayPoolVerbose.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ResourcePoolsService.GetChildPools(System.String,System.String,System.String)">
+            <summary>
+            Lists child pools for a given resource pool.
+            Based on Microsoft ResourcePools/MsvmResourcePool.cs DisplayChildPools using Msvm_ElementAllocatedFromPool.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.ResourcePoolsService.GetParentPools(System.String,System.String,System.String)">
+            <summary>
+            Lists parent pools for a given resource pool.
+            Based on Microsoft ResourcePools/MsvmResourcePool.cs DisplayParentPools using Msvm_ElementAllocatedFromPool.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.StorageService.GetImageManagementService(System.Management.ManagementScope)">
+            <summary>
+            Gets the Msvm_ImageManagementService instance.
+            </summary>
+            <param name="scope">The ManagementScope to use to connect to WMI.</param>
+            <returns>The Msvm_ImageManagementService instance.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.StorageService.CreateVirtualHardDiskSettingData(System.Management.ManagementScope,HyperV.Contracts.Models.CreateVhdRequest)">
+            <summary>
+            Creates a new Msvm_VirtualHardDiskSettingData instance with the specified parameters.
+            </summary>
+            <param name="scope">The ManagementScope to use to connect to WMI.</param>
+            <param name="request">The VHD creation request parameters.</param>
+            <returns>A configured Msvm_VirtualHardDiskSettingData instance.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.StorageService.GetDefaultStorageAllocationSettingData(System.Management.ManagementScope)">
+            <summary>
+            Gets the default storage allocation setting data for virtual hard disks.
+            Uses the Microsoft recommended approach from virtualization samples.
+            </summary>
+            <param name="scope">The ManagementScope to use to connect to WMI.</param>
+            <returns>A default Msvm_StorageAllocationSettingData instance.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.StorageService.GetSuitableControllerWithAddress(System.Management.ManagementObject)">
+            <summary>
+            Gets a suitable controller path and address for attaching storage devices.
+            Prefers SCSI controllers over IDE controllers and finds the next available address.
+            Based on Microsoft documentation: SCSI controllers support up to 256 drives.
+            </summary>
+            <param name="vmSettings">The virtual machine settings object.</param>
+            <returns>Controller information including path and next available address.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.StorageService.GetNextAvailableAddress(System.String,System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.HashSet{System.String}},System.Boolean)">
+            <summary>
+            Gets the next available address on a controller for attaching a new drive.
+            Based on Microsoft documentation: SCSI supports up to 256 devices, IDE supports 2 per channel.
+            </summary>
+            <param name="controllerPath">The controller path to check.</param>
+            <param name="usedAddresses">Dictionary of used addresses per controller.</param>
+            <param name="isScsi">True if this is a SCSI controller, false for IDE.</param>
+            <returns>The next available address, or null if no slots available.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.StorageService.HasAvailableSlots(System.Management.ManagementObject)">
+            <summary>
+            Checks if a controller has available slots for attaching additional drives.
+            </summary>
+            <param name="controller">The controller resource allocation setting data.</param>
+            <returns>True if the controller has available slots, false otherwise.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.StorageService.FindVirtualHardDiskSetting(System.Management.ManagementObject,System.String)">
+            <summary>
+            Finds the storage allocation setting data for a specific VHD path on a virtual machine.
+            </summary>
+            <param name="vm">The virtual machine object.</param>
+            <param name="vhdPath">The path of the VHD to find.</param>
+            <returns>The storage allocation setting data for the VHD, or null if not found.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.StorageService.ListStorageDevicesAsync">
+            <summary>
+            Lists all fixed storage devices (local drives) with their details.
+            </summary>
+            <returns>A list of storage device information.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.StorageService.GetSuitableVhdLocationsAsync(System.Int64)">
+            <summary>
+            Browses filesystems to find suitable locations for VHDX storage.
+            Returns drives with sufficient free space and suggested paths.
+            </summary>
+            <param name="minFreeSpaceGb">Minimum free space required in GB (default: 10).</param>
+            <returns>A list of suitable storage locations.</returns>
+        </member>
+        <member name="T:HyperV.Core.Wmi.Services.VmCreationService">
+            <summary>VM Creation Service using Hyper-V WMI API for proper VM registration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmCreationService.CreateHyperVVm(System.String,HyperV.Contracts.Models.CreateVmRequest)">
+            <summary>Creates a VM using pure Hyper-V WMI API based on Microsoft samples.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmCreationService.CreateVmSettingsText(System.String,System.Int32,System.String)">
+            <summary>
+            Creates VM settings text in WMI DTD format based on Microsoft Generation2VM sample.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmCreationService.ConfigureVmResourcesWmi(System.Management.ManagementScope,System.Management.ManagementObject,HyperV.Contracts.Models.CreateVmRequest)">
+            <summary>
+            Configures VM resources using Microsoft WMI patterns.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmCreationService.CreateAndAttachVhd(System.Management.ManagementScope,System.Management.ManagementObject,System.String,System.Int32)">
+            <summary>
+            Creates and attaches VHD using pure WMI based on Microsoft Storage samples.
+            </summary>
+        </member>
+        <member name="T:HyperV.Core.Wmi.Services.VmService">
+            <summary>Comprehensive WMI VM Service providing all VM operations using Hyper-V WMI API.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.ListVms">
+            <summary>Lists all VMs in WMI.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.IsVmPresent(System.String)">
+            <summary>Checks if a VM exists in WMI.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.GetVmProperties(System.String)">
+            <summary>Gets VM properties and status.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.StartVm(System.String)">
+            <summary>Starts a VM using WMI.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.StopVm(System.String)">
+            <summary>Stops a VM using WMI.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.TerminateVm(System.String)">
+            <summary>Terminates a VM using WMI.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.PauseVm(System.String)">
+            <summary>Pauses a VM using WMI.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.ResumeVm(System.String)">
+            <summary>Resumes a VM using WMI.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.ModifyVmConfiguration(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.Nullable{System.Boolean},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>Modifies VM configuration.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.ListVmSnapshots(System.String)">
+            <summary>Lists VM snapshots.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.CreateVmSnapshot(System.String,System.String,System.String)">
+            <summary>Creates a VM snapshot.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.DeleteVmSnapshot(System.String,System.String)">
+            <summary>Deletes a VM snapshot.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.RevertVmToSnapshot(System.String,System.String)">
+            <summary>Reverts VM to snapshot.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.GetVmMemoryStatus(System.String)">
+            <summary>Gets VM memory status.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.GetSlpDataRoot(System.String)">
+            <summary>Gets SLP data root.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.ModifySlpDataRoot(System.String,System.String)">
+            <summary>Modifies SLP data root.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.GetVmGeneration(System.String)">
+            <summary>Gets VM generation.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.GetSecureBoot(System.String)">
+            <summary>Gets secure boot status.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.SetSecureBoot(System.String,System.Boolean)">
+            <summary>Sets secure boot status.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.GetBootOrder(System.String)">
+            <summary>Gets boot order.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.SetBootOrder(System.String,System.String[])">
+            <summary>Sets boot order.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.MigrateVm(System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>Migrates VM to another host.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.GetAppHealth(System.String)">
+            <summary>Gets application health status.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.CopyFileToGuest(System.String,System.String,System.String,System.Boolean)">
+            <summary>Copies file to guest VM.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ListPhysicalAdapters">
+            <summary>
+            Lists physical network adapters for external switch creation.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ListVirtualSwitches">
+            <summary>
+            Lists virtual switches using Msvm_VirtualEthernetSwitch.
+            Returns Id (GUID) and Name (ElementName). Never throws; returns empty on errors.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ListVirtualSwitchesSummary">
+            <summary>
+            Returns a more detailed list with type, notes and basic metadata.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreateVirtualSwitch(System.String,HyperV.Core.Wmi.Services.WmiNetworkService.WmiSwitchType,System.String,System.String,System.Boolean)">
+            <summary>
+            Creates a virtual switch (Internal/Private/External supported). Returns the switch Guid.
+            Based on Microsoft CreateSwitch sample from Windows-classic-samples.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreatePrivateSwitch(System.String,System.String)">
+            <summary>
+            Creates a private virtual switch (no host access).
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreateInternalSwitch(System.String,System.String)">
+            <summary>
+            Creates an internal virtual switch (with host access).
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreateExternalOnlySwitch(System.String,System.String,System.String)">
+            <summary>
+            Creates an external-only virtual switch (no host access).
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreateExternalSwitch(System.String,System.String,System.String,System.Boolean)">
+            <summary>
+            Creates an external virtual switch (with host access via internal port).
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.CreateSwitchInternal(System.String,System.String,System.String[])">
+            <summary>
+            Core method to create the switch with specified ports.
+            Based on Microsoft CreateSwitch sample implementation.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetEthernetSwitchManagementService">
+            <summary>
+            Gets the Ethernet Switch Management Service.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetHostComputerSystem">
+            <summary>
+            Gets the host computer system for internal switch ports.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetDefaultEthernetPortAllocationSettingData(System.Management.ManagementScope)">
+            <summary>
+            Gets default Msvm_EthernetPortAllocationSettingData instance.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.WaitForSwitchByName(System.String,System.Int32)">
+            <summary>
+            Polls for switch by name until found or timeout.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.DeleteVirtualSwitch(System.Guid)">
+            <summary>
+            Deletes a virtual switch. Based on Microsoft DeleteSwitch sample.
+            Note: This can delete any type of switch. Any ports connected to external or internal resources are also deleted.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.UpdateVirtualSwitch(System.Guid,System.String,System.String)">
+            <summary>
+            Updates basic switch settings (name, notes). Throws on failure.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ListInstalledExtensions">
+            <summary>
+            Lists installed Ethernet switch extensions on host.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.SetExtensionEnabledState(System.String,System.String,System.Boolean)">
+            <summary>
+            Enables or disables a specific extension on a virtual switch.
+            Based on Microsoft Networking/ManageExtension.cs SetExtensionEnabledState using RequestStateChange.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.SupportsTrunkMode(System.String)">
+            <summary>
+            Checks if a virtual switch supports trunk mode.
+            Based on Microsoft Networking/SupportsTrunkMode.cs using Msvm_EthernetSwitchPortFeatures.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.FindExternalAdapter(System.String)">
+            <summary>
+            Finds a physical network adapter by name. Returns the ManagementObject or null if not found.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ListPhysicalAdaptersRaw">
+            <summary>
+            Lists all physical network adapters from Msvm_ExternalEthernetPort. Returns an enumerable of ManagementObject.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.ConnectVmToSwitch(System.String,System.String)">
+            <summary>
+            Connects a VM to a virtual switch. Based on Microsoft ConnectVmToSwitch sample.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.DisconnectVmFromSwitch(System.String,System.String)">
+            <summary>
+            Disconnects a VM from a virtual switch. Based on Microsoft ConnectVmToSwitch sample.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.AddSyntheticAdapter(System.Management.ManagementObject)">
+            <summary>
+            Adds a synthetic network adapter to a VM. Based on Microsoft NetworkingUtilities.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetDefaultSyntheticAdapter">
+            <summary>
+            Gets default synthetic adapter settings.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetDefaultEthernetPortAllocationSettingData">
+            <summary>
+            Gets default ethernet port allocation setting data.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.FindEthernetSwitch(System.String)">
+            <summary>
+            Finds ethernet switch by name.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.FindConnectionsToSwitch(System.Management.ManagementObject,System.Management.ManagementObject)">
+            <summary>
+            Finds VM connections to a specific switch.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetDefaultObjectFromResourcePool(System.Management.ManagementObject)">
+            <summary>
+            Gets default object from resource pool.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.WmiUtilities.GetHostComputerSystem(System.Management.ManagementScope)">
+            <summary>
+            Gets the Msvm_ComputerSystem instance that matches the host computer system.
+            </summary>
+            <param name="scope">The ManagementScope to use to connect to WMI.</param>
+            <returns>The Msvm_ComputerSystem instance for the host computer system.</returns>
+        </member>
+        <member name="M:HyperV.Core.Wmi.WmiUtilities.GetHostComputerSystem(System.String,System.Management.ManagementScope)">
+            <summary>
+            Gets the Msvm_ComputerSystem instance for the host computer system with name hostName.
+            </summary>
+            <param name="hostName">Host computer system name.</param>
+            <param name="scope">The ManagementScope to use to connect to WMI.</param>
+            <returns>The Msvm_ComputerSystem instance for the host computer system.</returns>
+        </member>
+    </members>
+</doc>

@@ -13,5 +13,11 @@
         <member name="M:HyperV.Core.Hcn.Services.NetworkService.CreateNATNetwork(System.String,System.String)">
             <summary>Tworzy sieć NAT o podanej nazwie i prefiksie.</summary>
         </member>
+        <member name="M:HyperV.Core.Hcn.Services.NetworkService.ListNetworks">
+            <summary>Listuje wszystkie sieci HCN.</summary>
+        </member>
+        <member name="M:HyperV.Core.Hcn.Services.NetworkService.ListEndpoints">
+            <summary>Listuje wszystkie endpointy HCN.</summary>
+        </member>
     </members>
 </doc>

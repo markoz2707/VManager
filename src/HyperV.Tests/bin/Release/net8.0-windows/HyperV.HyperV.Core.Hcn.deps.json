@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "HyperV.HyperV.Core.Hcn/1.0.0": {
+        "runtime": {
+          "HyperV.HyperV.Core.Hcn.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "HyperV.HyperV.Core.Hcn/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

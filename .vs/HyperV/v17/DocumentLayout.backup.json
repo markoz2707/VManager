@@ -3,12 +3,79 @@
   "WorkspaceRootPath": "I:\\AI Projects\\VManager\\hyperv-agent\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.wmi\\services\\replicationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|solutionrelative:src\\hyperv.core.wmi\\services\\replicationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.wmi\\services\\wminetworkservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|solutionrelative:src\\hyperv.core.wmi\\services\\wminetworkservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{17BFB98A-3F9C-4638-BF66-76C0503A2E09}|src\\HyperV.Agent\\HyperV.Agent.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.agent\\controllers\\networkscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{17BFB98A-3F9C-4638-BF66-76C0503A2E09}|src\\HyperV.Agent\\HyperV.Agent.csproj|solutionrelative:src\\hyperv.agent\\controllers\\networkscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{707DF41C-4A14-4A00-8C77-9AF441C09B69}|src\\HyperV.Tests\\HyperV.Tests.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.tests\\controllers\\networkscontrollertests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{707DF41C-4A14-4A00-8C77-9AF441C09B69}|src\\HyperV.Tests\\HyperV.Tests.csproj|solutionrelative:src\\hyperv.tests\\controllers\\networkscontrollertests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{707DF41C-4A14-4A00-8C77-9AF441C09B69}|src\\HyperV.Tests\\HyperV.Tests.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.tests\\hyperv.tests.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{707DF41C-4A14-4A00-8C77-9AF441C09B69}|src\\HyperV.Tests\\HyperV.Tests.csproj|solutionrelative:src\\hyperv.tests\\hyperv.tests.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|I:\\Program Files\\Microsoft Visual Studio\\2022\\Preview\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{707DF41C-4A14-4A00-8C77-9AF441C09B69}|src\\HyperV.Tests\\HyperV.Tests.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.tests\\hyperv.tests.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{707DF41C-4A14-4A00-8C77-9AF441C09B69}|src\\HyperV.Tests\\HyperV.Tests.csproj|solutionrelative:src\\hyperv.tests\\hyperv.tests.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BB4E758E-93CB-403F-BEA2-4104B3385612}|src\\HyperV.LocalShell\\HyperV.LocalShell.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.localshell\\hyperv.localshell.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{BB4E758E-93CB-403F-BEA2-4104B3385612}|src\\HyperV.LocalShell\\HyperV.LocalShell.csproj|solutionrelative:src\\hyperv.localshell\\hyperv.localshell.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{17BFB98A-3F9C-4638-BF66-76C0503A2E09}|src\\HyperV.Agent\\HyperV.Agent.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.agent\\hyperv.agent.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{17BFB98A-3F9C-4638-BF66-76C0503A2E09}|src\\HyperV.Agent\\HyperV.Agent.csproj|solutionrelative:src\\hyperv.agent\\hyperv.agent.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{17BFB98A-3F9C-4638-BF66-76C0503A2E09}|src\\HyperV.Agent\\HyperV.Agent.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.agent\\hyperv.agent.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{17BFB98A-3F9C-4638-BF66-76C0503A2E09}|src\\HyperV.Agent\\HyperV.Agent.csproj|solutionrelative:src\\hyperv.agent\\hyperv.agent.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.wmi\\hyperv.core.wmi.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|solutionrelative:src\\hyperv.core.wmi\\hyperv.core.wmi.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.wmi\\hyperv.core.wmi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{D0B163B1-D0E4-41CB-AB5D-2A4A34050869}|src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj|solutionrelative:src\\hyperv.core.wmi\\hyperv.core.wmi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D558135F-12A4-443E-AC2E-42B745E5910C}|src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.vhd\\hyperv.core.vhd.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{D558135F-12A4-443E-AC2E-42B745E5910C}|src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj|solutionrelative:src\\hyperv.core.vhd\\hyperv.core.vhd.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D558135F-12A4-443E-AC2E-42B745E5910C}|src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.vhd\\hyperv.core.vhd.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{D558135F-12A4-443E-AC2E-42B745E5910C}|src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj|solutionrelative:src\\hyperv.core.vhd\\hyperv.core.vhd.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7011BA19-EBF5-403D-924A-B78DBA5FC88F}|src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.hcs\\hyperv.core.hcs.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{7011BA19-EBF5-403D-924A-B78DBA5FC88F}|src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj|solutionrelative:src\\hyperv.core.hcs\\hyperv.core.hcs.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7011BA19-EBF5-403D-924A-B78DBA5FC88F}|src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.hcs\\hyperv.core.hcs.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{7011BA19-EBF5-403D-924A-B78DBA5FC88F}|src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj|solutionrelative:src\\hyperv.core.hcs\\hyperv.core.hcs.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4B0542D-A43B-4694-87E9-ABE0979A640F}|src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.hcn\\hyperv.core.hcn.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{C4B0542D-A43B-4694-87E9-ABE0979A640F}|src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj|solutionrelative:src\\hyperv.core.hcn\\hyperv.core.hcn.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C4B0542D-A43B-4694-87E9-ABE0979A640F}|src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.core.hcn\\hyperv.core.hcn.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{C4B0542D-A43B-4694-87E9-ABE0979A640F}|src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj|solutionrelative:src\\hyperv.core.hcn\\hyperv.core.hcn.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{594444F5-CBCF-4593-91E0-C9D804B704CC}|src\\HyperV.Contracts\\HyperV.Contracts.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.contracts\\hyperv.contracts.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{594444F5-CBCF-4593-91E0-C9D804B704CC}|src\\HyperV.Contracts\\HyperV.Contracts.csproj|solutionrelative:src\\hyperv.contracts\\hyperv.contracts.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{594444F5-CBCF-4593-91E0-C9D804B704CC}|src\\HyperV.Contracts\\HyperV.Contracts.csproj|i:\\ai projects\\vmanager\\hyperv-agent\\src\\hyperv.contracts\\hyperv.contracts.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{594444F5-CBCF-4593-91E0-C9D804B704CC}|src\\HyperV.Contracts\\HyperV.Contracts.csproj|solutionrelative:src\\hyperv.contracts\\hyperv.contracts.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,32 +85,246 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "ReplicationService.cs",
-              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\Services\\ReplicationService.cs",
-              "RelativeDocumentMoniker": "src\\HyperV.Core.Wmi\\Services\\ReplicationService.cs",
-              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\Services\\ReplicationService.cs",
-              "RelativeToolTip": "src\\HyperV.Core.Wmi\\Services\\ReplicationService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAjAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "NetworksController.cs",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent\\Controllers\\NetworksController.cs",
+              "RelativeDocumentMoniker": "src\\HyperV.Agent\\Controllers\\NetworksController.cs",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent\\Controllers\\NetworksController.cs",
+              "RelativeToolTip": "src\\HyperV.Agent\\Controllers\\NetworksController.cs",
+              "ViewState": "AgIAAG0AAAAAAAAAAAAawIUAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-06T07:49:49.444Z",
+              "WhenOpened": "2025-09-18T10:19:52.081Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "HyperV.Core.Wmi.csproj",
+              "DocumentIndex": 2,
+              "Title": "NetworksControllerTests.cs",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Tests\\Controllers\\NetworksControllerTests.cs",
+              "RelativeDocumentMoniker": "src\\HyperV.Tests\\Controllers\\NetworksControllerTests.cs",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Tests\\Controllers\\NetworksControllerTests.cs",
+              "RelativeToolTip": "src\\HyperV.Tests\\Controllers\\NetworksControllerTests.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAjwBQAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-18T09:41:04.233Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Microsoft.Common.CurrentVersion.targets",
+              "DocumentMoniker": "I:\\Program Files\\Microsoft Visual Studio\\2022\\Preview\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeDocumentMoniker": "..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Preview\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ToolTip": "I:\\Program Files\\Microsoft Visual Studio\\2022\\Preview\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeToolTip": "..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Preview\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ViewState": "AgIAAEwHAAAAAAAAAAAlwGAHAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2025-09-18T09:40:20.342Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "HyperV.Tests",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Tests\\HyperV.Tests.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Tests\\HyperV.Tests.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Tests\\HyperV.Tests.csproj",
+              "RelativeToolTip": "src\\HyperV.Tests\\HyperV.Tests.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:40:04.489Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "HyperV.LocalShell",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.LocalShell\\HyperV.LocalShell.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.LocalShell\\HyperV.LocalShell.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.LocalShell\\HyperV.LocalShell.csproj",
+              "RelativeToolTip": "src\\HyperV.LocalShell\\HyperV.LocalShell.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:39:59.492Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "HyperV.Tests",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Tests\\HyperV.Tests.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Tests\\HyperV.Tests.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Tests\\HyperV.Tests.csproj",
+              "RelativeToolTip": "src\\HyperV.Tests\\HyperV.Tests.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:39:42.555Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "HyperV.Core.Wmi",
               "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
               "RelativeDocumentMoniker": "src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
               "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
               "RelativeToolTip": "src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-09-06T07:49:46.83Z"
+              "WhenOpened": "2025-09-18T09:39:08.686Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "HyperV.Core.Wmi",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+              "RelativeToolTip": "src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:39:10.35Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "WmiNetworkService.cs",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\Services\\WmiNetworkService.cs",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Wmi\\Services\\WmiNetworkService.cs",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\Services\\WmiNetworkService.cs",
+              "RelativeToolTip": "src\\HyperV.Core.Wmi\\Services\\WmiNetworkService.cs",
+              "ViewState": "AgIAAMUAAAAAAAAAAAAcwLIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-18T07:40:29.941Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "HyperV.Core.Vhd",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+              "RelativeToolTip": "src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:39:04.918Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "HyperV.Core.Vhd",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+              "RelativeToolTip": "src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:39:03.466Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "HyperV.Core.Hcs",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+              "RelativeToolTip": "src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:38:58.082Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "HyperV.Core.Hcs",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+              "RelativeToolTip": "src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:38:59.459Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "HyperV.Core.Hcn",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+              "RelativeToolTip": "src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:38:52.429Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "HyperV.Core.Hcn",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+              "RelativeToolTip": "src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:38:54.441Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "HyperV.Contracts",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+              "RelativeToolTip": "src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:38:46.279Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "HyperV.Contracts",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+              "RelativeToolTip": "src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:38:47.975Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "HyperV.Agent",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent\\HyperV.Agent.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Agent\\HyperV.Agent.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent\\HyperV.Agent.csproj",
+              "RelativeToolTip": "src\\HyperV.Agent\\HyperV.Agent.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:35:53.231Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "HyperV.Agent",
+              "DocumentMoniker": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent\\HyperV.Agent.csproj",
+              "RelativeDocumentMoniker": "src\\HyperV.Agent\\HyperV.Agent.csproj",
+              "ToolTip": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent\\HyperV.Agent.csproj",
+              "RelativeToolTip": "src\\HyperV.Agent\\HyperV.Agent.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-18T09:35:55.503Z",
+              "EditorCaption": ""
             }
           ]
         }

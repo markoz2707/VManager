@@ -1,5 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>HyperV.Core.Hcn</RootNamespace>
+    <TargetFramework>net9.0-windows7.0</TargetFramework>
   </PropertyGroup>
 </Project>

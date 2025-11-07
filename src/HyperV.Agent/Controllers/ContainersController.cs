@@ -66,17 +66,17 @@ public class ContainersController : ControllerBase
     {
         try
         {
-            var containers = new List<object>();
+            var hcsContainers = _hcsContainerSvc.ListContainers();
+            var wmiContainers = _wmiContainerSvc.ListContainers();
 
-            // Add HCS containers (this would need implementation to list existing containers)
-            // For now, we'll return a placeholder response
-            
-            return Ok(new
+            var obj = new
             {
-                HcsContainers = new List<object>(),
-                WmiContainers = new List<object>(),
-                Message = "Container listing not yet fully implemented - containers are tracked in memory only"
-            });
+                HcsContainers = hcsContainers,
+                WmiContainers = wmiContainers,
+                TotalCount = hcsContainers.Count + wmiContainers.Count,
+                Message = "Combined container list from HCS and WMI backends"
+            };
+            return Ok(obj);
         }
         catch (Exception ex)
         {

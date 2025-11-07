@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Management;
+using System.Threading;
+using System.Threading.Tasks;
 using HyperV.Contracts.Interfaces;
 using HyperV.Contracts.Models;
 
@@ -180,7 +182,7 @@ namespace HyperV.Core.Wmi.Services
             vhdSettings["MaxInternalSize"] = request.MaxInternalSize;
 
             // Set VHD format
-            switch (request.Format.ToUpperInvariant())
+            switch (request.Format?.ToUpperInvariant() ?? "VHDX")
             {
                 case "VHD":
                     vhdSettings["Format"] = 2;
@@ -193,7 +195,7 @@ namespace HyperV.Core.Wmi.Services
             }
 
             // Set VHD type
-            switch (request.Type.ToUpperInvariant())
+            switch (request.Type?.ToUpperInvariant() ?? "DYNAMIC")
             {
                 case "DYNAMIC":
                     vhdSettings["Type"] = 3; // Dynamic
@@ -385,11 +387,11 @@ namespace HyperV.Core.Wmi.Services
                     }
                 }
 
-                return null; // No available addresses
+                return null!; // No available addresses
             }
             catch
             {
-            return null!;
+                return null!; // No available addresses
             }
         }
 
@@ -447,7 +449,7 @@ namespace HyperV.Core.Wmi.Services
             
             if (vhdSettings == null)
             {
-            return null!;
+                return null!; // VHD settings not found
             }
 
             foreach (var setting in vhdSettings)
@@ -480,7 +482,1099 @@ namespace HyperV.Core.Wmi.Services
                 setting?.Dispose();
             }
 
-            return null;
+            return null!; // VHD setting not found
         }
+
+        // Asynchronous versions of basic operations
+        public async Task CreateVirtualHardDiskAsync(CreateVhdRequest request, CancellationToken cancellationToken, IProgress<VirtualDiskProgress> progress)
+        {
+            await Task.Run(() =>
+            {
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 0, CompletionValue = 100 });
+                CreateVirtualHardDisk(request);
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 100, CompletionValue = 100 });
+            }, cancellationToken);
+        }
+
+        public async Task AttachVirtualHardDiskAsync(string vmName, string vhdPath, CancellationToken cancellationToken, IProgress<VirtualDiskProgress> progress)
+        {
+            await Task.Run(() =>
+            {
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 0, CompletionValue = 100 });
+                AttachVirtualHardDisk(vmName, vhdPath);
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 100, CompletionValue = 100 });
+            }, cancellationToken);
+        }
+
+        public async Task DetachVirtualHardDiskAsync(string vmName, string vhdPath, CancellationToken cancellationToken, IProgress<VirtualDiskProgress> progress)
+        {
+            await Task.Run(() =>
+            {
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 0, CompletionValue = 100 });
+                DetachVirtualHardDisk(vmName, vhdPath);
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 100, CompletionValue = 100 });
+            }, cancellationToken);
+        }
+
+        public async Task ResizeVirtualHardDiskAsync(ResizeVhdRequest request, CancellationToken cancellationToken, IProgress<VirtualDiskProgress> progress)
+        {
+            await Task.Run(() =>
+            {
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 0, CompletionValue = 100 });
+                ResizeVirtualHardDisk(request);
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 100, CompletionValue = 100 });
+            }, cancellationToken);
+        }
+
+        // Differencing disk operations
+        public async Task CreateDifferencingDiskAsync(string childPath, string parentPath, CancellationToken cancellationToken, IProgress<VirtualDiskProgress> progress)
+        {
+            await Task.Run(() =>
+            {
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 0, CompletionValue = 100 });
+                
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+                using var vhdSettings = CreateDifferencingDiskSettingData(scope, childPath, parentPath);
+
+                var inParams = imageManagementService.GetMethodParameters("CreateVirtualHardDisk");
+                inParams["VirtualDiskSettingData"] = vhdSettings.GetText(TextFormat.WmiDtd20);
+
+                using var result = imageManagementService.InvokeMethod("CreateVirtualHardDisk", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to create differencing disk at {childPath}");
+                }
+                
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 100, CompletionValue = 100 });
+            }, cancellationToken);
+        }
+
+        public async Task MergeDifferencingDiskAsync(string childPath, uint mergeDepth, CancellationToken cancellationToken, IProgress<VirtualDiskProgress> progress)
+        {
+            await Task.Run(() =>
+            {
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 0, CompletionValue = 100 });
+                
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("MergeVirtualHardDisk");
+                inParams["SourcePath"] = childPath;
+                inParams["MergeDepth"] = mergeDepth;
+
+                using var result = imageManagementService.InvokeMethod("MergeVirtualHardDisk", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to merge differencing disk {childPath}");
+                }
+                
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 100, CompletionValue = 100 });
+            }, cancellationToken);
+        }
+
+        // VHD metadata operations
+        public async Task<VhdMetadata> GetVhdMetadataAsync(string vhdPath)
+        {
+            return await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("GetVirtualHardDiskInfo");
+                inParams["Path"] = vhdPath;
+
+                using var result = imageManagementService.InvokeMethod("GetVirtualHardDiskInfo", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to get VHD metadata for {vhdPath}");
+                }
+
+                var info = (string)result["Info"];
+                return ParseVhdMetadata(info, vhdPath);
+            });
+        }
+
+        public async Task SetVhdMetadataAsync(string vhdPath, VhdMetadataUpdate update)
+        {
+            await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("SetVirtualHardDiskSettingData");
+                inParams["Path"] = vhdPath;
+                
+                // Create VHD setting data with updated values
+                using var vhdSettings = CreateUpdatedVhdSettingData(scope, update);
+                inParams["VirtualDiskSettingData"] = vhdSettings.GetText(TextFormat.WmiDtd20);
+
+                using var result = imageManagementService.InvokeMethod("SetVirtualHardDiskSettingData", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to set VHD metadata for {vhdPath}");
+                }
+            });
+        }
+
+        // VHD optimization operations
+        public async Task CompactVhdAsync(string vhdPath, CancellationToken cancellationToken, IProgress<VirtualDiskProgress> progress)
+        {
+            await Task.Run(() =>
+            {
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 0, CompletionValue = 100 });
+                
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("CompactVirtualHardDisk");
+                inParams["Path"] = vhdPath;
+                inParams["Mode"] = 0; // Full compact
+
+                using var result = imageManagementService.InvokeMethod("CompactVirtualHardDisk", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to compact VHD {vhdPath}");
+                }
+                
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 100, CompletionValue = 100 });
+            }, cancellationToken);
+        }
+
+        // VHD state and validation operations
+        public async Task<VhdStateResponse> GetVhdStateAsync(string vhdPath)
+        {
+            return await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                // Check if VHD is mounted
+                var mountedImages = GetMountedStorageImages(scope);
+                ManagementObject? mountedImage = null;
+                
+                try
+                {
+                    mountedImage = mountedImages.FirstOrDefault(img =>
+                        string.Equals(img["ImagePath"] as string, vhdPath, StringComparison.OrdinalIgnoreCase));
+                }
+                finally
+                {
+                    // Dispose all images except the one we're returning data from
+                    foreach (var img in mountedImages)
+                    {
+                        if (img != mountedImage)
+                        {
+                            img?.Dispose();
+                        }
+                    }
+                }
+
+                var response = new VhdStateResponse
+                {
+                    Path = vhdPath,
+                    IsAttached = mountedImage != null,
+                    PhysicalPath = mountedImage?["DevicePath"] as string,
+                    OperationalState = mountedImage != null ? "Attached" : "Detached",
+                    HealthStatus = "OK",
+                    IsReadOnly = mountedImage?["ReadOnly"] as bool? ?? false,
+                    AccessMode = mountedImage != null ? "Mounted" : "Available"
+                };
+                
+                // Dispose the mounted image after extracting the data
+                mountedImage?.Dispose();
+                
+                return response;
+            });
+        }
+
+        public async Task<VhdValidationResponse> ValidateVhdAsync(VhdValidationRequest request, CancellationToken cancellationToken)
+        {
+            return await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("ValidateVirtualHardDisk");
+                inParams["Path"] = request.Path;
+
+                using var result = imageManagementService.InvokeMethod("ValidateVirtualHardDisk", inParams, null);
+
+                var returnValue = (UInt32)result["ReturnValue"];
+                var isValid = returnValue == 0;
+
+                var response = new VhdValidationResponse
+                {
+                    Path = request.Path,
+                    IsValid = isValid,
+                    ValidatedAt = DateTime.UtcNow
+                };
+
+                if (!isValid)
+                {
+                    response.Errors.Add($"VHD validation failed with error code: {returnValue}");
+                }
+
+                return response;
+            }, cancellationToken);
+        }
+
+        public async Task ConvertVhdAsync(string sourcePath, string destinationPath, string targetFormat, CancellationToken cancellationToken, IProgress<VirtualDiskProgress> progress)
+        {
+            await Task.Run(() =>
+            {
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 0, CompletionValue = 100 });
+                
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("ConvertVirtualHardDisk");
+                inParams["SourcePath"] = sourcePath;
+                inParams["DestinationPath"] = destinationPath;
+                
+                // Set target format
+                var formatValue = targetFormat.ToUpperInvariant() switch
+                {
+                    "VHD" => 2,
+                    "VHDX" => 3,
+                    _ => throw new ArgumentException($"Unsupported format: {targetFormat}")
+                };
+                
+                using var vhdSettings = CreateConversionSettingData(scope, formatValue);
+                inParams["VirtualDiskSettingData"] = vhdSettings.GetText(TextFormat.WmiDtd20);
+
+                using var result = imageManagementService.InvokeMethod("ConvertVirtualHardDisk", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to convert VHD from {sourcePath} to {destinationPath}");
+                }
+                
+                progress?.Report(new VirtualDiskProgress { CurrentValue = 100, CompletionValue = 100 });
+            }, cancellationToken);
+        }
+
+        // Virtual Floppy Disk operations
+        public async Task CreateVirtualFloppyDiskAsync(CreateVfdRequest request, CancellationToken cancellationToken)
+        {
+            await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("CreateVirtualFloppyDisk");
+                inParams["Path"] = request.Path;
+                inParams["Size"] = (uint)request.Size;
+
+                using var result = imageManagementService.InvokeMethod("CreateVirtualFloppyDisk", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to create virtual floppy disk at {request.Path}");
+                }
+            }, cancellationToken);
+        }
+
+        public async Task AttachVirtualFloppyDiskAsync(VfdAttachRequest request)
+        {
+            await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var vm = WmiUtilities.GetVirtualMachine(request.VmName, scope);
+                using var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
+                using var managementService = WmiUtilities.GetVirtualMachineManagementService(scope);
+
+                // Create floppy disk allocation setting data
+                using var floppySettings = CreateFloppyDiskAllocationSettingData(scope, request.VfdPath, request.ReadOnly);
+
+                var inParams = managementService.GetMethodParameters("AddResourceSettings");
+                inParams["AffectedSystem"] = vm.Path.Path;
+                inParams["ResourceSettings"] = new[] { floppySettings.GetText(TextFormat.WmiDtd20) };
+
+                using var result = managementService.InvokeMethod("AddResourceSettings", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to attach virtual floppy disk {request.VfdPath} to VM {request.VmName}");
+                }
+            });
+        }
+
+        public async Task DetachVirtualFloppyDiskAsync(string vmName, string vfdPath)
+        {
+            await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var vm = WmiUtilities.GetVirtualMachine(vmName, scope);
+                using var managementService = WmiUtilities.GetVirtualMachineManagementService(scope);
+                
+                // Find the VFD to remove
+                using var vfdToRemove = FindVirtualFloppyDiskSetting(vm, vfdPath);
+                
+                if (vfdToRemove == null)
+                {
+                    throw new InvalidOperationException($"Virtual floppy disk {vfdPath} not found on VM {vmName}");
+                }
+
+                var inParams = managementService.GetMethodParameters("RemoveResourceSettings");
+                inParams["ResourceSettings"] = new[] { vfdToRemove.Path.Path };
+
+                using var result = managementService.InvokeMethod("RemoveResourceSettings", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to detach virtual floppy disk {vfdPath} from VM {vmName}");
+                }
+            });
+        }
+
+        // Mounted storage operations
+        public async Task<List<MountedStorageImageResponse>> GetMountedStorageImagesAsync()
+        {
+            return await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                var mountedImages = new List<MountedStorageImageResponse>();
+                var images = GetMountedStorageImages(scope);
+
+                try
+                {
+                    foreach (var image in images)
+                {
+                    try
+                    {
+                        var response = new MountedStorageImageResponse
+                        {
+                            ImagePath = image["ImagePath"] as string ?? string.Empty,
+                            MountPath = image["DevicePath"] as string ?? string.Empty,
+                            ImageType = DetermineImageType(image["ImagePath"] as string),
+                            IsReadOnly = image["ReadOnly"] as bool? ?? false,
+                            Size = (ulong)(image["Size"] ?? 0),
+                            MountedAt = DateTime.UtcNow
+                        };
+                        mountedImages.Add(response);
+                    }
+                    catch
+                    {
+                        // Continue processing other images
+                        continue;
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
+                }
+                }
+                finally
+                {
+                    // Dispose all images
+                    foreach (var image in images)
+                    {
+                        image?.Dispose();
+                    }
+                }
+
+                return mountedImages;
+            });
+        }
+
+        // Change tracking operations
+        public async Task EnableChangeTrackingAsync(string vhdPath)
+        {
+            await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("EnableVirtualHardDiskResilienChangeTracking");
+                inParams["Path"] = vhdPath;
+
+                using var result = imageManagementService.InvokeMethod("EnableVirtualHardDiskResilienChangeTracking", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to enable change tracking for VHD {vhdPath}");
+                }
+            });
+        }
+
+        public async Task DisableChangeTrackingAsync(string vhdPath)
+        {
+            await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("DisableVirtualHardDiskResilienChangeTracking");
+                inParams["Path"] = vhdPath;
+
+                using var result = imageManagementService.InvokeMethod("DisableVirtualHardDiskResilienChangeTracking", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to disable change tracking for VHD {vhdPath}");
+                }
+            });
+        }
+
+        public async Task<List<string>> GetVirtualDiskChangesAsync(string vhdPath, string changeTrackingId)
+        {
+            return await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var imageManagementService = GetImageManagementService(scope);
+
+                var inParams = imageManagementService.GetMethodParameters("GetVirtualHardDiskChanges");
+                inParams["Path"] = vhdPath;
+                inParams["ChangeTrackingId"] = changeTrackingId;
+
+                using var result = imageManagementService.InvokeMethod("GetVirtualHardDiskChanges", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to get VHD changes for {vhdPath}");
+                }
+
+                // Parse the changes result - this is a simplified implementation
+                var changes = new List<string>();
+                var changesData = result["Changes"] as string[];
+                if (changesData != null)
+                {
+                    changes.AddRange(changesData);
+                }
+
+                return changes;
+            });
+        }
+
+        // Storage device management operations
+        public async Task<List<StorageDeviceResponse>> GetVmStorageDevicesAsync(string vmName)
+        {
+            return await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var vm = WmiUtilities.GetVirtualMachine(vmName, scope);
+                using var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
+
+                var devices = new List<StorageDeviceResponse>();
+
+                using var resourceCollection = vmSettings.GetRelated("Msvm_ResourceAllocationSettingData",
+                    "Msvm_VirtualSystemSettingDataComponent", null, null, null, null, false, null);
+
+                foreach (ManagementObject resource in resourceCollection)
+                {
+                    try
+                    {
+                        var resourceType = (UInt16)resource["ResourceType"];
+                        var resourceSubType = resource["ResourceSubType"] as string;
+
+                        // Storage devices (ResourceType = 31)
+                        if (resourceType == 31 && (resourceSubType == VirtualHardDiskSubType ||
+                            resourceSubType == "Microsoft:Hyper-V:Virtual Floppy Disk" ||
+                            resourceSubType == "Microsoft:Hyper-V:Virtual DVD Drive"))
+                        {
+                            var hostResources = resource["HostResource"] as string[];
+                            var device = new StorageDeviceResponse
+                            {
+                                DeviceId = resource["InstanceID"] as string ?? string.Empty,
+                                Name = resource["ElementName"] as string ?? string.Empty,
+                                DeviceType = DetermineDeviceType(resourceSubType),
+                                Path = hostResources?.FirstOrDefault(),
+                                ControllerId = resource["Parent"] as string ?? string.Empty,
+                                ControllerType = DetermineControllerType(resource["Parent"] as string),
+                                IsReadOnly = resource["HostResourceAccessType"] as uint? == 1,
+                                OperationalStatus = "Connected"
+                            };
+
+                            devices.Add(device);
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    finally
+                    {
+                        resource?.Dispose();
+                    }
+                }
+
+                return devices;
+            });
+        }
+
+        public async Task<List<StorageControllerResponse>> GetVmStorageControllersAsync(string vmName)
+        {
+            return await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var vm = WmiUtilities.GetVirtualMachine(vmName, scope);
+                using var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
+
+                var controllers = new List<StorageControllerResponse>();
+
+                using var resourceCollection = vmSettings.GetRelated("Msvm_ResourceAllocationSettingData",
+                    "Msvm_VirtualSystemSettingDataComponent", null, null, null, null, false, null);
+
+                foreach (ManagementObject resource in resourceCollection)
+                {
+                    try
+                    {
+                        var resourceType = (UInt16)resource["ResourceType"];
+                        var resourceSubType = resource["ResourceSubType"] as string;
+
+                        // Controller types (ResourceType = 5 for IDE, 6 for SCSI)
+                        if ((resourceType == 5 && resourceSubType == "Microsoft:Hyper-V:Emulated IDE Controller") ||
+                            (resourceType == 6 && resourceSubType == "Microsoft:Hyper-V:Synthetic SCSI Controller"))
+                        {
+                            var controller = new StorageControllerResponse
+                            {
+                                ControllerId = resource["InstanceID"] as string ?? string.Empty,
+                                Name = resource["ElementName"] as string ?? string.Empty,
+                                ControllerType = resourceType == 5 ? "IDE" : "SCSI",
+                                MaxDevices = resourceType == 5 ? 2 : 64,
+                                AttachedDevices = CountAttachedDevices(resource["InstanceID"] as string, resourceCollection),
+                                SupportsHotPlug = resourceType == 6,
+                                OperationalStatus = "OK",
+                                Protocol = resourceType == 5 ? "ATA" : "SCSI"
+                            };
+
+                            // Calculate available locations
+                            controller.AvailableLocations = GetAvailableControllerLocations(controller.ControllerId, controller.MaxDevices, controller.AttachedDevices);
+
+                            controllers.Add(controller);
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    finally
+                    {
+                        resource?.Dispose();
+                    }
+                }
+
+                return controllers;
+            });
+        }
+
+        public async Task AddStorageDeviceToVmAsync(string vmName, AddStorageDeviceRequest request)
+        {
+            await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var vm = WmiUtilities.GetVirtualMachine(vmName, scope);
+                using var managementService = WmiUtilities.GetVirtualMachineManagementService(scope);
+
+                // Create appropriate storage allocation setting data based on device type
+                ManagementObject storageSettings = request.DeviceType.ToLowerInvariant() switch
+                {
+                    "virtualdisk" or "vhd" or "vhdx" => CreateVhdAllocationSettingData(scope, request),
+                    "floppy" or "vfd" => CreateFloppyDiskAllocationSettingData(scope, request.Path ?? string.Empty, request.ReadOnly),
+                    "dvd" or "iso" => CreateDvdAllocationSettingData(scope, request.Path, request.ReadOnly),
+                    _ => throw new ArgumentException($"Unsupported device type: {request.DeviceType}")
+                };
+
+                using (storageSettings)
+                {
+                    var inParams = managementService.GetMethodParameters("AddResourceSettings");
+                    inParams["AffectedSystem"] = vm.Path.Path;
+                    inParams["ResourceSettings"] = new[] { storageSettings.GetText(TextFormat.WmiDtd20) };
+
+                    using var result = managementService.InvokeMethod("AddResourceSettings", inParams, null);
+
+                    if (!WmiUtilities.ValidateOutput(result, scope))
+                    {
+                        throw new ManagementException($"Failed to add storage device to VM {vmName}");
+                    }
+                }
+            });
+        }
+
+        public async Task RemoveStorageDeviceFromVmAsync(string vmName, string deviceId)
+        {
+            await Task.Run(() =>
+            {
+                var scope = new ManagementScope(WmiNamespace);
+                scope.Connect();
+
+                using var vm = WmiUtilities.GetVirtualMachine(vmName, scope);
+                using var managementService = WmiUtilities.GetVirtualMachineManagementService(scope);
+                
+                // Find the device to remove
+                using var device = FindStorageDevice(vm, deviceId);
+                
+                if (device == null)
+                {
+                    throw new InvalidOperationException($"Storage device {deviceId} not found on VM {vmName}");
+                }
+
+                var inParams = managementService.GetMethodParameters("RemoveResourceSettings");
+                inParams["ResourceSettings"] = new[] { device.Path.Path };
+
+                using var result = managementService.InvokeMethod("RemoveResourceSettings", inParams, null);
+
+                if (!WmiUtilities.ValidateOutput(result, scope))
+                {
+                    throw new ManagementException($"Failed to remove storage device {deviceId} from VM {vmName}");
+                }
+            });
+        }
+
+        // Helper methods for the new functionality
+        
+        private static ManagementObject CreateDifferencingDiskSettingData(ManagementScope scope, string childPath, string parentPath)
+        {
+            using var vhdSettingsClass = new ManagementClass("Msvm_VirtualHardDiskSettingData");
+            vhdSettingsClass.Scope = scope;
+
+            var vhdSettings = vhdSettingsClass.CreateInstance();
+            if (vhdSettings == null)
+            {
+                throw new InvalidOperationException("Failed to create VirtualHardDiskSettingData instance");
+            }
+
+            vhdSettings["Path"] = childPath;
+            vhdSettings["ParentPath"] = parentPath;
+            vhdSettings["Type"] = 4; // Differencing
+            vhdSettings["Format"] = 3; // VHDX (recommended for differencing disks)
+
+            return vhdSettings;
+        }
+
+        private static VhdMetadata ParseVhdMetadata(string info, string vhdPath)
+        {
+            // This is a simplified parser - in reality you'd parse the XML info properly
+            var metadata = new VhdMetadata
+            {
+                Path = vhdPath,
+                Format = vhdPath.EndsWith(".vhdx", StringComparison.OrdinalIgnoreCase) ? "VHDX" : "VHD",
+                UniqueId = Guid.NewGuid(), // This would be parsed from the info XML
+                IsAttached = false
+            };
+
+            // Parse additional properties from info XML as needed
+            return metadata;
+        }
+
+        private static ManagementObject CreateUpdatedVhdSettingData(ManagementScope scope, VhdMetadataUpdate update)
+        {
+            using var vhdSettingsClass = new ManagementClass("Msvm_VirtualHardDiskSettingData");
+            vhdSettingsClass.Scope = scope;
+
+            var vhdSettings = vhdSettingsClass.CreateInstance();
+            if (vhdSettings == null)
+            {
+                throw new InvalidOperationException("Failed to create VirtualHardDiskSettingData instance");
+            }
+
+            if (update.NewUniqueId.HasValue)
+            {
+                vhdSettings["UniqueId"] = update.NewUniqueId.Value.ToString();
+            }
+
+            if (!string.IsNullOrEmpty(update.NewParentPath))
+            {
+                vhdSettings["ParentPath"] = update.NewParentPath;
+            }
+
+            if (update.NewPhysicalSectorSize.HasValue)
+            {
+                vhdSettings["PhysicalSectorSize"] = update.NewPhysicalSectorSize.Value;
+            }
+
+            return vhdSettings;
+        }
+
+        private static ManagementObject CreateConversionSettingData(ManagementScope scope, int formatValue)
+        {
+            using var vhdSettingsClass = new ManagementClass("Msvm_VirtualHardDiskSettingData");
+            vhdSettingsClass.Scope = scope;
+
+            var vhdSettings = vhdSettingsClass.CreateInstance();
+            if (vhdSettings == null)
+            {
+                throw new InvalidOperationException("Failed to create VirtualHardDiskSettingData instance");
+            }
+
+            vhdSettings["Format"] = formatValue;
+            vhdSettings["Type"] = 3; // Dynamic by default
+
+            return vhdSettings;
+        }
+
+        private static List<ManagementObject> GetMountedStorageImages(ManagementScope scope)
+        {
+            var images = new List<ManagementObject>();
+
+            using var imageCollection = new ManagementObjectSearcher(scope, new ObjectQuery("SELECT * FROM Msvm_MountedStorageImage"));
+            using var imageInstances = imageCollection.Get();
+
+            foreach (ManagementObject image in imageInstances)
+            {
+                images.Add(image);
+            }
+
+            return images;
+        }
+
+        private static string DetermineImageType(string? imagePath)
+        {
+            if (string.IsNullOrEmpty(imagePath))
+                return "Unknown";
+
+            var extension = System.IO.Path.GetExtension(imagePath).ToLowerInvariant();
+            return extension switch
+            {
+                ".vhd" => "VHD",
+                ".vhdx" => "VHDX",
+                ".iso" => "ISO",
+                ".vfd" => "VFD",
+                _ => "Unknown"
+            };
+        }
+
+        private static ManagementObject CreateFloppyDiskAllocationSettingData(ManagementScope scope, string vfdPath, bool readOnly)
+        {
+            using var resourceClass = new ManagementClass("Msvm_ResourceAllocationSettingData");
+            resourceClass.Scope = scope;
+
+            var resource = resourceClass.CreateInstance();
+            if (resource == null)
+            {
+                throw new InvalidOperationException("Failed to create ResourceAllocationSettingData instance");
+            }
+
+            resource["ResourceType"] = (UInt16)21; // Floppy Drive
+            resource["ResourceSubType"] = "Microsoft:Hyper-V:Virtual Floppy Disk";
+            resource["HostResource"] = new[] { vfdPath };
+            resource["HostResourceAccessType"] = readOnly ? (UInt32)1 : (UInt32)3;
+
+            return resource;
+        }
+
+        private static ManagementObject FindVirtualFloppyDiskSetting(ManagementObject vm, string vfdPath)
+        {
+            using var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
+            using var resourceCollection = vmSettings.GetRelated("Msvm_ResourceAllocationSettingData",
+                "Msvm_VirtualSystemSettingDataComponent", null, null, null, null, false, null);
+
+            foreach (ManagementObject resource in resourceCollection)
+            {
+                try
+                {
+                    var resourceType = (UInt16)resource["ResourceType"];
+                    var resourceSubType = resource["ResourceSubType"] as string;
+
+                    if (resourceType == 21 && resourceSubType == "Microsoft:Hyper-V:Virtual Floppy Disk")
+                    {
+                        var hostResources = resource["HostResource"] as string[];
+                        if (hostResources != null && hostResources.Length > 0)
+                        {
+                            if (string.Equals(hostResources[0], vfdPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                return resource;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
+                finally
+                {
+                    // Don't dispose here as we might return this object
+                }
+            }
+
+            return null!; // Virtual floppy disk setting not found
+        }
+
+        private static string DetermineDeviceType(string? resourceSubType)
+        {
+            return resourceSubType switch
+            {
+                "Microsoft:Hyper-V:Virtual Hard Disk" => "VirtualDisk",
+                "Microsoft:Hyper-V:Virtual Floppy Disk" => "Floppy",
+                "Microsoft:Hyper-V:Virtual DVD Drive" => "DVD",
+                _ => "Unknown"
+            };
+        }
+
+        private static string DetermineControllerType(string? controllerPath)
+        {
+            if (string.IsNullOrEmpty(controllerPath))
+                return "Unknown";
+
+            return controllerPath.Contains("IDE", StringComparison.OrdinalIgnoreCase) ? "IDE" : "SCSI";
+        }
+
+        private static int CountAttachedDevices(string? controllerId, ManagementObjectCollection resourceCollection)
+        {
+            if (string.IsNullOrEmpty(controllerId))
+                return 0;
+
+            var count = 0;
+            foreach (ManagementObject resource in resourceCollection)
+            {
+                try
+                {
+                    var parent = resource["Parent"] as string;
+                    if (string.Equals(parent, controllerId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        count++;
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            return count;
+        }
+
+        private static List<int> GetAvailableControllerLocations(string controllerId, int maxDevices, int attachedDevices)
+        {
+            var availableLocations = new List<int>();
+            var usedLocations = maxDevices - attachedDevices;
+            
+            for (int i = 0; i < maxDevices; i++)
+            {
+                if (i >= attachedDevices)
+                {
+                    availableLocations.Add(i);
+                }
+            }
+
+            return availableLocations;
+        }
+
+        private static ManagementObject CreateVhdAllocationSettingData(ManagementScope scope, AddStorageDeviceRequest request)
+        {
+            using var resourceClass = new ManagementClass("Msvm_ResourceAllocationSettingData");
+            resourceClass.Scope = scope;
+
+            var resource = resourceClass.CreateInstance();
+            if (resource == null)
+            {
+                throw new InvalidOperationException("Failed to create ResourceAllocationSettingData instance");
+            }
+
+            resource["ResourceType"] = StorageResourceType;
+            resource["ResourceSubType"] = VirtualHardDiskSubType;
+            resource["HostResource"] = new[] { request.Path };
+            resource["HostResourceAccessType"] = request.ReadOnly ? (UInt32)1 : (UInt32)3;
+
+            if (!string.IsNullOrEmpty(request.ControllerId))
+            {
+                resource["Parent"] = request.ControllerId;
+            }
+
+            return resource;
+        }
+
+        private static ManagementObject CreateDvdAllocationSettingData(ManagementScope scope, string? isoPath, bool readOnly)
+        {
+            using var resourceClass = new ManagementClass("Msvm_ResourceAllocationSettingData");
+            resourceClass.Scope = scope;
+
+            var resource = resourceClass.CreateInstance();
+            if (resource == null)
+            {
+                throw new InvalidOperationException("Failed to create ResourceAllocationSettingData instance");
+            }
+
+            resource["ResourceType"] = (UInt16)16; // DVD Drive
+            resource["ResourceSubType"] = "Microsoft:Hyper-V:Virtual DVD Drive";
+            if (!string.IsNullOrEmpty(isoPath))
+            {
+                resource["HostResource"] = new[] { isoPath };
+            }
+            resource["HostResourceAccessType"] = (UInt32)1; // DVD is always read-only
+
+            return resource;
+        }
+
+        private static ManagementObject FindStorageDevice(ManagementObject vm, string deviceId)
+        {
+            using var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
+            using var resourceCollection = vmSettings.GetRelated("Msvm_ResourceAllocationSettingData",
+                "Msvm_VirtualSystemSettingDataComponent", null, null, null, null, false, null);
+
+            foreach (ManagementObject resource in resourceCollection)
+            {
+                try
+                {
+                    var instanceId = resource["InstanceID"] as string;
+                    if (string.Equals(instanceId, deviceId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return resource;
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
+                finally
+                {
+                    // Don't dispose here as we might return this object
+                }
+            }
+
+            return null!; // Storage device not found
+        }
+        /// <summary>
+        /// Lists all fixed storage devices (local drives) with their details.
+        /// </summary>
+        /// <returns>A list of storage device information.</returns>
+        public async Task<List<StorageDeviceInfo>> ListStorageDevicesAsync()
+        {
+            return await Task.Run(() =>
+            {
+                var devices = new List<StorageDeviceInfo>();
+                var scope = new ManagementScope("root\\CIMV2");
+                scope.Connect();
+
+                var query = new ObjectQuery("SELECT * FROM Win32_LogicalDisk WHERE DriveType = 3"); // Fixed local disks
+                using var searcher = new ManagementObjectSearcher(scope, query);
+                using var results = searcher.Get();
+
+                foreach (ManagementObject disk in results)
+                {
+                    try
+                    {
+                        var deviceId = disk["DeviceID"]?.ToString() ?? string.Empty;
+                        var fileSystem = disk["FileSystem"]?.ToString() ?? "Unknown";
+                        var size = (ulong?)disk["Size"] ?? 0;
+                        var freeSpace = (ulong?)disk["FreeSpace"] ?? 0;
+                        var usedSpace = size - freeSpace;
+
+                        devices.Add(new StorageDeviceInfo
+                        {
+                            Name = deviceId,
+                            Filesystem = fileSystem,
+                            Size = (long)size,
+                            UsedSpace = (long)usedSpace,
+                            FreeSpace = (long)freeSpace
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error processing disk: {ex.Message}");
+                    }
+                    finally
+                    {
+                        disk?.Dispose();
+                    }
+                }
+
+                return devices.OrderBy(d => d.Name).ToList();
+            });
+        }
+
+        /// <summary>
+        /// Browses filesystems to find suitable locations for VHDX storage.
+        /// Returns drives with sufficient free space and suggested paths.
+        /// </summary>
+        /// <param name="minFreeSpaceGb">Minimum free space required in GB (default: 10).</param>
+        /// <returns>A list of suitable storage locations.</returns>
+        public async Task<List<StorageLocation>> GetSuitableVhdLocationsAsync(long minFreeSpaceGb = 10)
+        {
+            var minFreeSpaceBytes = minFreeSpaceGb * 1024 * 1024 * 1024L;
+            return await Task.Run(() =>
+            {
+                var locations = new List<StorageLocation>();
+                var scope = new ManagementScope("root\\CIMV2");
+                scope.Connect();
+
+                var query = new ObjectQuery("SELECT * FROM Win32_LogicalDisk WHERE DriveType = 3");
+                using var searcher = new ManagementObjectSearcher(scope, query);
+                using var results = searcher.Get();
+
+                foreach (ManagementObject disk in results)
+                {
+                    try
+                    {
+                        var deviceId = disk["DeviceID"]?.ToString() ?? string.Empty;
+                        var freeSpace = (ulong?)disk["FreeSpace"] ?? 0;
+
+                        if (freeSpace >= (ulong)minFreeSpaceBytes)
+                        {
+                            var suggestedPaths = new List<string>
+                            {
+                                $"{deviceId}\\VMs\\", // Suggested VM folder
+                                $"{deviceId}\\Hyper-V\\Virtual Hard Disks\\", // Default Hyper-V path
+                                $"{deviceId}\\" // Root as fallback
+                            };
+
+                            // Filter existing paths (basic check)
+                            var validPaths = suggestedPaths.Where(p => Directory.Exists(p) || true).ToList(); // Always include for creation
+
+                            locations.Add(new StorageLocation
+                            {
+                                Drive = deviceId,
+                                FreeSpaceBytes = (long)freeSpace,
+                                FreeSpaceGb = Math.Round((double)freeSpace / (1024 * 1024 * 1024), 2),
+                                SuggestedPaths = validPaths,
+                                IsSuitable = true
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error processing location: {ex.Message}");
+                    }
+                    finally
+                    {
+                        disk?.Dispose();
+                    }
+                }
+
+                return locations.OrderByDescending(l => l.FreeSpaceGb).ToList();
+            });
+        }
+
     }
 }

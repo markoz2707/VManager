@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>HyperV.LocalShell</RootNamespace>
+    <TargetFramework>net9.0-windows7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="0.48.0" />

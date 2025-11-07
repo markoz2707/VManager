@@ -248,6 +248,79 @@ namespace HyperV.Core.Hcs.Interop
         SET_VIRTUAL_DISK_INFO_PARENT_LOCATOR = 7
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GET_VIRTUAL_DISK_INFO_SIZE
+    {
+        public ulong VirtualSize;
+        public ulong PhysicalSize;
+        public uint BlockSize;
+        public uint SectorSize;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GET_VIRTUAL_DISK_INFO_PARENT_LOCATION
+    {
+        public bool ParentResolved;
+        public IntPtr ParentLocationBuffer;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GET_VIRTUAL_DISK_INFO_PHYSICAL_DISK
+    {
+        public uint LogicalSectorSize;
+        public uint PhysicalSectorSize;
+        public bool IsRemote;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct GET_VIRTUAL_DISK_INFO
+    {
+        [FieldOffset(0)]
+        public GET_VIRTUAL_DISK_INFO_VERSION Version;
+
+        [FieldOffset(4)]
+        public GET_VIRTUAL_DISK_INFO_SIZE Size;
+
+        [FieldOffset(4)]
+        public Guid Identifier;
+
+        [FieldOffset(4)]
+        public GET_VIRTUAL_DISK_INFO_PARENT_LOCATION ParentLocation;
+
+        [FieldOffset(4)]
+        public Guid ParentIdentifier;
+
+        [FieldOffset(4)]
+        public uint ParentTimestamp;
+
+        [FieldOffset(4)]
+        public VIRTUAL_STORAGE_TYPE VirtualStorageType;
+
+        [FieldOffset(4)]
+        public uint ProviderSubtype;
+
+        [FieldOffset(4)]
+        public bool Is4kAligned;
+
+        [FieldOffset(4)]
+        public GET_VIRTUAL_DISK_INFO_PHYSICAL_DISK PhysicalDisk;
+
+        [FieldOffset(4)]
+        public uint VhdPhysicalSectorSize;
+
+        [FieldOffset(4)]
+        public ulong SmallestSafeVirtualSize;
+
+        [FieldOffset(4)]
+        public uint FragmentationPercentage;
+
+        [FieldOffset(4)]
+        public Guid VirtualDiskId;
+
+        [FieldOffset(4)]
+        public bool ChangeTrackingState;
+    }
+
     [StructLayout(LayoutKind.Explicit, CharSet = CharSet.Unicode)]
     public struct SET_VIRTUAL_DISK_INFO
     {
@@ -258,13 +331,13 @@ namespace HyperV.Core.Hcs.Interop
         public IntPtr ParentFilePath;
 
         [FieldOffset(4)]
-        public Guid UniqueIdentifier;
+        public Guid Identifier;
 
         [FieldOffset(4)]
         public SET_VIRTUAL_DISK_INFO_PARENT_PATH_WITH_DEPTH ParentPathWithDepth;
 
         [FieldOffset(4)]
-        public uint VhdPhysicalSectorSize;
+        public uint PhysicalSectorSize;
 
         [FieldOffset(4)]
         public Guid VirtualDiskId;

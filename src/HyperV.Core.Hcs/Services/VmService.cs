@@ -11,10 +11,10 @@ using HyperV.Core.Hcs.Interop;
 namespace HyperV.Core.Hcs.Services;
 
 /// <summary>VM Service using Host Compute System (HCS) API for real Hyper-V integration.</summary>
-public sealed class VmService
+public class VmService
 {
     /// <summary>Creates a VM using HCS API with comprehensive configuration.</summary>
-    public string Create(string id, CreateVmRequest req)
+    public virtual string Create(string id, CreateVmRequest req)
     {
         // Create virtual disk first
         var vhdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), 
@@ -558,7 +558,7 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     private static readonly Dictionary<string, IntPtr> _hcsVms = new Dictionary<string, IntPtr>();
 
     /// <summary>Lists all HCS VMs.</summary>
-    public string ListVms()
+    public virtual string ListVms()
     {
         try
         {
@@ -590,13 +590,13 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     }
 
     /// <summary>Checks if an HCS VM exists by name.</summary>
-    public bool IsVmPresent(string vmName)
+    public virtual bool IsVmPresent(string vmName)
     {
         return _hcsVms.ContainsKey(vmName);
     }
 
     /// <summary>Starts an HCS VM by name.</summary>
-    public void StartVm(string vmName)
+    public virtual void StartVm(string vmName)
     {
         if (!_hcsVms.TryGetValue(vmName, out var system))
             throw new InvalidOperationException($"HCS VM {vmName} not found");
@@ -621,7 +621,7 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     }
 
     /// <summary>Stops an HCS VM by name.</summary>
-    public void StopVm(string vmName)
+    public virtual void StopVm(string vmName)
     {
         if (!_hcsVms.TryGetValue(vmName, out var system))
             throw new InvalidOperationException($"HCS VM {vmName} not found");
@@ -646,7 +646,7 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     }
 
     /// <summary>Terminates an HCS VM by name.</summary>
-    public void TerminateVm(string vmName)
+    public virtual void TerminateVm(string vmName)
     {
         if (!_hcsVms.TryGetValue(vmName, out var system))
             throw new InvalidOperationException($"HCS VM {vmName} not found");
@@ -671,7 +671,7 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     }
 
     /// <summary>Pauses an HCS VM by name.</summary>
-    public void PauseVm(string vmName)
+    public virtual void PauseVm(string vmName)
     {
         if (!_hcsVms.TryGetValue(vmName, out var system))
             throw new InvalidOperationException($"HCS VM {vmName} not found");
@@ -696,7 +696,7 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     }
 
     /// <summary>Resumes an HCS VM by name.</summary>
-    public void ResumeVm(string vmName)
+    public virtual void ResumeVm(string vmName)
     {
         if (!_hcsVms.TryGetValue(vmName, out var system))
             throw new InvalidOperationException($"HCS VM {vmName} not found");
@@ -721,7 +721,7 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     }
 
     /// <summary>Gets properties of an HCS VM by name.</summary>
-    public string GetVmProperties(string vmName)
+    public virtual string GetVmProperties(string vmName)
     {
         if (!_hcsVms.TryGetValue(vmName, out var system))
             throw new InvalidOperationException($"HCS VM {vmName} not found");
@@ -746,7 +746,7 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     }
 
     /// <summary>Modifies an HCS VM by name.</summary>
-    public void ModifyVm(string vmName, string configuration)
+    public virtual void ModifyVm(string vmName, string configuration)
     {
         if (!_hcsVms.TryGetValue(vmName, out var system))
             throw new InvalidOperationException($"HCS VM {vmName} not found");
@@ -771,7 +771,7 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     }
 
     /// <summary>Lists snapshots for an HCS VM (not supported - returns empty list).</summary>
-    public string ListVmSnapshots(string vmName)
+    public virtual string ListVmSnapshots(string vmName)
     {
         // HCS VMs don't support snapshots in the same way as traditional Hyper-V VMs
         return JsonSerializer.Serialize(new
@@ -786,19 +786,19 @@ private string CreateVhdxWithPowerShell(string path, uint sizeGb)
     }
 
     /// <summary>Creates a snapshot for an HCS VM (not supported).</summary>
-    public string CreateVmSnapshot(string vmName, string snapshotName, string? notes = null)
+    public virtual string CreateVmSnapshot(string vmName, string snapshotName, string? notes = null)
     {
         throw new NotSupportedException("Snapshots are not supported for HCS VMs");
     }
 
     /// <summary>Deletes a snapshot for an HCS VM (not supported).</summary>
-    public void DeleteVmSnapshot(string vmName, string snapshotId)
+    public virtual void DeleteVmSnapshot(string vmName, string snapshotId)
     {
         throw new NotSupportedException("Snapshots are not supported for HCS VMs");
     }
 
     /// <summary>Reverts an HCS VM to a snapshot (not supported).</summary>
-    public void RevertVmToSnapshot(string vmName, string snapshotId)
+    public virtual void RevertVmToSnapshot(string vmName, string snapshotId)
     {
         throw new NotSupportedException("Snapshots are not supported for HCS VMs");
     }
