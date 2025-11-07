@@ -6,3 +6,13 @@ Hyper-V/
 Hyper-V_v2/
 OLD/
 Windows-classic-samples-main/
+src/HyperV.Agent/bin/
+src/HyperV.Contracts/bin/
+src/HyperV.Core.Hcn/bin/
+src/HyperV.Core.Hcs/bin/
+src/HyperV.Core.Vhd/bin/
+src/HyperV.Contracts/obj/
+src/HyperV.Core.Hcn/obj/
+src/HyperV.Core.Hcs/obj/
+src/HyperV.Core.Vhd/obj/
+src/HyperV.Agent/obj/

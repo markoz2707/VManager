@@ -2,11 +2,12 @@ using System;
 using System.Management;
 using System.Text.Json;
 using HyperV.Core.Wmi;
+using HyperV.Contracts.Services;
 using Microsoft.Extensions.Logging;
 
 namespace HyperV.Core.Wmi.Services;
 
-public class StorageQoSService
+public class StorageQoSService : IStorageQoSService
 {
     private readonly ILogger _logger;
 

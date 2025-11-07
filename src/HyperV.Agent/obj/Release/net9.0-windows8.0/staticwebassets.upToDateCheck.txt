@@ -1,4 +1,0 @@
-I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\wwwroot\index.html
-I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\wwwroot\assets\index-CRgzwxVX.js
-wwwroot\assets\index-CRgzwxVX.js
-wwwroot\index.html

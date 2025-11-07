@@ -148,8 +148,13 @@
         <member name="M:HyperV.Core.Wmi.Services.ReplicationService.SaveVm(System.String)">
             <summary>Saves VM state.</summary>
         </member>
-        <member name="M:HyperV.Core.Wmi.Services.ReplicationService.ModifyVm(System.String,System.String)">
-            <summary>Modifies VM configuration.</summary>
+        <member name="M:HyperV.Core.Wmi.Services.ReplicationService.ModifyVmAsync(System.String,System.String)">
+            <summary>Modifies VM configuration settings.</summary>
+            <param name="vmName">The name of the virtual machine to modify.</param>
+            <param name="configuration">JSON string containing configuration parameters to modify.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when VM is not found or modification fails.</exception>
+            <exception cref="T:System.ArgumentException">Thrown when configuration parameters are invalid.</exception>
         </member>
         <member name="M:HyperV.Core.Wmi.Services.ResourcePoolsService.ListResourcePools">
             <summary>

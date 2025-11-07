@@ -17,3 +17,5 @@ I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcs\obj\Debug\net9.0-window
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcs\obj\Debug\net9.0-windows7.0\HyperV.HyperV.Core.Hcs.xml
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcs\obj\Debug\net9.0-windows7.0\HyperV.HyperV.Core.Hcs.pdb
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcs\obj\Debug\net9.0-windows7.0\ref\HyperV.HyperV.Core.Hcs.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcs\bin\Debug\net9.0-windows7.0\HyperV.HyperV.Core.Hcs.runtimeconfig.json
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Hcs\obj\Debug\net9.0-windows7.0\HyperV.Core.Hcs.genruntimeconfig.cache

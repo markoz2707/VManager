@@ -83,7 +83,7 @@ namespace HyperV.Core.Wmi.Services
                 inParams["AffectedSystem"] = vmName;
 
                 var outParams = service.InvokeMethod("StartReplication", inParams, null);
-                WmiUtilities.ValidateOutput(outParams["ReturnValue"] as ManagementBaseObject, service.Scope);
+                WmiUtilities.ValidateOutput((outParams["ReturnValue"] as ManagementBaseObject)!, service.Scope);
 
                 var job = outParams["Job"] as ManagementObject;
                 if (job != null)
@@ -116,7 +116,7 @@ namespace HyperV.Core.Wmi.Services
                 inParams["FailoverType"] = failoverType;
 
                 var outParams = service.InvokeMethod("InitiateFailover", inParams, null);
-                WmiUtilities.ValidateOutput(outParams["ReturnValue"] as ManagementBaseObject, service.Scope);
+                WmiUtilities.ValidateOutput((outParams["ReturnValue"] as ManagementBaseObject)!, service.Scope);
 
                 var job = outParams["Job"] as ManagementObject;
                 string status = job != null ? GetJobStatus(job) : "Completed";
@@ -140,7 +140,7 @@ namespace HyperV.Core.Wmi.Services
                 inParams["AffectedSystem"] = vmName;
 
                 var outParams = service.InvokeMethod("ReverseReplicationRelationship", inParams, null);
-                WmiUtilities.ValidateOutput(outParams["ReturnValue"] as ManagementBaseObject, service.Scope);
+                WmiUtilities.ValidateOutput((outParams["ReturnValue"] as ManagementBaseObject)!, service.Scope);
 
                 var job = outParams["Job"] as ManagementObject;
                 if (job != null)
@@ -193,7 +193,7 @@ namespace HyperV.Core.Wmi.Services
                 inParams["AuthorizationEntry"] = entry;
 
                 var outParams = service.InvokeMethod("AddAuthorizationEntry", inParams, null);
-                WmiUtilities.ValidateOutput(outParams["ReturnValue"] as ManagementBaseObject, service.Scope);
+                WmiUtilities.ValidateOutput((outParams["ReturnValue"] as ManagementBaseObject)!, service.Scope);
 
                 var job = outParams["Job"] as ManagementObject;
                 if (job != null)
@@ -300,34 +300,119 @@ namespace HyperV.Core.Wmi.Services
             }
         }
 
-        /// <summary>Modifies VM configuration.</summary>
-        public void ModifyVm(string vmName, string configuration)
+        /// <summary>Modifies VM configuration settings.</summary>
+        /// <param name="vmName">The name of the virtual machine to modify.</param>
+        /// <param name="configuration">JSON string containing configuration parameters to modify.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when VM is not found or modification fails.</exception>
+        /// <exception cref="ArgumentException">Thrown when configuration parameters are invalid.</exception>
+        public async Task<string> ModifyVmAsync(string vmName, string configuration)
         {
             try
             {
+                _logger.LogInformation("Starting VM modification for {VmName} with configuration: {Configuration}", vmName, configuration);
+
                 var scope = GetScope();
-                var query = new ObjectQuery($"SELECT * FROM Msvm_ComputerSystem WHERE ElementName = '{vmName}' OR Name = '{vmName}'");
-                using var searcher = new ManagementObjectSearcher(scope, query);
-                using var collection = searcher.Get();
-                
-                foreach (ManagementObject vm in collection)
+                var vmQuery = new ObjectQuery($"SELECT * FROM Msvm_ComputerSystem WHERE ElementName = '{vmName}' OR Name = '{vmName}'");
+                using var vmSearcher = new ManagementObjectSearcher(scope, vmQuery);
+                using var vmCollection = vmSearcher.Get();
+
+                var vm = vmCollection.OfType<ManagementObject>().FirstOrDefault();
+                if (vm == null)
                 {
-                    using (vm)
-                    {
-                        // This is a placeholder implementation
-                        // Full implementation would require modifying Msvm_VirtualSystemSettingData
-                        _logger.LogInformation("VM modification requested for {VmName} with configuration: {Configuration}", vmName, configuration);
-                        throw new NotImplementedException("VM modification via ReplicationService not yet implemented");
-                    }
+                    throw new InvalidOperationException($"VM {vmName} not found");
                 }
-                
-                throw new InvalidOperationException($"VM {vmName} not found");
+
+                // Get the virtual system setting data for modification
+                var settingQuery = new ObjectQuery($"SELECT * FROM Msvm_VirtualSystemSettingData WHERE SystemName = '{vm["Name"]}'");
+                using var settingSearcher = new ManagementObjectSearcher(scope, settingQuery);
+                using var settingCollection = settingSearcher.Get();
+
+                var setting = settingCollection.OfType<ManagementObject>().FirstOrDefault();
+                if (setting == null)
+                {
+                    throw new InvalidOperationException($"Virtual system settings not found for VM {vmName}");
+                }
+
+                // Parse configuration JSON and apply modifications
+                var config = JsonSerializer.Deserialize<JsonElement>(configuration);
+                var inParams = setting.GetMethodParameters("ModifyVirtualSystem");
+
+                // Apply configuration changes based on provided parameters
+                if (config.TryGetProperty("processorCount", out var processorCount))
+                {
+                    inParams["VirtualSystemData"] = setting;
+                    inParams["SystemSettingData"] = CreateProcessorSettings(scope, processorCount.GetInt32());
+                }
+
+                if (config.TryGetProperty("memoryMB", out var memoryMB))
+                {
+                    inParams["VirtualSystemData"] = setting;
+                    inParams["SystemSettingData"] = CreateMemorySettings(scope, memoryMB.GetInt32());
+                }
+
+                if (config.TryGetProperty("notes", out var notes))
+                {
+                    inParams["VirtualSystemData"] = setting;
+                    inParams["SystemSettingData"] = CreateNotesSettings(scope, notes.GetString());
+                }
+
+                if (inParams["SystemSettingData"] == null)
+                {
+                    throw new ArgumentException("No valid configuration parameters provided for modification");
+                }
+
+                var outParams = await Task.Run(() => setting.InvokeMethod("ModifyVirtualSystem", inParams, null));
+                WmiUtilities.ValidateOutput(outParams["ReturnValue"] as ManagementBaseObject ?? throw new InvalidOperationException("Invalid WMI output"), scope);
+
+                var job = outParams["Job"] as ManagementObject;
+                string status = job != null ? GetJobStatus(job) : "Completed";
+                string jobId = job?.GetPropertyValue("InstanceID")?.ToString() ?? string.Empty;
+
+                var result = new { vmName, jobId, status, message = "VM configuration modified successfully" };
+                _logger.LogInformation("VM {VmName} modification completed with status: {Status}", vmName, status);
+
+                return JsonSerializer.Serialize(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to modify VM {VmName}", vmName);
+                _logger.LogError(ex, "Failed to modify VM {VmName} with configuration: {Configuration}", vmName, configuration);
                 throw;
             }
+        }
+
+        private ManagementObject CreateProcessorSettings(ManagementScope scope, int processorCount)
+        {
+            var processorClass = new ManagementClass(scope, new ManagementPath("Msvm_ProcessorSettingData"), null);
+            var processorInstance = processorClass.CreateInstance();
+
+            processorInstance["VirtualQuantity"] = (uint)processorCount;
+            processorInstance["Reservation"] = (ulong)(processorCount * 1000); // 1000 MHz per processor
+            processorInstance["Limit"] = (ulong)(processorCount * 10000); // 10000 MHz per processor
+
+            return processorInstance;
+        }
+
+        private ManagementObject CreateMemorySettings(ManagementScope scope, int memoryMB)
+        {
+            var memoryClass = new ManagementClass(scope, new ManagementPath("Msvm_MemorySettingData"), null);
+            var memoryInstance = memoryClass.CreateInstance();
+
+            memoryInstance["VirtualQuantity"] = (ulong)memoryMB;
+            memoryInstance["Reservation"] = (ulong)(memoryMB * 1024 * 1024); // Convert MB to bytes
+            memoryInstance["Limit"] = (ulong)(memoryMB * 1024 * 1024 * 2); // 2x memory limit
+
+            return memoryInstance;
+        }
+
+        private ManagementObject CreateNotesSettings(ManagementScope scope, string notes)
+        {
+            var settingClass = new ManagementClass(scope, new ManagementPath("Msvm_VirtualSystemSettingData"), null);
+            var settingInstance = settingClass.CreateInstance();
+
+            settingInstance["Notes"] = notes;
+
+            return settingInstance;
         }
     }
 }

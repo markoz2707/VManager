@@ -1,8 +1,0 @@
-{
-  "HyperV.HyperV.Agent, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent",
-  "HyperV.HyperV.Contracts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts",
-  "HyperV.HyperV.Core.Hcn, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn",
-  "HyperV.HyperV.Core.Hcs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs",
-  "HyperV.HyperV.Core.Vhd, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd",
-  "HyperV.HyperV.Core.Wmi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi"
-}

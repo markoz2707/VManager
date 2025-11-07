@@ -86,10 +86,10 @@ public class FibreChannelService
             inParams["AllocationSettings"] = allocationSettings.Select(a => a.GetText(TextFormat.WmiDtd20)).ToArray();
 
             var outParams = configService.InvokeMethod("CreatePool", inParams, null);
-            WmiUtilities.ValidateOutput(outParams["ReturnValue"] as ManagementBaseObject, scope);
+            WmiUtilities.ValidateOutput((outParams["ReturnValue"] as ManagementBaseObject)!, scope);
 
             var poolInstanceId = outParams["Pool"]?.ToString();
-            var poolId = ExtractGuidFromInstanceId(poolInstanceId);
+            var poolId = ExtractGuidFromInstanceId(poolInstanceId!);
 
             var result = new
             {
@@ -137,7 +137,7 @@ public class FibreChannelService
             inParams["Pool"] = poolRef;
 
             var outParams = configService.InvokeMethod("DestroyPool", inParams, null);
-            WmiUtilities.ValidateOutput(outParams["ReturnValue"] as ManagementBaseObject, scope);
+            WmiUtilities.ValidateOutput((outParams["ReturnValue"] as ManagementBaseObject)!, scope);
         }
         catch (Exception ex)
         {
@@ -244,9 +244,9 @@ public class FibreChannelService
             inParams["ResourceSettings"] = new object[] { allocSetting.GetText(TextFormat.WmiDtd20) };
 
             var outParams = managementService.InvokeMethod("AddResourceSettings", inParams, null);
-            WmiUtilities.ValidateOutput(outParams["ReturnValue"] as ManagementBaseObject, scope);
+            WmiUtilities.ValidateOutput((outParams["ReturnValue"] as ManagementBaseObject)!, scope);
 
-            var portId = ExtractGuidFromInstanceId(allocSetting["InstanceID"]?.ToString());
+            var portId = ExtractGuidFromInstanceId(allocSetting["InstanceID"]?.ToString()!);
 
             var result = new
             {

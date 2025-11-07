@@ -48,7 +48,6 @@ I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\obj\Release\net9.0-windows
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\obj\Release\net9.0-windows8.0\staticwebassets.build.json.cache
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\obj\Release\net9.0-windows8.0\staticwebassets.development.json
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\obj\Release\net9.0-windows8.0\staticwebassets.build.endpoints.json
-I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\obj\Release\net9.0-windows8.0\staticwebassets.upToDateCheck.txt
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\obj\Release\net9.0-windows8.0\HyperV.A.E59DFC4C.Up2Date
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\obj\Release\net9.0-windows8.0\HyperV.HyperV.Agent.dll
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Agent\obj\Release\net9.0-windows8.0\refint\HyperV.HyperV.Agent.dll

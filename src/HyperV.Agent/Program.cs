@@ -1,4 +1,5 @@
 using HyperV.Contracts.Interfaces;
+using HyperV.Contracts.Services;
 using HyperV.Core.Hcn.Services;
 using HyperV.Core.Hcs.Services;
 using HyperV.Core.Wmi.Services;
@@ -7,49 +8,25 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Linq;
+using Serilog;
+using HyperV.Agent.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var serverConfig = builder.Configuration.GetSection("Server").Get<ServerConfig>() ?? new ServerConfig();
 var corsConfig = builder.Configuration.GetSection("Cors").Get<CorsConfig>() ?? new CorsConfig();
 
-// Configure logging based on configuration
-var logToFile = builder.Configuration.GetValue<bool>("Logging:LogToFile");
-var logFilePath = builder.Configuration.GetValue<string>("Logging:LogFilePath") ?? "logs/hyperv-agent.log";
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
-builder.Logging.ClearProviders();
-
-// Always add console logging unless file-only is specified
-var logToConsole = builder.Configuration.GetValue<bool>("Logging:LogToConsole", true);
-if (logToConsole)
-{
-    builder.Logging.AddConsole();
-}
-
-if (logToFile)
-{
-    // Ensure log directory exists
-    var logDir = Path.GetDirectoryName(logFilePath);
-    if (!string.IsNullOrEmpty(logDir) && !Directory.Exists(logDir))
-    {
-        Directory.CreateDirectory(logDir);
-    }
-    
-    // For now, we'll use console logging with option to redirect
-    // In production, consider using Serilog: builder.Host.UseSerilog()
-    Console.WriteLine($"File logging would be configured to: {logFilePath}");
-    if (!logToConsole)
-    {
-        builder.Logging.AddConsole(); // Fallback for now
-    }
-}
-
-// Configure log levels
-var logLevel = builder.Configuration.GetValue<string>("Logging:LogLevel:Default", "Information");
-if (Enum.TryParse<LogLevel>(logLevel, true, out var level))
-{
-    builder.Logging.SetMinimumLevel(level);
-}
+builder.Host.UseSerilog();
 
 // Configure CORS for central management applications
 builder.Services.AddCors(options =>
@@ -64,6 +41,32 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Configure JWT Authentication
+var jwtConfig = builder.Configuration.GetSection("Jwt");
+var secretKey = Encoding.UTF8.GetBytes(jwtConfig["Secret"] ?? "default-secret-key");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtConfig["Issuer"],
+        ValidAudience = jwtConfig["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+    };
+});
+
+builder.Services.AddAuthorization();
+builder.Services.AddMemoryCache();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -94,8 +97,9 @@ builder.Services.AddSingleton<HyperV.Core.Hcs.Services.ContainerService>();
 builder.Services.AddSingleton<HyperV.Core.Wmi.Services.ContainerService>();
 builder.Services.AddSingleton<IStorageService, EnhancedStorageService>();
 builder.Services.AddSingleton<IImageManagementService, HyperV.Core.Wmi.Services.ImageManagementService>();
+builder.Services.AddSingleton<IStorageQoSService, HyperV.Core.Wmi.Services.StorageQoSService>();
 builder.Services.AddSingleton<IJobService, HyperV.Agent.Services.InMemoryJobService>();
-builder.Services.AddSingleton<IHostInfoService, HyperV.Core.Wmi.Services.HostInfoService>();
+builder.Services.AddSingleton<IHostInfoService>(sp => new HyperV.Core.Wmi.Services.HostInfoService(sp.GetRequiredService<ILogger<HyperV.Core.Wmi.Services.HostInfoService>>(), sp.GetRequiredService<IMemoryCache>()));
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -145,11 +149,18 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
+// Global exception handler
+app.UseMiddleware<GlobalExceptionHandler>();
+
 // Enable CORS middleware - use default policy for development
 app.UseCors();
 
 // Alternative: Use named policy for production
 // app.UseCors("ProductionCORS");
+
+// Authentication and Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure static files for LocalManagement UI
 app.UseStaticFiles();

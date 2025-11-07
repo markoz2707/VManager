@@ -70,6 +70,111 @@
             Combined host details model.
             </summary>
         </member>
+        <member name="T:HyperV.Agent.Controllers.ImageManagementController">
+            <summary>
+            Controller for managing virtual hard disk (VHD/VHDX) operations including compact, merge, convert, resize, and snapshot operations.
+            </summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.CompactVirtualHardDisk(HyperV.Contracts.Models.CompactVhdRequest)">
+            <summary>
+            Compacts a virtual hard disk by removing unused space.
+            </summary>
+            <param name="request">Compact operation parameters including path and mode.</param>
+            <returns>Success response when compaction completes.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.MergeVirtualHardDisk(HyperV.Contracts.Models.MergeDiskRequest)">
+            <summary>
+            Merges a child virtual hard disk with its parent.
+            </summary>
+            <param name="request">Merge operation parameters including source and destination paths.</param>
+            <returns>Success response when merge completes.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.GetVirtualHardDiskSettingData(System.String)">
+            <summary>
+            Gets virtual hard disk setting data including type, format, and size information.
+            </summary>
+            <param name="path">Path to the virtual hard disk file.</param>
+            <returns>Virtual hard disk setting data.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.GetVirtualHardDiskState(System.String)">
+            <summary>
+            Gets the current state of a virtual hard disk including operational status.
+            </summary>
+            <param name="path">Path to the virtual hard disk file.</param>
+            <returns>Virtual hard disk state information.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.ConvertVirtualHardDisk(HyperV.Contracts.Models.ConvertVhdRequest)">
+            <summary>
+            Converts a virtual hard disk to a different format or type.
+            </summary>
+            <param name="request">Conversion parameters including source, destination, and format options.</param>
+            <returns>Success message with conversion details.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.ConvertVirtualHardDiskToVHDSet(HyperV.Contracts.Models.ConvertToVhdSetRequest)">
+            <summary>
+            Converts a virtual hard disk to VHD Set format.
+            </summary>
+            <param name="request">VHD Set conversion parameters.</param>
+            <returns>Success message with conversion details.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.DeleteVHDSnapshot(System.String,System.String)">
+            <summary>
+            Deletes a VHD snapshot from a VHD Set.
+            </summary>
+            <param name="vhdSetPath">Path to the VHD Set file.</param>
+            <param name="snapshotId">ID of the snapshot to delete.</param>
+            <returns>Success response when snapshot is deleted.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.FindMountedStorageImageInstance(System.String)">
+            <summary>
+            Finds mounted storage image instances for a given image path.
+            </summary>
+            <param name="imagePath">Path to the storage image file.</param>
+            <returns>Mounted storage image information.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.GetVHDSetInformation(System.String)">
+            <summary>
+            Gets VHD Set information including snapshots and properties.
+            </summary>
+            <param name="vhdSetPath">Path to the VHD Set file.</param>
+            <returns>VHD Set information including snapshots.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.GetVHDSnapshotInformation(System.String,System.String)">
+            <summary>
+            Gets information about a specific VHD snapshot.
+            </summary>
+            <param name="vhdSetPath">Path to the VHD Set file.</param>
+            <param name="snapshotId">ID of the snapshot to retrieve.</param>
+            <returns>VHD snapshot information.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.GetVirtualDiskChanges(HyperV.Contracts.Models.GetVirtualDiskChangesRequest)">
+            <summary>
+            Gets virtual disk changes since a specific change tracking ID.
+            </summary>
+            <param name="request">Request parameters including VHD Set path and change tracking information.</param>
+            <returns>Virtual disk changes information.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.OptimizeVHDSet(System.String)">
+            <summary>
+            Optimizes a VHD Set by performing maintenance operations.
+            </summary>
+            <param name="vhdSetPath">Path to the VHD Set file to optimize.</param>
+            <returns>Success response when optimization completes.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.SetVHDSnapshotInformation(HyperV.Contracts.Models.SetVhdSnapshotInfoRequest)">
+            <summary>
+            Sets information for a VHD snapshot including name, description, and active state.
+            </summary>
+            <param name="request">Snapshot information update parameters.</param>
+            <returns>Success response when snapshot information is updated.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.ImageManagementController.ValidatePersistentReservationSupport(System.String)">
+            <summary>
+            Validates whether a storage path supports persistent reservations.
+            </summary>
+            <param name="path">Path to validate for persistent reservation support.</param>
+            <returns>Boolean indicating whether persistent reservations are supported.</returns>
+        </member>
         <member name="T:HyperV.Agent.Controllers.JobsController">
             <summary>Operacje na zadaniach związanych z pamięcią masową.</summary>
         </member>
@@ -161,6 +266,78 @@
             Gets suitable storage locations for VHDX based on minimum free space.
             </summary>
             <param name="minGb">Minimum free space in GB (default: 10).</param>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.StorageQoSController">
+            <summary>
+            Controller for managing Storage Quality of Service (QoS) policies and their application to virtual machines.
+            Provides REST API endpoints for creating, managing, and applying storage QoS policies that control IOPS and bandwidth limits.
+            </summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.StorageQoSController.CreateQoSPolicy(HyperV.Agent.Controllers.CreateQoSPolicyRequest)">
+            <summary>
+            Creates a new Storage QoS policy with specified IOPS and bandwidth limits.
+            </summary>
+            <param name="request">The QoS policy creation parameters including policy ID, IOPS limit, bandwidth limit, and description.</param>
+            <returns>JSON response indicating the creation status of the QoS policy.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.StorageQoSController.DeleteQoSPolicy(System.Guid)">
+            <summary>
+            Deletes an existing Storage QoS policy.
+            </summary>
+            <param name="policyId">The unique identifier of the QoS policy to delete.</param>
+            <returns>Success response if the policy was deleted, or appropriate error if not found.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.StorageQoSController.GetQoSPolicyInfo(System.Guid)">
+            <summary>
+            Retrieves information about a specific Storage QoS policy.
+            </summary>
+            <param name="policyId">The unique identifier of the QoS policy to retrieve.</param>
+            <returns>JSON response containing the QoS policy details including IOPS and bandwidth limits.</returns>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.StorageQoSController.ApplyQoSPolicyToVm(System.String,HyperV.Agent.Controllers.ApplyQoSPolicyRequest)">
+            <summary>
+            Applies a Storage QoS policy to a virtual machine.
+            </summary>
+            <param name="vmName">The name of the virtual machine to apply the policy to.</param>
+            <param name="request">The request containing the policy ID to apply.</param>
+            <returns>Success response if the policy was applied successfully.</returns>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.CreateQoSPolicyRequest">
+            <summary>
+            Request model for creating a new Storage QoS policy.
+            </summary>
+        </member>
+        <member name="P:HyperV.Agent.Controllers.CreateQoSPolicyRequest.PolicyId">
+            <summary>
+            The unique identifier for the QoS policy.
+            </summary>
+        </member>
+        <member name="P:HyperV.Agent.Controllers.CreateQoSPolicyRequest.MaxIops">
+            <summary>
+            The maximum IOPS (Input/Output Operations Per Second) limit for the policy.
+            Set to 0 for unlimited IOPS.
+            </summary>
+        </member>
+        <member name="P:HyperV.Agent.Controllers.CreateQoSPolicyRequest.MaxBandwidth">
+            <summary>
+            The maximum bandwidth limit in bytes per second for the policy.
+            Set to 0 for unlimited bandwidth.
+            </summary>
+        </member>
+        <member name="P:HyperV.Agent.Controllers.CreateQoSPolicyRequest.Description">
+            <summary>
+            Optional description for the QoS policy.
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.ApplyQoSPolicyRequest">
+            <summary>
+            Request model for applying a QoS policy to a virtual machine.
+            </summary>
+        </member>
+        <member name="P:HyperV.Agent.Controllers.ApplyQoSPolicyRequest.PolicyId">
+            <summary>
+            The unique identifier of the QoS policy to apply.
+            </summary>
         </member>
         <member name="T:HyperV.Agent.Controllers.VmsController">
             <summary>Operacje na maszynach wirtualnych (VM).</summary>

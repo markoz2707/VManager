@@ -5,6 +5,8 @@ using System.Management;
 using System.Threading.Tasks;
 using HyperV.Contracts.Interfaces;
 using HyperV.Contracts.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace HyperV.Core.Wmi.Services
 {
@@ -14,8 +16,16 @@ namespace HyperV.Core.Wmi.Services
     /// </summary>
     public class HostInfoService : IHostInfoService
     {
+        private readonly ILogger<HostInfoService> _logger;
+        private readonly IMemoryCache _cache;
         private const string Cimv2Namespace = @"root\CIMV2";
         private const string VirtualizationNamespace = @"root\virtualization\v2";
+
+        public HostInfoService(ILogger<HostInfoService> logger, IMemoryCache cache)
+        {
+            _logger = logger;
+            _cache = cache;
+        }
 
         /// <summary>
         /// Retrieves hardware information for the host.
@@ -23,7 +33,14 @@ namespace HyperV.Core.Wmi.Services
         /// <returns>Host hardware details.</returns>
         public async Task<HostHardwareInfo> GetHostHardwareInfoAsync()
         {
-            return await Task.Run(() =>
+            const string cacheKey = "HostHardwareInfo";
+            if (_cache.TryGetValue(cacheKey, out HostHardwareInfo cachedInfo))
+            {
+                _logger.LogInformation("Returning cached host hardware info");
+                return cachedInfo;
+            }
+
+            var info = await Task.Run(() =>
             {
                 var scope = new ManagementScope(Cimv2Namespace);
                 scope.Connect();
@@ -76,6 +93,10 @@ namespace HyperV.Core.Wmi.Services
 
                 return hardware;
             });
+
+            _cache.Set(cacheKey, info, TimeSpan.FromMinutes(10));
+            _logger.LogInformation("Cached host hardware info");
+            return info;
         }
 
         /// <summary>
@@ -133,17 +154,17 @@ namespace HyperV.Core.Wmi.Services
                     var cpuQuery = new ObjectQuery("SELECT * FROM Win32_PerfFormattedData_PerfProc_Processor WHERE Name='_Total'");
                     using var cpuSearcher = new ManagementObjectSearcher(scope, cpuQuery);
                     using var cpuResults = cpuSearcher.Get();
-                    // SprawdŸ, czy kolekcja nie jest pusta i nie rzuca wyj¹tku
+                    // SprawdÅº, czy kolekcja nie jest pusta i nie rzuca wyjï¿½tku
                     foreach (ManagementObject cpu in cpuResults)
                     {
                         summary.CpuUsagePercent = double.Parse(cpu["PercentProcessorTime"]?.ToString() ?? "0");
                         cpu.Dispose();
                     }
                 }
-                catch (ManagementException ex)
+                catch (ManagementException)
                 {
-                    // Logowanie lub alternatywna obs³uga
-                    summary.CpuUsagePercent = 0; // lub inna wartoœæ domyœlna
+                    // Logowanie lub alternatywna obsuga
+                    summary.CpuUsagePercent = 0; // lub inna warto domylna
                 }
 
                 // Memory Usage
@@ -233,7 +254,7 @@ namespace HyperV.Core.Wmi.Services
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error processing job: {ex.Message}");
+                        _logger.LogError(ex, "Error processing job");
                     }
                     finally
                     {

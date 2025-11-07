@@ -50,6 +50,78 @@
             Gets suitable locations for VHDX storage based on free space.
             </summary>
         </member>
+        <member name="T:HyperV.Contracts.Models.VmCloneType">
+            <summary>
+            Clone type for VM cloning operations.
+            </summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmCloneType.Full">
+            <summary>Full clone - complete copy of the VM with independent disks.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmCloneType.Linked">
+            <summary>Linked clone - shares base disks with parent VM, uses differencing disks.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.CloneVmRequest">
+            <summary>
+            Request model for cloning a VM.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.SourceVmName">
+            <summary>Source VM name to clone from.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.NewVmName">
+            <summary>Name for the new cloned VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.CloneType">
+            <summary>Type of clone to create.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.NewMemoryMB">
+            <summary>Optional new memory allocation in MB (overrides source VM memory).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.NewCpuCount">
+            <summary>Optional new CPU count (overrides source VM CPU count).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.NewDiskSizeGB">
+            <summary>Optional new disk size in GB (for full clones, expands the copied disk).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.NewVhdPath">
+            <summary>Optional new VHD path for the cloned VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.NewSwitchName">
+            <summary>Optional new network switch name.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.Notes">
+            <summary>Optional notes for the cloned VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.StartAfterClone">
+            <summary>Whether to start the cloned VM after creation.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmRequest.PreferredBackend">
+            <summary>Preferred backend for the cloned VM.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.CloneVmResponse">
+            <summary>
+            Response model for clone operations.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmResponse.ClonedVmName">
+            <summary>Name of the cloned VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmResponse.CloneType">
+            <summary>Clone type used.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmResponse.Backend">
+            <summary>Backend used for cloning.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmResponse.Started">
+            <summary>Whether the clone was started automatically.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmResponse.CompletedAt">
+            <summary>Timestamp of clone completion.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CloneVmResponse.Details">
+            <summary>Additional information about the clone operation.</summary>
+        </member>
         <member name="T:HyperV.Contracts.Models.ConvertVhdRequest">
             <summary>
             Request model for converting virtual hard disk formats
@@ -140,6 +212,47 @@
         </member>
         <member name="P:HyperV.Contracts.Models.CreateContainerRequest.VolumeMounts">
             <summary>Volume mounts for the container.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.CreateVmFromTemplateRequest">
+            <summary>
+            Request model for creating VM from template.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.Id">
+            <summary>Unikalny identyfikator VM (UUID lub friendly name).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.Name">
+            <summary>Nazwa VM widoczna w menedżerze Hyper-V.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.Template">
+            <summary>Template type to use for VM creation.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.MemoryMB">
+            <summary>Optional custom memory in MB (overrides template default).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.CpuCount">
+            <summary>Optional custom CPU count (overrides template default).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.DiskSizeGB">
+            <summary>Optional custom disk size in GB (overrides template default).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.Generation">
+            <summary>Optional custom generation (overrides template default).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.SecureBoot">
+            <summary>Optional custom secure boot setting (overrides template default).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.VhdPath">
+            <summary>Ścieżka do pliku VHD/VHDX. Jeśli nie podano, zostanie utworzona automatycznie.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.SwitchName">
+            <summary>Nazwa przełącznika sieciowego do podłączenia VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.Notes">
+            <summary>Notatki/opis VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateVmFromTemplateRequest.PreferredBackend">
+            <summary>Preferred backend (auto-selected if not specified).</summary>
         </member>
         <member name="T:HyperV.Contracts.Models.VmCreationMode">
             <summary>
@@ -1101,6 +1214,290 @@
         </member>
         <member name="P:HyperV.Contracts.Models.VmSummary.State">
             <summary>Bieżący stan.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.VmTemplateType">
+            <summary>
+            VM template types for simplified creation.
+            </summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmTemplateType.Development">
+            <summary>Development template - higher resources for development work.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmTemplateType.Production">
+            <summary>Production template - balanced resources for production workloads.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmTemplateType.Lightweight">
+            <summary>Lightweight template - minimal resources for testing or small applications.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.VmTemplateConfiguration">
+            <summary>
+            Configuration for VM templates.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplateConfiguration.Type">
+            <summary>Template type.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplateConfiguration.DefaultMemoryMB">
+            <summary>Default memory in MB.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplateConfiguration.DefaultCpuCount">
+            <summary>Default CPU count.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplateConfiguration.DefaultDiskSizeGB">
+            <summary>Default disk size in GB.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplateConfiguration.DefaultGeneration">
+            <summary>Default generation (1 or 2).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplateConfiguration.DefaultSecureBoot">
+            <summary>Default secure boot enabled.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplateConfiguration.SupportedModes">
+            <summary>Supported creation modes.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplateConfiguration.Description">
+            <summary>Description of the template.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.VmTemplate">
+            <summary>
+            VM template stored in the system.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.Id">
+            <summary>Unique template ID.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.Name">
+            <summary>Template name.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.Description">
+            <summary>Template description.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.SourceVmName">
+            <summary>Source VM name used to create this template.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.SourceBackend">
+            <summary>Backend used for the source VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.MemoryMB">
+            <summary>Memory configuration in MB.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.CpuCount">
+            <summary>CPU count.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.DiskSizeGB">
+            <summary>Disk size in GB.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.Generation">
+            <summary>VM generation (1 or 2).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.SecureBoot">
+            <summary>Secure boot enabled.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.SwitchName">
+            <summary>Network switch name.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.Category">
+            <summary>Template category/type.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.IsPublic">
+            <summary>Whether the template is public (available to all users).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.Owner">
+            <summary>Owner/creator of the template.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.CreatedAt">
+            <summary>Creation timestamp.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.ModifiedAt">
+            <summary>Last modified timestamp.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.Version">
+            <summary>Template version.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.Tags">
+            <summary>Tags for categorization.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmTemplate.SupportedBackends">
+            <summary>Supported backends for this template.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.CreateTemplateFromVmRequest">
+            <summary>
+            Request model for creating a template from a VM.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateTemplateFromVmRequest.SourceVmName">
+            <summary>Source VM name to create template from.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateTemplateFromVmRequest.TemplateName">
+            <summary>Template name.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateTemplateFromVmRequest.Description">
+            <summary>Template description.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateTemplateFromVmRequest.Category">
+            <summary>Template category.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateTemplateFromVmRequest.IsPublic">
+            <summary>Whether the template is public.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateTemplateFromVmRequest.Tags">
+            <summary>Tags for the template.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateTemplateFromVmRequest.CustomMemoryMB">
+            <summary>Custom memory setting (overrides source VM memory).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateTemplateFromVmRequest.CustomCpuCount">
+            <summary>Custom CPU count (overrides source VM CPU count).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.CreateTemplateFromVmRequest.CustomDiskSizeGB">
+            <summary>Custom disk size (overrides source VM disk size).</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.UpdateTemplateRequest">
+            <summary>
+            Request model for updating a template.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.UpdateTemplateRequest.Name">
+            <summary>New template name.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.UpdateTemplateRequest.Description">
+            <summary>New description.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.UpdateTemplateRequest.Category">
+            <summary>New category.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.UpdateTemplateRequest.IsPublic">
+            <summary>New public status.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.UpdateTemplateRequest.Tags">
+            <summary>New tags.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.UpdateTemplateRequest.MemoryMB">
+            <summary>New memory setting.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.UpdateTemplateRequest.CpuCount">
+            <summary>New CPU count.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.UpdateTemplateRequest.DiskSizeGB">
+            <summary>New disk size.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.UpdateTemplateRequest.Version">
+            <summary>New version.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.TemplateOperationResponse">
+            <summary>
+            Response model for template operations.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.TemplateOperationResponse.TemplateId">
+            <summary>Template ID.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.TemplateOperationResponse.TemplateName">
+            <summary>Template name.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.TemplateOperationResponse.Operation">
+            <summary>Operation performed.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.TemplateOperationResponse.Success">
+            <summary>Success status.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.TemplateOperationResponse.Details">
+            <summary>Additional details.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.TemplateOperationResponse.Timestamp">
+            <summary>Timestamp of operation.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.VmWizardRequest">
+            <summary>
+            Request model for VM creation wizard.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardRequest.Id">
+            <summary>Unikalny identyfikator VM (UUID lub friendly name).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardRequest.Name">
+            <summary>Nazwa VM widoczna w menedżerze Hyper-V.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardRequest.WorkloadType">
+            <summary>Workload type to determine optimal defaults.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardRequest.ResourceLevel">
+            <summary>Resource level preference.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardRequest.PreferredBackend">
+            <summary>Preferred backend (auto-selected if not specified).</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardRequest.VhdPath">
+            <summary>Ścieżka do pliku VHD/VHDX. Jeśli nie podano, zostanie utworzona automatycznie.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardRequest.SwitchName">
+            <summary>Nazwa przełącznika sieciowego do podłączenia VM.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardRequest.Notes">
+            <summary>Notatki/opis VM.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.VmWorkloadType">
+            <summary>
+            VM workload types for wizard.
+            </summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmWorkloadType.General">
+            <summary>General purpose computing.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmWorkloadType.WebServer">
+            <summary>Web server.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmWorkloadType.Database">
+            <summary>Database server.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmWorkloadType.Development">
+            <summary>Development environment.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmWorkloadType.Testing">
+            <summary>Testing/CI.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmWorkloadType.Container">
+            <summary>Container host.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.VmResourceLevel">
+            <summary>
+            Resource level preferences.
+            </summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmResourceLevel.Minimal">
+            <summary>Minimal resources.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmResourceLevel.Low">
+            <summary>Low resources.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmResourceLevel.Medium">
+            <summary>Medium resources (default).</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmResourceLevel.High">
+            <summary>High resources.</summary>
+        </member>
+        <member name="F:HyperV.Contracts.Models.VmResourceLevel.Maximum">
+            <summary>Maximum resources.</summary>
+        </member>
+        <member name="T:HyperV.Contracts.Models.VmWizardResponse">
+            <summary>
+            Wizard response with recommended configuration.
+            </summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardResponse.RecommendedConfiguration">
+            <summary>Recommended VM configuration.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardResponse.TemplateUsed">
+            <summary>Template used as basis.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardResponse.BackendSelected">
+            <summary>Backend selected.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardResponse.ValidationMessages">
+            <summary>Validation messages.</summary>
+        </member>
+        <member name="P:HyperV.Contracts.Models.VmWizardResponse.Recommendations">
+            <summary>Resource recommendations.</summary>
         </member>
         <member name="T:HyperV.Contracts.Services.IFibreChannelService">
             <summary>

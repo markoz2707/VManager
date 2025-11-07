@@ -1650,9 +1650,27 @@ namespace HyperV.Core.Hcs.Services
 
             await Task.Run(() =>
             {
-                // This would use HCS APIs to add a storage device to the VM
-                // Modify VM configuration to include the new storage device
-                // Placeholder implementation
+                // Use HCS APIs to add storage device to VM
+                var vmConfig = GetVmConfigurationAsync(vmName).GetAwaiter().GetResult();
+                
+                // Create storage device configuration
+                var storageDevice = new
+                {
+                    Type = request.DeviceType ?? "VirtualDisk",
+                    Path = request.Path,
+                    ReadOnly = request.ReadOnly,
+                    Controller = request.ControllerId ?? "SCSI"
+                };
+
+                // Find suitable controller
+                var controller = FindSuitableController(vmConfig);
+                if (controller == null)
+                {
+                    throw new InvalidOperationException($"No suitable storage controller found for VM {vmName}");
+                }
+
+                // Add storage device to controller
+                AddStorageDeviceToControllerAsync(vmName, controller, storageDevice, CancellationToken.None).GetAwaiter().GetResult();
             });
         }
 
@@ -1668,9 +1686,18 @@ namespace HyperV.Core.Hcs.Services
 
             await Task.Run(() =>
             {
-                // This would use HCS APIs to remove a storage device from the VM
-                // Modify VM configuration to remove the specified storage device
-                // Placeholder implementation
+                // Use HCS APIs to remove storage device from VM
+                var vmConfig = GetVmConfigurationAsync(vmName).GetAwaiter().GetResult();
+                
+                // Find the storage device to remove
+                var storageDevice = FindStorageDevice(vmConfig, deviceId);
+                if (storageDevice == null)
+                {
+                    throw new InvalidOperationException($"Storage device {deviceId} not found on VM {vmName}");
+                }
+
+                // Remove storage device from VM
+                RemoveStorageDeviceFromVmAsync(vmName, storageDevice, CancellationToken.None).GetAwaiter().GetResult();
             });
         }
 

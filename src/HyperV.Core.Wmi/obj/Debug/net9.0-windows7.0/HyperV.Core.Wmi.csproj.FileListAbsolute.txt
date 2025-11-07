@@ -17,3 +17,5 @@ I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net9.0-window
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net9.0-windows7.0\HyperV.HyperV.Core.Wmi.xml
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net9.0-windows7.0\HyperV.HyperV.Core.Wmi.pdb
 I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net9.0-windows7.0\ref\HyperV.HyperV.Core.Wmi.dll
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\bin\Debug\net9.0-windows7.0\HyperV.HyperV.Core.Wmi.runtimeconfig.json
+I:\AI Projects\VManager\hyperv-agent\src\HyperV.Core.Wmi\obj\Debug\net9.0-windows7.0\HyperV.Core.Wmi.genruntimeconfig.cache
