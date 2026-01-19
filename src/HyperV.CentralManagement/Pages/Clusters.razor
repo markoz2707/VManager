@@ -1,0 +1,50 @@
+@page "/clusters"
+@inject CentralApiClient Api
+@inject AuthSession Session
+
+<PageTitle>Clusters</PageTitle>
+
+<h2>Clusters</h2>
+
+@if (string.IsNullOrWhiteSpace(Session.Token))
+{
+    <div class="alert alert-warning">Login required to load clusters.</div>
+}
+else if (clusters.Count == 0)
+{
+    <div class="alert alert-info">No clusters defined yet.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Nodes</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var cluster in clusters)
+        {
+            <tr>
+                <td>@cluster.Name</td>
+                <td>@cluster.Description</td>
+                <td>@cluster.Nodes.Count</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<HyperV.CentralManagement.Models.Cluster> clusters = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(Session.Token))
+        {
+            clusters = (await Api.GetClustersAsync()).ToList();
+        }
+    }
+}

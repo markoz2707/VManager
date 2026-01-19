@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: hyperv-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hyperv_central
+      POSTGRES_USER: hyperv
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - hyperv-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hyperv -d hyperv_central"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # HyperV Central Management Server
+  central-management:
+    build:
+      context: .
+      dockerfile: src/HyperV.CentralManagement/Dockerfile
+    container_name: hyperv-central
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__CentralDb=Host=postgres;Port=5432;Database=hyperv_central;Username=hyperv;Password=${DB_PASSWORD:-changeme}
+      - Jwt__Secret=${JWT_SECRET}
+      - Jwt__Issuer=hyperv-central
+      - Jwt__Audience=hyperv-central-ui
+      - Jwt__ExpirationMinutes=480
+      - InitialAdmin__Username=admin
+      - InitialAdmin__Password=${ADMIN_PASSWORD}
+      - Ldap__Enabled=${LDAP_ENABLED:-false}
+      - Ldap__Host=${LDAP_HOST:-}
+      - Ldap__Port=${LDAP_PORT:-636}
+      - Ldap__UseSsl=${LDAP_USE_SSL:-true}
+      - Ldap__BaseDn=${LDAP_BASE_DN:-}
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - central-logs:/var/log/hyperv-central
+      - ./certs:/app/certs:ro
+    networks:
+      - hyperv-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Optional: PgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hyperv-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@hyperv.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - hyperv-network
+    profiles:
+      - tools
+
+volumes:
+  postgres-data:
+    driver: local
+  central-logs:
+    driver: local
+  pgadmin-data:
+    driver: local
+
+networks:
+  hyperv-network:
+    driver: bridge

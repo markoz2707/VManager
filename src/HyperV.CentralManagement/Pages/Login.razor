@@ -1,0 +1,46 @@
+@page "/login"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>Login</PageTitle>
+
+<h2>Login</h2>
+
+<div class="card p-3">
+    <div class="mb-2">
+        <label class="form-label">Username</label>
+        <input class="form-control" @bind="username" />
+    </div>
+    <div class="mb-2">
+        <label class="form-label">Password</label>
+        <input class="form-control" type="password" @bind="password" />
+    </div>
+    <button class="btn btn-primary" @onclick="HandleLogin">Sign in</button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3">@error</div>
+}
+
+@code {
+    private string username = string.Empty;
+    private string password = string.Empty;
+    private string error = string.Empty;
+
+    private async Task HandleLogin()
+    {
+        error = string.Empty;
+        var token = await Api.LoginAsync(username, password);
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            error = "Login failed. Check credentials or LDAP configuration.";
+            return;
+        }
+
+        Session.Token = token;
+        Session.Username = username;
+        Nav.NavigateTo("/agents");
+    }
+}

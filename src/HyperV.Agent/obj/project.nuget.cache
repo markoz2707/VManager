@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "zon0h72QY0Q=",
+  "dgSpecHash": "Pppb0iEmo28=",
   "success": true,
   "projectFilePath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent\\HyperV.Agent.csproj",
   "expectedPackageFiles": [
@@ -68,6 +68,7 @@
     "C:\\Users\\mkozn\\.nuget\\packages\\system.diagnostics.eventlog\\9.0.10\\system.diagnostics.eventlog.9.0.10.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\system.identitymodel.tokens.jwt\\8.0.1\\system.identitymodel.tokens.jwt.8.0.1.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\system.management\\9.0.8\\system.management.9.0.8.nupkg.sha512",
+    "C:\\Users\\mkozn\\.nuget\\packages\\system.serviceprocess.servicecontroller\\9.0.0\\system.serviceprocess.servicecontroller.9.0.0.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\xunit\\2.9.3\\xunit.2.9.3.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\xunit.abstractions\\2.0.3\\xunit.abstractions.2.0.3.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\xunit.analyzers\\1.18.0\\xunit.analyzers.1.18.0.nupkg.sha512",

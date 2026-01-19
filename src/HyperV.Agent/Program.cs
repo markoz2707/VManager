@@ -44,7 +44,12 @@ builder.Services.AddEndpointsApiExplorer();
 
 // Configure JWT Authentication
 var jwtConfig = builder.Configuration.GetSection("Jwt");
-var secretKey = Encoding.UTF8.GetBytes(jwtConfig["Secret"] ?? "default-secret-key");
+var jwtSecret = jwtConfig["Secret"];
+if (string.IsNullOrWhiteSpace(jwtSecret))
+{
+    jwtSecret = "default-secret-key-min-32-chars-required-for-hmacsha256";
+}
+var secretKey = Encoding.UTF8.GetBytes(jwtSecret);
 
 builder.Services.AddAuthentication(options =>
 {

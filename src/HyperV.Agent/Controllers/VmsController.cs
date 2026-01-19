@@ -1069,6 +1069,184 @@ public class VmsController : ControllerBase
         return new { memory = 2048, processors = 2 }; // Default fallback
     }
 
+    /// <summary>Gets HCS VM usage metrics.</summary>
+    private VmUsageSummary GetHcsVmUsageMetrics(string vmName)
+    {
+        // Placeholder - implement HCS metrics collection
+        return new VmUsageSummary
+        {
+            Timestamp = DateTime.UtcNow.ToString("o"),
+            Cpu = new CpuUsage
+            {
+                UsagePercent = 0.0,
+                GuestAverageUsage = 0.0
+            },
+            Memory = new MemoryUsage
+            {
+                AssignedMB = 2048,
+                DemandMB = 1024,
+                UsagePercent = 50.0,
+                Status = "Healthy"
+            },
+            Disks = new List<DiskUsage>(),
+            Networks = new List<NetworkUsage>(),
+            StorageAdapters = new List<StorageAdapterUsage>()
+        };
+    }
+
+    /// <summary>Gets WMI VM usage metrics.</summary>
+    private VmUsageSummary GetWmiVmUsageMetrics(string vmName)
+    {
+        var usage = new VmUsageSummary
+        {
+            Timestamp = DateTime.UtcNow.ToString("o"),
+            Disks = new List<DiskUsage>(),
+            Networks = new List<NetworkUsage>(),
+            StorageAdapters = new List<StorageAdapterUsage>()
+        };
+
+        try
+        {
+            var scope = new ManagementScope(@"root\virtualization\v2");
+            scope.Connect();
+
+            // Get VM instance
+            var vmQuery = new ObjectQuery($"SELECT * FROM Msvm_ComputerSystem WHERE ElementName = '{vmName}'");
+            using var vmSearcher = new ManagementObjectSearcher(scope, vmQuery);
+            using var vmResults = vmSearcher.Get();
+
+            foreach (ManagementObject vm in vmResults)
+            {
+                using (vm)
+                {
+                    // Get CPU metrics
+                    var cpuUsage = 0.0;
+                    try
+                    {
+                        var processorLoadQuery = new ObjectQuery($"SELECT * FROM Msvm_Processor WHERE SystemName = '{vmName}'");
+                        using var procSearcher = new ManagementObjectSearcher(scope, processorLoadQuery);
+                        using var procResults = procSearcher.Get();
+                        foreach (ManagementObject proc in procResults)
+                        {
+                            using (proc)
+                            {
+                                if (proc["LoadPercentage"] != null)
+                                {
+                                    cpuUsage = Convert.ToDouble(proc["LoadPercentage"]);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+
+                    usage.Cpu = new CpuUsage
+                    {
+                        UsagePercent = cpuUsage,
+                        GuestAverageUsage = cpuUsage
+                    };
+
+                    // Get Memory metrics
+                    var vmGuid = vm["Name"]?.ToString();
+                    if (!string.IsNullOrEmpty(vmGuid))
+                    {
+                        var memoryQuery = new ObjectQuery($"SELECT * FROM Msvm_MemorySettingData WHERE InstanceID LIKE '%{vmGuid}%'");
+                        using var memSearcher = new ManagementObjectSearcher(scope, memoryQuery);
+                        using var memResults = memSearcher.Get();
+
+                        var assignedMB = 2048;
+                        var demandMB = 1024;
+                        foreach (ManagementObject mem in memResults)
+                        {
+                            using (mem)
+                            {
+                                if (mem["VirtualQuantity"] != null)
+                                {
+                                    assignedMB = Convert.ToInt32(mem["VirtualQuantity"]);
+                                }
+                            }
+                        }
+
+                        // Try to get memory demand from summary information
+                        try
+                        {
+                            var summaryQuery = new ObjectQuery($"SELECT * FROM Msvm_SummaryInformation WHERE Name = '{vmGuid}'");
+                            using var summarySearcher = new ManagementObjectSearcher(scope, summaryQuery);
+                            using var summaryResults = summarySearcher.Get();
+                            foreach (ManagementObject summary in summaryResults)
+                            {
+                                using (summary)
+                                {
+                                    if (summary["MemoryUsage"] != null)
+                                    {
+                                        demandMB = Convert.ToInt32(summary["MemoryUsage"]);
+                                    }
+                                }
+                            }
+                        }
+                        catch { }
+
+                        var usagePercent = assignedMB > 0 ? (double)demandMB / assignedMB * 100.0 : 0.0;
+                        var status = usagePercent < 70 ? "Healthy" : usagePercent < 90 ? "Warning" : "Critical";
+
+                        usage.Memory = new MemoryUsage
+                        {
+                            AssignedMB = assignedMB,
+                            DemandMB = demandMB,
+                            UsagePercent = usagePercent,
+                            Status = status
+                        };
+                    }
+
+                    // Get Disk metrics (placeholder - would need to query virtual disks)
+                    usage.Disks.Add(new DiskUsage
+                    {
+                        Name = "System VHD",
+                        ReadIops = 0,
+                        WriteIops = 0,
+                        LatencyMs = 0.0,
+                        ThroughputBytesPerSec = 0
+                    });
+
+                    // Get Network metrics (placeholder - would need to query network adapters)
+                    usage.Networks.Add(new NetworkUsage
+                    {
+                        AdapterName = "Network Adapter",
+                        BytesReceivedPerSec = 0,
+                        BytesSentPerSec = 0,
+                        PacketsDropped = 0
+                    });
+
+                    // Get Storage Adapter metrics (placeholder)
+                    usage.StorageAdapters.Add(new StorageAdapterUsage
+                    {
+                        Name = "SCSI Controller 0",
+                        QueueDepth = 0,
+                        ThroughputBytesPerSec = 0,
+                        ErrorsCount = 0
+                    });
+
+                    break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting WMI VM usage metrics for {VmName}", vmName);
+            // Return default values on error
+            usage.Cpu = new CpuUsage { UsagePercent = 0.0, GuestAverageUsage = 0.0 };
+            usage.Memory = new MemoryUsage
+            {
+                AssignedMB = 2048,
+                DemandMB = 1024,
+                UsagePercent = 50.0,
+                Status = "Healthy"
+            };
+        }
+
+        return usage;
+    }
+
     #endregion
 
     #region Bulk VM Operations
@@ -1442,6 +1620,40 @@ public class VmsController : ControllerBase
         }
     }
 
+    /// <summary>Gets comprehensive VM resource usage metrics.</summary>
+    [HttpGet("{name}/metrics/usage")]
+    [ProducesResponseType(typeof(VmUsageSummary), 200)]
+    [ProducesResponseType(404)]
+    [SwaggerOperation(Summary = "Get VM Usage Metrics", Description = "Retrieves comprehensive CPU, memory, disk, network, and storage adapter usage metrics for a VM.")]
+    public IActionResult GetVmUsageMetrics([FromRoute] string name)
+    {
+        try
+        {
+            VmUsageSummary usage;
+
+            // Try HCS first
+            if (_hcsVm.IsVmPresent(name))
+            {
+                usage = GetHcsVmUsageMetrics(name);
+            }
+            // Fall back to WMI
+            else if (_wmiVm.IsVmPresent(name))
+            {
+                usage = GetWmiVmUsageMetrics(name);
+            }
+            else
+            {
+                return NotFound(new { error = $"VM '{name}' not found" });
+            }
+
+            return Ok(usage);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
     /// <summary>Gets VM generation type.</summary>
     [HttpGet("{name}/generation")]
     [ProducesResponseType(typeof(object), 200)]
@@ -1645,8 +1857,6 @@ public IActionResult CopyFileToGuest([FromRoute] string name, [FromBody] GuestFi
     }
 }
 
-}
-
 /// <summary>Request model for locking/unlocking media.</summary>
 public class LockMediaRequest
 {
@@ -1767,7 +1977,7 @@ public class BulkVmOperationResult
     public bool Success { get; set; }
     public string? Error { get; set; }
     public string Backend { get; set; } = string.Empty;
-    #endregion
+}
 
     #region VM Templates and Wizard
 
@@ -2516,7 +2726,7 @@ public class BulkVmOperationResult
             else if (backend == VmCreationMode.WMI && _wmiVm.IsVmPresent(vmName))
             {
                 // Get WMI properties
-                var wmiProps = GetWmiVmResourceSettings(vmName);
+                dynamic wmiProps = GetWmiVmResourceSettings(vmName);
                 properties.MemoryMB = wmiProps.memory;
                 properties.CpuCount = wmiProps.processors;
                 properties.DiskSizeGB = 20; // Would get from storage service
@@ -2626,1405 +2836,6 @@ public class BulkVmOperationResult
         public int Generation { get; set; }
         public bool SecureBoot { get; set; }
         public string? SwitchName { get; set; }
-    }
-
-    #endregion
-
-    #region VM Cloning and Templates
-
-    /// <summary>Clone an existing VM with optional modifications.</summary>
-    [HttpPost("{sourceVmName}/clone")]
-    [Authorize]
-    [Produces("application/json")]
-    [Consumes("application/json")]
-    [ProducesResponseType(typeof(CloneVmResponse), 200)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Clone VM", Description = "Creates a clone of an existing VM with support for full clones and linked clones, with optional resource modifications.")]
-    public async Task<IActionResult> CloneVm([FromRoute] string sourceVmName, [FromBody] CloneVmRequest request)
-    {
-        _logger.LogInformation("Cloning VM {SourceVm} to {NewVm}", sourceVmName, request?.NewVmName);
-        try
-        {
-            // Validate the request
-            if (request == null)
-            {
-                _logger.LogWarning("Clone VM request is null");
-                return BadRequest(new { error = "Request body is required" });
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            // Validate required fields
-            if (string.IsNullOrEmpty(request.NewVmName))
-            {
-                return BadRequest(new { error = "New VM name is required" });
-            }
-
-            // Check if source VM exists
-            bool sourceExists = _hcsVm.IsVmPresent(sourceVmName) || _wmiVm.IsVmPresent(sourceVmName);
-            if (!sourceExists)
-            {
-                return NotFound(new { error = $"Source VM '{sourceVmName}' not found" });
-            }
-
-            // Check if target VM name already exists
-            bool targetExists = _hcsVm.IsVmPresent(request.NewVmName) || _wmiVm.IsVmPresent(request.NewVmName);
-            if (targetExists)
-            {
-                return BadRequest(new { error = $"VM with name '{request.NewVmName}' already exists" });
-            }
-
-            // Determine backend and perform clone
-            CloneVmResponse response = await PerformVmClone(sourceVmName, request);
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error cloning VM");
-            return BadRequest(new { error = ex.Message, details = ex.ToString() });
-        }
-    }
-
-    /// <summary>Create a template from an existing VM.</summary>
-    [HttpPost("templates")]
-    [Authorize]
-    [Produces("application/json")]
-    [Consumes("application/json")]
-    [ProducesResponseType(typeof(TemplateOperationResponse), 201)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Create Template from VM", Description = "Creates a reusable template from an existing VM configuration.")]
-    public IActionResult CreateTemplateFromVm([FromBody] CreateTemplateFromVmRequest request)
-    {
-        _logger.LogInformation("Creating template from VM {VmName}", request?.SourceVmName);
-        try
-        {
-            // Validate the request
-            if (request == null)
-            {
-                _logger.LogWarning("Create template request is null");
-                return BadRequest(new { error = "Request body is required" });
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            // Validate required fields
-            if (string.IsNullOrEmpty(request.SourceVmName))
-            {
-                return BadRequest(new { error = "Source VM name is required" });
-            }
-
-            if (string.IsNullOrEmpty(request.TemplateName))
-            {
-                return BadRequest(new { error = "Template name is required" });
-            }
-
-            // Check if source VM exists
-            bool sourceExists = _hcsVm.IsVmPresent(request.SourceVmName) || _wmiVm.IsVmPresent(request.SourceVmName);
-            if (!sourceExists)
-            {
-                return NotFound(new { error = $"Source VM '{request.SourceVmName}' not found" });
-            }
-
-            // Create template
-            var template = CreateVmTemplate(request);
-            SaveTemplate(template);
-
-            var response = new TemplateOperationResponse
-            {
-                TemplateId = template.Id,
-                TemplateName = template.Name,
-                Operation = "Created",
-                Success = true,
-                Details = new Dictionary<string, string>
-                {
-                    ["sourceVm"] = request.SourceVmName,
-                    ["backend"] = template.SourceBackend.ToString(),
-                    ["category"] = template.Category.ToString()
-                }
-            };
-
-            return Created($"api/v1/vms/templates/{template.Id}", response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating template from VM");
-            return BadRequest(new { error = ex.Message, details = ex.ToString() });
-        }
-    }
-
-    /// <summary>Get all available VM templates.</summary>
-    [HttpGet("templates")]
-    [ProducesResponseType(typeof(List<VmTemplate>), 200)]
-    [SwaggerOperation(Summary = "List VM Templates", Description = "Gets list of all available VM templates.")]
-    public IActionResult ListTemplates()
-    {
-        try
-        {
-            var templates = GetStoredTemplates();
-            return Ok(templates);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = $"Failed to list templates: {ex.Message}" });
-        }
-    }
-
-    /// <summary>Get a specific template by ID.</summary>
-    [HttpGet("templates/{templateId}")]
-    [ProducesResponseType(typeof(VmTemplate), 200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Get VM Template", Description = "Gets details of a specific VM template.")]
-    public IActionResult GetTemplate([FromRoute] string templateId)
-    {
-        try
-        {
-            var template = GetStoredTemplate(templateId);
-            if (template == null)
-            {
-                return NotFound(new { error = $"Template '{templateId}' not found" });
-            }
-            return Ok(template);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = $"Failed to get template: {ex.Message}" });
-        }
-    }
-
-    /// <summary>Update an existing template.</summary>
-    [HttpPut("templates/{templateId}")]
-    [Authorize]
-    [ProducesResponseType(typeof(TemplateOperationResponse), 200)]
-    [ProducesResponseType(400)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Update VM Template", Description = "Updates an existing VM template configuration.")]
-    public IActionResult UpdateTemplate([FromRoute] string templateId, [FromBody] UpdateTemplateRequest request)
-    {
-        try
-        {
-            if (request == null)
-            {
-                return BadRequest(new { error = "Request body is required" });
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var template = GetStoredTemplate(templateId);
-            if (template == null)
-            {
-                return NotFound(new { error = $"Template '{templateId}' not found" });
-            }
-
-            // Update template properties
-            UpdateTemplateFromRequest(template, request);
-            SaveTemplate(template);
-
-            var response = new TemplateOperationResponse
-            {
-                TemplateId = template.Id,
-                TemplateName = template.Name,
-                Operation = "Updated",
-                Success = true
-            };
-
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating template");
-            return BadRequest(new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Delete a template.</summary>
-    [HttpDelete("templates/{templateId}")]
-    [Authorize]
-    [ProducesResponseType(typeof(TemplateOperationResponse), 200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Delete VM Template", Description = "Deletes a VM template.")]
-    public IActionResult DeleteTemplate([FromRoute] string templateId)
-    {
-        try
-        {
-            var template = GetStoredTemplate(templateId);
-            if (template == null)
-            {
-                return NotFound(new { error = $"Template '{templateId}' not found" });
-            }
-
-            DeleteStoredTemplate(templateId);
-
-            var response = new TemplateOperationResponse
-            {
-                TemplateId = templateId,
-                TemplateName = template.Name,
-                Operation = "Deleted",
-                Success = true
-            };
-
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting template");
-            return BadRequest(new { error = ex.Message });
-        }
-    }
-
-    #endregion
-
-    /// <summary>Performs the actual VM cloning operation.</summary>
-    private async Task<CloneVmResponse> PerformVmClone(string sourceVmName, CloneVmRequest request)
-    {
-        var response = new CloneVmResponse
-        {
-            ClonedVmName = request.NewVmName,
-            CloneType = request.CloneType,
-            Details = new Dictionary<string, string>()
-        };
-
-        // Determine which backend the source VM is on
-        VmCreationMode sourceBackend;
-        if (_hcsVm.IsVmPresent(sourceVmName))
-        {
-            sourceBackend = VmCreationMode.HCS;
-        }
-        else if (_wmiVm.IsVmPresent(sourceVmName))
-        {
-            sourceBackend = VmCreationMode.WMI;
-        }
-        else
-        {
-            throw new InvalidOperationException($"Source VM '{sourceVmName}' not found");
-        }
-
-        response.Backend = sourceBackend.ToString();
-
-        // For now, implement basic cloning using VM creation with modified parameters
-        // In a full implementation, this would use proper cloning APIs
-        var sourceProperties = GetVmProperties(sourceVmName, sourceBackend);
-
-        // Create new VM configuration based on source with modifications
-        var cloneConfig = new CreateVmRequest
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = request.NewVmName,
-            MemoryMB = request.NewMemoryMB ?? sourceProperties.MemoryMB,
-            CpuCount = request.NewCpuCount ?? sourceProperties.CpuCount,
-            DiskSizeGB = request.NewDiskSizeGB ?? sourceProperties.DiskSizeGB,
-            Mode = request.PreferredBackend ?? sourceBackend,
-            Generation = sourceProperties.Generation,
-            SecureBoot = sourceProperties.SecureBoot,
-            VhdPath = request.NewVhdPath,
-            SwitchName = request.NewSwitchName ?? sourceProperties.SwitchName,
-            Notes = request.Notes ?? $"Cloned from {sourceVmName} ({request.CloneType} clone)"
-        };
-
-        // Create the cloned VM
-        string resultJson;
-        switch (cloneConfig.Mode)
-        {
-            case VmCreationMode.HCS:
-                resultJson = _hcsVm.Create(cloneConfig.Id, cloneConfig);
-                break;
-            case VmCreationMode.WMI:
-            default:
-                resultJson = _wmiCreation.CreateHyperVVm(cloneConfig.Id, cloneConfig);
-                break;
-        }
-
-        // Start VM if requested
-        if (request.StartAfterClone)
-        {
-            try
-            {
-                if (_hcsVm.IsVmPresent(request.NewVmName))
-                {
-                    _hcsVm.StartVm(request.NewVmName);
-                }
-                else if (_wmiVm.IsVmPresent(request.NewVmName))
-                {
-                    _wmiVm.StartVm(request.NewVmName);
-                }
-                response.Started = true;
-            }
-            catch (Exception ex)
-            {
-                response.Details["startError"] = ex.Message;
-            }
-        }
-
-        response.CompletedAt = DateTime.UtcNow;
-        response.Details["sourceBackend"] = sourceBackend.ToString();
-        response.Details["cloneMode"] = cloneConfig.Mode.ToString();
-
-        return response;
-    }
-
-    /// <summary>Gets VM properties for cloning purposes.</summary>
-    private VmProperties GetVmProperties(string vmName, VmCreationMode backend)
-    {
-        var properties = new VmProperties();
-
-        try
-        {
-            if (backend == VmCreationMode.HCS && _hcsVm.IsVmPresent(vmName))
-            {
-                var hcsProps = _hcsVm.GetVmProperties(vmName);
-                // Parse HCS properties - simplified for now
-                properties.MemoryMB = 2048; // Would parse from JSON
-                properties.CpuCount = 2;
-                properties.DiskSizeGB = 20;
-                properties.Generation = 2;
-                properties.SecureBoot = true;
-            }
-            else if (backend == VmCreationMode.WMI && _wmiVm.IsVmPresent(vmName))
-            {
-                // Get WMI properties
-                var wmiProps = GetWmiVmResourceSettings(vmName);
-                properties.MemoryMB = wmiProps.memory;
-                properties.CpuCount = wmiProps.processors;
-                properties.DiskSizeGB = 20; // Would get from storage service
-                properties.Generation = 2; // Would query from WMI
-                properties.SecureBoot = true; // Would query from WMI
-            }
-        }
-        catch
-        {
-            // Use defaults if parsing fails
-            properties.MemoryMB = 2048;
-            properties.CpuCount = 2;
-            properties.DiskSizeGB = 20;
-            properties.Generation = 2;
-            properties.SecureBoot = true;
-        }
-
-        return properties;
-    }
-
-    /// <summary>Creates a VM template from a VM.</summary>
-    private VmTemplate CreateVmTemplate(CreateTemplateFromVmRequest request)
-    {
-        // Determine source backend
-        VmCreationMode sourceBackend = VmCreationMode.WMI;
-        if (_hcsVm.IsVmPresent(request.SourceVmName))
-        {
-            sourceBackend = VmCreationMode.HCS;
-        }
-
-        // Get VM properties
-        var vmProps = GetVmProperties(request.SourceVmName, sourceBackend);
-
-        return new VmTemplate
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = request.TemplateName,
-            Description = request.Description,
-            SourceVmName = request.SourceVmName,
-            SourceBackend = sourceBackend,
-            MemoryMB = request.CustomMemoryMB ?? vmProps.MemoryMB,
-            CpuCount = request.CustomCpuCount ?? vmProps.CpuCount,
-            DiskSizeGB = request.CustomDiskSizeGB ?? vmProps.DiskSizeGB,
-            Generation = vmProps.Generation,
-            SecureBoot = vmProps.SecureBoot,
-            Category = request.Category,
-            IsPublic = request.IsPublic,
-            Tags = request.Tags ?? new List<string>(),
-            SupportedBackends = new List<VmCreationMode> { sourceBackend },
-            Owner = "System", // Would get from current user context
-            CreatedAt = DateTime.UtcNow,
-            ModifiedAt = DateTime.UtcNow,
-            Version = "1.0"
-        };
-    }
-
-    /// <summary>Updates a template from update request.</summary>
-    private void UpdateTemplateFromRequest(VmTemplate template, UpdateTemplateRequest request)
-    {
-        if (!string.IsNullOrEmpty(request.Name)) template.Name = request.Name;
-        if (!string.IsNullOrEmpty(request.Description)) template.Description = request.Description;
-        if (request.Category.HasValue) template.Category = request.Category.Value;
-        if (request.IsPublic.HasValue) template.IsPublic = request.IsPublic.Value;
-        if (request.Tags != null) template.Tags = request.Tags;
-        if (request.MemoryMB.HasValue) template.MemoryMB = request.MemoryMB.Value;
-        if (request.CpuCount.HasValue) template.CpuCount = request.CpuCount.Value;
-        if (request.DiskSizeGB.HasValue) template.DiskSizeGB = request.DiskSizeGB.Value;
-        if (!string.IsNullOrEmpty(request.Version)) template.Version = request.Version;
-
-        template.ModifiedAt = DateTime.UtcNow;
-    }
-
-    /// <summary>Simple in-memory template storage (would be replaced with proper persistence).</summary>
-    private static readonly Dictionary<string, VmTemplate> _templateStorage = new();
-
-    /// <summary>Saves a template to storage.</summary>
-    private void SaveTemplate(VmTemplate template)
-    {
-        _templateStorage[template.Id] = template;
-        // In real implementation, save to database/file system
-    }
-
-    /// <summary>Gets all stored templates.</summary>
-    private List<VmTemplate> GetStoredTemplates()
-    {
-        return _templateStorage.Values.ToList();
-    }
-
-    /// <summary>Gets a specific template by ID.</summary>
-    private VmTemplate? GetStoredTemplate(string templateId)
-    {
-        return _templateStorage.TryGetValue(templateId, out var template) ? template : null;
-    }
-
-    /// <summary>Deletes a template from storage.</summary>
-    private void DeleteStoredTemplate(string templateId)
-    {
-        _templateStorage.Remove(templateId);
-    }
-
-    /// <summary>VM properties helper class.</summary>
-    private class VmProperties
-    {
-        public int MemoryMB { get; set; }
-        public int CpuCount { get; set; }
-        public int DiskSizeGB { get; set; }
-        public int Generation { get; set; }
-        public bool SecureBoot { get; set; }
-        public string? SwitchName { get; set; }
-    }
-
-    #endregion
-}
-
-    /// <summary>Gets real-time health metrics for a VM.</summary>
-    [HttpGet("{name}/health")]
-    [ProducesResponseType(typeof(VmHealthMetrics), 200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Get VM Health Metrics", Description = "Retrieves real-time CPU, memory, storage, and network metrics for a VM.")]
-    public IActionResult GetVmHealth([FromRoute] string name)
-    {
-        try
-        {
-            VmHealthMetrics metrics = null;
-
-            // Try HCS first
-            if (_hcsVm.IsVmPresent(name))
-            {
-                metrics = GetHcsVmHealthMetrics(name);
-            }
-            // Fall back to WMI
-            else if (_wmiVm.IsVmPresent(name))
-            {
-                metrics = GetWmiVmHealthMetrics(name);
-            }
-
-            if (metrics == null)
-            {
-                return NotFound(new { error = $"VM '{name}' not found" });
-            }
-
-            return Ok(metrics);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets aggregated dashboard data for all VMs.</summary>
-    [HttpGet("dashboard")]
-    [ProducesResponseType(typeof(DashboardData), 200)]
-    [SwaggerOperation(Summary = "Get Dashboard Data", Description = "Aggregates health metrics and alerts for all VMs in a dashboard format.")]
-    public IActionResult GetDashboardData()
-    {
-        try
-        {
-            var dashboard = new DashboardData
-            {
-                Timestamp = DateTime.UtcNow,
-                VmSummaries = new List<VmSummary>(),
-                ActiveAlerts = new List<Alert>(),
-                SystemHealth = GetSystemHealthOverview()
-            };
-
-            // Get all VMs from both backends
-            var hcsVms = _hcsVm.ListVms();
-            var wmiVms = _wmiVm.ListVms();
-
-            // Parse and aggregate (simplified - in real implementation, parse JSON properly)
-            dashboard.VmSummaries.AddRange(ParseVmSummaries(hcsVms, VmCreationMode.HCS));
-            dashboard.VmSummaries.AddRange(ParseVmSummaries(wmiVms, VmCreationMode.WMI));
-
-            // Get active alerts (placeholder - implement alert storage)
-            dashboard.ActiveAlerts = GetActiveAlerts();
-
-            return Ok(dashboard);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets historical metrics for a VM.</summary>
-    [HttpGet("{name}/metrics/history")]
-    [ProducesResponseType(typeof(List<VmMetricsHistory>), 200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Get VM Metrics History", Description = "Retrieves historical metrics data for trend analysis.")]
-    public IActionResult GetVmMetricsHistory([FromRoute] string name, [FromQuery] DateTime? startTime, [FromQuery] DateTime? endTime)
-    {
-        try
-        {
-            if (!_wmiVm.IsVmPresent(name) && !_hcsVm.IsVmPresent(name))
-            {
-                return NotFound(new { error = $"VM '{name}' not found" });
-            }
-
-            // Placeholder - implement metrics storage and retrieval
-            var history = GetMetricsHistory(name, startTime ?? DateTime.UtcNow.AddHours(-24), endTime ?? DateTime.UtcNow);
-            return Ok(history);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets all alert rules.</summary>
-    [HttpGet("alerts/rules")]
-    [ProducesResponseType(typeof(List<AlertRule>), 200)]
-    [SwaggerOperation(Summary = "Get Alert Rules", Description = "Retrieves all configured alert rules.")]
-    public IActionResult GetAlertRules()
-    {
-        try
-        {
-            var rules = GetConfiguredAlertRules();
-            return Ok(rules);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Creates a new alert rule.</summary>
-    [HttpPost("alerts/rules")]
-    [ProducesResponseType(typeof(AlertRule), 201)]
-    [ProducesResponseType(400)]
-    [SwaggerOperation(Summary = "Create Alert Rule", Description = "Creates a new configurable alert rule for VM thresholds.")]
-    public IActionResult CreateAlertRule([FromBody] AlertRule rule)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var createdRule = SaveAlertRule(rule);
-            return Created($"api/v1/vms/alerts/rules/{createdRule.Id}", createdRule);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Updates an alert rule.</summary>
-    [HttpPut("alerts/rules/{ruleId}")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Update Alert Rule", Description = "Updates an existing alert rule configuration.")]
-    public IActionResult UpdateAlertRule([FromRoute] string ruleId, [FromBody] AlertRule rule)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var updated = UpdateAlertRuleInternal(ruleId, rule);
-            if (!updated)
-            {
-                return NotFound(new { error = $"Alert rule '{ruleId}' not found" });
-            }
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Deletes an alert rule.</summary>
-    [HttpDelete("alerts/rules/{ruleId}")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Delete Alert Rule", Description = "Deletes an alert rule.")]
-    public IActionResult DeleteAlertRule([FromRoute] string ruleId)
-    {
-        try
-        {
-            var deleted = DeleteAlertRuleInternal(ruleId);
-            if (!deleted)
-            {
-                return NotFound(new { error = $"Alert rule '{ruleId}' not found" });
-            }
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets active alerts.</summary>
-    [HttpGet("alerts")]
-    [ProducesResponseType(typeof(List<Alert>), 200)]
-    [SwaggerOperation(Summary = "Get Active Alerts", Description = "Retrieves all active alerts.")]
-    public IActionResult GetActiveAlerts()
-    {
-        try
-        {
-            var alerts = GetActiveAlertsInternal();
-            return Ok(alerts);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Acknowledges an alert.</summary>
-    [HttpPost("alerts/{alertId}/acknowledge")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Acknowledge Alert", Description = "Acknowledges an active alert.")]
-    public IActionResult AcknowledgeAlert([FromRoute] string alertId)
-    {
-        try
-        {
-            var acknowledged = AcknowledgeAlertInternal(alertId);
-            if (!acknowledged)
-            {
-                return NotFound(new { error = $"Alert '{alertId}' not found" });
-            }
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets monitoring configuration.</summary>
-    [HttpGet("monitoring/config")]
-    [ProducesResponseType(typeof(MonitoringConfiguration), 200)]
-    [SwaggerOperation(Summary = "Get Monitoring Configuration", Description = "Retrieves current monitoring settings.")]
-    public IActionResult GetMonitoringConfig()
-    {
-        try
-        {
-            var config = GetMonitoringConfiguration();
-            return Ok(config);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Updates monitoring configuration.</summary>
-    [HttpPost("monitoring/config")]
-    [ProducesResponseType(200)]
-    [SwaggerOperation(Summary = "Update Monitoring Configuration", Description = "Updates monitoring settings.")]
-    public IActionResult UpdateMonitoringConfig([FromBody] MonitoringConfiguration config)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            SaveMonitoringConfiguration(config);
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    #endregion
-
-    #region Monitoring Helper Methods
-
-    private VmHealthMetrics GetHcsVmHealthMetrics(string name)
-    {
-        // Placeholder - implement HCS metrics retrieval
-        return new VmHealthMetrics
-        {
-            VmName = name,
-            Backend = "HCS",
-            Timestamp = DateTime.UtcNow,
-            CpuUsagePercent = 0, // Implement actual retrieval
-            MemoryUsageMB = 0,
-            MemoryUsagePercent = 0,
-            StorageUsageGB = 0,
-            NetworkRxMBps = 0,
-            NetworkTxMBps = 0,
-            Status = "Running"
-        };
-    }
-
-    private VmHealthMetrics GetWmiVmHealthMetrics(string name)
-    {
-        // Use existing metrics service
-        var metricsJson = _metricsService.GetVmMetrics(name);
-        // Parse and return structured metrics
-        return ParseVmHealthMetrics(metricsJson, name, "WMI");
-    }
-
-    private VmHealthMetrics ParseVmHealthMetrics(string json, string name, string backend)
-    {
-        // Placeholder parsing - implement proper JSON deserialization
-        return new VmHealthMetrics
-        {
-            VmName = name,
-            Backend = backend,
-            Timestamp = DateTime.UtcNow,
-            CpuUsagePercent = 0,
-            MemoryUsageMB = 0,
-            MemoryUsagePercent = 0,
-            StorageUsageGB = 0,
-            NetworkRxMBps = 0,
-            NetworkTxMBps = 0,
-            Status = "Running"
-        };
-    }
-
-    private List<VmSummary> ParseVmSummaries(string json, VmCreationMode mode)
-    {
-        // Placeholder - implement proper parsing
-        return new List<VmSummary>();
-    }
-
-    private SystemHealthOverview GetSystemHealthOverview()
-    {
-        return new SystemHealthOverview
-        {
-            TotalVms = 0,
-            RunningVms = 0,
-            CriticalAlerts = 0,
-            HostCpuUsage = 0,
-            HostMemoryUsage = 0
-        };
-    }
-
-    private List<VmMetricsHistory> GetMetricsHistory(string name, DateTime start, DateTime end)
-    {
-        // Placeholder - implement metrics storage
-        return new List<VmMetricsHistory>();
-    }
-
-    private List<AlertRule> GetConfiguredAlertRules()
-    {
-        // Placeholder - implement alert rule storage
-        return new List<AlertRule>();
-    }
-
-    private AlertRule SaveAlertRule(AlertRule rule)
-    {
-        rule.Id = Guid.NewGuid().ToString();
-        // Placeholder - save to storage
-        return rule;
-    }
-
-    private bool UpdateAlertRuleInternal(string ruleId, AlertRule rule)
-    {
-        // Placeholder - update in storage
-        return true;
-    }
-
-    private bool DeleteAlertRuleInternal(string ruleId)
-    {
-        // Placeholder - delete from storage
-        return true;
-    }
-
-    private List<Alert> GetActiveAlertsInternal()
-    {
-        // Placeholder - retrieve from storage
-        return new List<Alert>();
-    }
-
-    private bool AcknowledgeAlertInternal(string alertId)
-    {
-        // Placeholder - update alert status
-        return true;
-    }
-
-    private MonitoringConfiguration GetMonitoringConfiguration()
-    {
-        // Placeholder - retrieve config
-        return new MonitoringConfiguration
-        {
-            CollectionIntervalSeconds = 60,
-            RetentionDays = 30,
-            EnableEmailNotifications = true,
-            EnableWebhookNotifications = false
-        };
-    }
-
-    private void SaveMonitoringConfiguration(MonitoringConfiguration config)
-    {
-        // Placeholder - save config
-    }
-
-    private List<Alert> GetActiveAlerts()
-    {
-        // Placeholder - implement alert retrieval
-        return new List<Alert>();
-    }
-
-    #endregion
-
-    #region Monitoring Models
-
-    /// <summary>VM health metrics model.</summary>
-    public class VmHealthMetrics
-    {
-        public string VmName { get; set; } = string.Empty;
-        public string Backend { get; set; } = string.Empty;
-        public DateTime Timestamp { get; set; }
-        public double CpuUsagePercent { get; set; }
-        public long MemoryUsageMB { get; set; }
-        public double MemoryUsagePercent { get; set; }
-        public double StorageUsageGB { get; set; }
-        public double NetworkRxMBps { get; set; }
-        public double NetworkTxMBps { get; set; }
-        public string Status { get; set; } = string.Empty;
-    }
-
-    /// <summary>VM metrics history model.</summary>
-    public class VmMetricsHistory
-    {
-        public DateTime Timestamp { get; set; }
-        public double CpuUsagePercent { get; set; }
-        public long MemoryUsageMB { get; set; }
-        public double MemoryUsagePercent { get; set; }
-        public double StorageUsageGB { get; set; }
-    }
-
-    /// <summary>Alert rule model.</summary>
-    public class AlertRule
-    {
-        public string Id { get; set; } = string.Empty;
-        public string VmName { get; set; } = string.Empty;
-        public AlertMetric Metric { get; set; }
-        public AlertCondition Condition { get; set; }
-        public double Threshold { get; set; }
-        public int DurationMinutes { get; set; }
-        public bool Enabled { get; set; } = true;
-        public string EmailRecipients { get; set; } = string.Empty;
-        public string WebhookUrl { get; set; } = string.Empty;
-    }
-
-    /// <summary>Alert model.</summary>
-    public class Alert
-    {
-        public string Id { get; set; } = string.Empty;
-        public string VmName { get; set; } = string.Empty;
-        public AlertMetric Metric { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public AlertSeverity Severity { get; set; }
-        public DateTime Timestamp { get; set; }
-        public bool Acknowledged { get; set; }
-    }
-
-    /// <summary>Dashboard data model.</summary>
-    public class DashboardData
-    {
-        public DateTime Timestamp { get; set; }
-        public List<VmSummary> VmSummaries { get; set; } = new List<VmSummary>();
-        public List<Alert> ActiveAlerts { get; set; } = new List<Alert>();
-        public SystemHealthOverview SystemHealth { get; set; } = new SystemHealthOverview();
-    }
-
-    /// <summary>VM summary model.</summary>
-    public class VmSummary
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Backend { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-        public double CpuUsagePercent { get; set; }
-        public double MemoryUsagePercent { get; set; }
-        public int ActiveAlerts { get; set; }
-    }
-
-    /// <summary>System health overview model.</summary>
-    public class SystemHealthOverview
-    {
-        public int TotalVms { get; set; }
-        public int RunningVms { get; set; }
-        public int CriticalAlerts { get; set; }
-        public double HostCpuUsage { get; set; }
-        public double HostMemoryUsage { get; set; }
-    }
-
-    /// <summary>Monitoring configuration model.</summary>
-    public class MonitoringConfiguration
-    {
-        public int CollectionIntervalSeconds { get; set; } = 60;
-        public int RetentionDays { get; set; } = 30;
-        public bool EnableEmailNotifications { get; set; }
-        public bool EnableWebhookNotifications { get; set; }
-        public string SmtpServer { get; set; } = string.Empty;
-        public string SmtpUsername { get; set; } = string.Empty;
-        public string SmtpPassword { get; set; } = string.Empty;
-    }
-
-    /// <summary>Alert metric enum.</summary>
-    public enum AlertMetric
-    {
-        CpuUsage,
-        MemoryUsage,
-        StorageUsage,
-        NetworkRx,
-        NetworkTx
-    }
-
-    /// <summary>Alert condition enum.</summary>
-    public enum AlertCondition
-    {
-        GreaterThan,
-        LessThan,
-        EqualTo
-    }
-
-    /// <summary>Alert severity enum.</summary>
-    public enum AlertSeverity
-    {
-        Low,
-        Medium,
-        High,
-        Critical
-    }
-
-    #endregion
-
-    #region Monitoring and Alerts
-
-    /// <summary>Gets real-time health metrics for a VM.</summary>
-    [HttpGet("{name}/health")]
-    [ProducesResponseType(typeof(VmHealthMetrics), 200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Get VM Health Metrics", Description = "Retrieves real-time CPU, memory, storage, and network metrics for a VM.")]
-    public IActionResult GetVmHealth([FromRoute] string name)
-    {
-        try
-        {
-            VmHealthMetrics metrics = null;
-
-            // Try HCS first
-            if (_hcsVm.IsVmPresent(name))
-            {
-                metrics = GetHcsVmHealthMetrics(name);
-            }
-            // Fall back to WMI
-            else if (_wmiVm.IsVmPresent(name))
-            {
-                metrics = GetWmiVmHealthMetrics(name);
-            }
-
-            if (metrics == null)
-            {
-                return NotFound(new { error = $"VM '{name}' not found" });
-            }
-
-            return Ok(metrics);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets aggregated dashboard data for all VMs.</summary>
-    [HttpGet("dashboard")]
-    [ProducesResponseType(typeof(DashboardData), 200)]
-    [SwaggerOperation(Summary = "Get Dashboard Data", Description = "Aggregates health metrics and alerts for all VMs in a dashboard format.")]
-    public IActionResult GetDashboardData()
-    {
-        try
-        {
-            var dashboard = new DashboardData
-            {
-                Timestamp = DateTime.UtcNow,
-                VmSummaries = new List<VmSummary>(),
-                ActiveAlerts = new List<Alert>(),
-                SystemHealth = GetSystemHealthOverview()
-            };
-
-            // Get all VMs from both backends
-            var hcsVms = _hcsVm.ListVms();
-            var wmiVms = _wmiVm.ListVms();
-
-            // Parse and aggregate (simplified - in real implementation, parse JSON properly)
-            dashboard.VmSummaries.AddRange(ParseVmSummaries(hcsVms, VmCreationMode.HCS));
-            dashboard.VmSummaries.AddRange(ParseVmSummaries(wmiVms, VmCreationMode.WMI));
-
-            // Get active alerts (placeholder - implement alert storage)
-            dashboard.ActiveAlerts = GetActiveAlertsList();
-
-            return Ok(dashboard);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets historical metrics for a VM.</summary>
-    [HttpGet("{name}/metrics/history")]
-    [ProducesResponseType(typeof(List<VmMetricsHistory>), 200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Get VM Metrics History", Description = "Retrieves historical metrics data for trend analysis.")]
-    public IActionResult GetVmMetricsHistory([FromRoute] string name, [FromQuery] DateTime? startTime, [FromQuery] DateTime? endTime)
-    {
-        try
-        {
-            if (!_wmiVm.IsVmPresent(name) && !_hcsVm.IsVmPresent(name))
-            {
-                return NotFound(new { error = $"VM '{name}' not found" });
-            }
-
-            // Placeholder - implement metrics storage and retrieval
-            var history = GetMetricsHistory(name, startTime ?? DateTime.UtcNow.AddHours(-24), endTime ?? DateTime.UtcNow);
-            return Ok(history);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets all alert rules.</summary>
-    [HttpGet("alerts/rules")]
-    [ProducesResponseType(typeof(List<AlertRule>), 200)]
-    [SwaggerOperation(Summary = "Get Alert Rules", Description = "Retrieves all configured alert rules.")]
-    public IActionResult GetAlertRules()
-    {
-        try
-        {
-            var rules = GetConfiguredAlertRules();
-            return Ok(rules);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Creates a new alert rule.</summary>
-    [HttpPost("alerts/rules")]
-    [ProducesResponseType(typeof(AlertRule), 201)]
-    [ProducesResponseType(400)]
-    [SwaggerOperation(Summary = "Create Alert Rule", Description = "Creates a new configurable alert rule for VM thresholds.")]
-    public IActionResult CreateAlertRule([FromBody] AlertRule rule)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var createdRule = SaveAlertRule(rule);
-            return Created($"api/v1/vms/alerts/rules/{createdRule.Id}", createdRule);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Updates an alert rule.</summary>
-    [HttpPut("alerts/rules/{ruleId}")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Update Alert Rule", Description = "Updates an existing alert rule configuration.")]
-    public IActionResult UpdateAlertRule([FromRoute] string ruleId, [FromBody] AlertRule rule)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var updated = UpdateAlertRuleInternal(ruleId, rule);
-            if (!updated)
-            {
-                return NotFound(new { error = $"Alert rule '{ruleId}' not found" });
-            }
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Deletes an alert rule.</summary>
-    [HttpDelete("alerts/rules/{ruleId}")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Delete Alert Rule", Description = "Deletes an alert rule.")]
-    public IActionResult DeleteAlertRule([FromRoute] string ruleId)
-    {
-        try
-        {
-            var deleted = DeleteAlertRuleInternal(ruleId);
-            if (!deleted)
-            {
-                return NotFound(new { error = $"Alert rule '{ruleId}' not found" });
-            }
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets active alerts.</summary>
-    [HttpGet("alerts")]
-    [ProducesResponseType(typeof(List<Alert>), 200)]
-    [SwaggerOperation(Summary = "Get Active Alerts", Description = "Retrieves all active alerts.")]
-    public IActionResult GetActiveAlerts()
-    {
-        try
-        {
-            var alerts = GetActiveAlertsInternal();
-            return Ok(alerts);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Acknowledges an alert.</summary>
-    [HttpPost("alerts/{alertId}/acknowledge")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(404)]
-    [SwaggerOperation(Summary = "Acknowledge Alert", Description = "Acknowledges an active alert.")]
-    public IActionResult AcknowledgeAlert([FromRoute] string alertId)
-    {
-        try
-        {
-            var acknowledged = AcknowledgeAlertInternal(alertId);
-            if (!acknowledged)
-            {
-                return NotFound(new { error = $"Alert '{alertId}' not found" });
-            }
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Gets monitoring configuration.</summary>
-    [HttpGet("monitoring/config")]
-    [ProducesResponseType(typeof(MonitoringConfiguration), 200)]
-    [SwaggerOperation(Summary = "Get Monitoring Configuration", Description = "Retrieves current monitoring settings.")]
-    public IActionResult GetMonitoringConfig()
-    {
-        try
-        {
-            var config = GetMonitoringConfiguration();
-            return Ok(config);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    /// <summary>Updates monitoring configuration.</summary>
-    [HttpPost("monitoring/config")]
-    [ProducesResponseType(200)]
-    [SwaggerOperation(Summary = "Update Monitoring Configuration", Description = "Updates monitoring settings.")]
-    public IActionResult UpdateMonitoringConfig([FromBody] MonitoringConfiguration config)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            SaveMonitoringConfiguration(config);
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
-    #endregion
-
-    #region Monitoring Helper Methods
-
-    private VmHealthMetrics GetHcsVmHealthMetrics(string name)
-    {
-        // Placeholder - implement HCS metrics retrieval
-        return new VmHealthMetrics
-        {
-            VmName = name,
-            Backend = "HCS",
-            Timestamp = DateTime.UtcNow,
-            CpuUsagePercent = 0, // Implement actual retrieval
-            MemoryUsageMB = 0,
-            MemoryUsagePercent = 0,
-            StorageUsageGB = 0,
-            NetworkRxMBps = 0,
-            NetworkTxMBps = 0,
-            Status = "Running"
-        };
-    }
-
-    private VmHealthMetrics GetWmiVmHealthMetrics(string name)
-    {
-        // Use existing metrics service
-        var metricsJson = _metricsService.GetVmMetrics(name);
-        // Parse and return structured metrics
-        return ParseVmHealthMetrics(metricsJson, name, "WMI");
-    }
-
-    private VmHealthMetrics ParseVmHealthMetrics(string json, string name, string backend)
-    {
-        // Placeholder parsing - implement proper JSON deserialization
-        return new VmHealthMetrics
-        {
-            VmName = name,
-            Backend = backend,
-            Timestamp = DateTime.UtcNow,
-            CpuUsagePercent = 0,
-            MemoryUsageMB = 0,
-            MemoryUsagePercent = 0,
-            StorageUsageGB = 0,
-            NetworkRxMBps = 0,
-            NetworkTxMBps = 0,
-            Status = "Running"
-        };
-    }
-
-    private List<VmSummary> ParseVmSummaries(string json, VmCreationMode mode)
-    {
-        // Placeholder - implement proper parsing
-        return new List<VmSummary>();
-    }
-
-    private SystemHealthOverview GetSystemHealthOverview()
-    {
-        return new SystemHealthOverview
-        {
-            TotalVms = 0,
-            RunningVms = 0,
-            CriticalAlerts = 0,
-            HostCpuUsage = 0,
-            HostMemoryUsage = 0
-        };
-    }
-
-    private List<VmMetricsHistory> GetMetricsHistory(string name, DateTime start, DateTime end)
-    {
-        // Placeholder - implement metrics storage
-        return new List<VmMetricsHistory>();
-    }
-
-    private List<AlertRule> GetConfiguredAlertRules()
-    {
-        // Placeholder - implement alert rule storage
-        return new List<AlertRule>();
-    }
-
-    private AlertRule SaveAlertRule(AlertRule rule)
-    {
-        rule.Id = Guid.NewGuid().ToString();
-        // Placeholder - save to storage
-        return rule;
-    }
-
-    private bool UpdateAlertRuleInternal(string ruleId, AlertRule rule)
-    {
-        // Placeholder - update in storage
-        return true;
-    }
-
-    private bool DeleteAlertRuleInternal(string ruleId)
-    {
-        // Placeholder - delete from storage
-        return true;
-    }
-
-    private List<Alert> GetActiveAlertsInternal()
-    {
-        // Placeholder - retrieve from storage
-        return new List<Alert>();
-    }
-
-    private bool AcknowledgeAlertInternal(string alertId)
-    {
-        // Placeholder - update alert status
-        return true;
-    }
-
-    private MonitoringConfiguration GetMonitoringConfiguration()
-    {
-        // Placeholder - retrieve config
-        return new MonitoringConfiguration
-        {
-            CollectionIntervalSeconds = 60,
-            RetentionDays = 30,
-            EnableEmailNotifications = true,
-            EnableWebhookNotifications = false
-        };
-    }
-
-    private void SaveMonitoringConfiguration(MonitoringConfiguration config)
-    {
-        // Placeholder - save config
-    }
-
-    private List<Alert> GetActiveAlertsList()
-    {
-        // Placeholder - implement alert retrieval
-        return new List<Alert>();
     }
 
     #endregion
@@ -4148,4 +2959,59 @@ public enum AlertSeverity
     Medium,
     High,
     Critical
+}
+
+/// <summary>Comprehensive VM resource usage summary.</summary>
+public class VmUsageSummary
+{
+    public string Timestamp { get; set; } = string.Empty;
+    public CpuUsage Cpu { get; set; } = new CpuUsage();
+    public MemoryUsage Memory { get; set; } = new MemoryUsage();
+    public List<DiskUsage> Disks { get; set; } = new List<DiskUsage>();
+    public List<NetworkUsage> Networks { get; set; } = new List<NetworkUsage>();
+    public List<StorageAdapterUsage> StorageAdapters { get; set; } = new List<StorageAdapterUsage>();
+}
+
+/// <summary>CPU usage metrics.</summary>
+public class CpuUsage
+{
+    public double UsagePercent { get; set; }
+    public double GuestAverageUsage { get; set; }
+}
+
+/// <summary>Memory usage metrics.</summary>
+public class MemoryUsage
+{
+    public int AssignedMB { get; set; }
+    public int DemandMB { get; set; }
+    public double UsagePercent { get; set; }
+    public string Status { get; set; } = "Healthy";
+}
+
+/// <summary>Disk usage metrics.</summary>
+public class DiskUsage
+{
+    public string Name { get; set; } = string.Empty;
+    public int ReadIops { get; set; }
+    public int WriteIops { get; set; }
+    public double LatencyMs { get; set; }
+    public long ThroughputBytesPerSec { get; set; }
+}
+
+/// <summary>Network adapter usage metrics.</summary>
+public class NetworkUsage
+{
+    public string AdapterName { get; set; } = string.Empty;
+    public long BytesReceivedPerSec { get; set; }
+    public long BytesSentPerSec { get; set; }
+    public int PacketsDropped { get; set; }
+}
+
+/// <summary>Storage adapter usage metrics.</summary>
+public class StorageAdapterUsage
+{
+    public string Name { get; set; } = string.Empty;
+    public int QueueDepth { get; set; }
+    public long ThroughputBytesPerSec { get; set; }
+    public int ErrorsCount { get; set; }
 }

@@ -65,9 +65,44 @@
             Gets performance stats (CPU, memory, storage).
             </summary>
         </member>
+        <member name="M:HyperV.Agent.Controllers.HostController.GetHostUsageMetrics">
+            <summary>
+            Gets detailed usage metrics for the physical host.
+            </summary>
+        </member>
         <member name="T:HyperV.Agent.Controllers.HostDetails">
             <summary>
             Combined host details model.
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.HostUsageSummary">
+            <summary>
+            Host usage metrics summary.
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.HostCpuUsage">
+            <summary>
+            Host CPU usage metrics.
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.HostMemoryUsage">
+            <summary>
+            Host memory usage metrics.
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.PhysicalDiskUsage">
+            <summary>
+            Physical disk usage metrics.
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.HostNetworkAdapterUsage">
+            <summary>
+            Network adapter usage metrics.
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.HostStorageAdapterUsage">
+            <summary>
+            Storage adapter (HBA/RAID controller) usage metrics.
             </summary>
         </member>
         <member name="T:HyperV.Agent.Controllers.ImageManagementController">
@@ -380,13 +415,13 @@
         <member name="M:HyperV.Agent.Controllers.VmsController.ListVms">
             <summary>Listuje wszystkie maszyny wirtualne.</summary>
         </member>
-        <member name="M:HyperV.Agent.Controllers.VmsController.ConfigureVm(System.String,HyperV.Agent.Controllers.VmConfigurationRequest)">
+        <member name="M:HyperV.Agent.Controllers.VmsController.ConfigureVm(System.String,HyperV.Agent.Controllers.VmsController.VmConfigurationRequest)">
             <summary>Modyfikuje konfigurację VM (pamięć, CPU, notatki).</summary>
         </member>
         <member name="M:HyperV.Agent.Controllers.VmsController.ListVmSnapshots(System.String)">
             <summary>Listuje snapshoty maszyny wirtualnej.</summary>
         </member>
-        <member name="M:HyperV.Agent.Controllers.VmsController.CreateVmSnapshot(System.String,HyperV.Agent.Controllers.CreateSnapshotRequest)">
+        <member name="M:HyperV.Agent.Controllers.VmsController.CreateVmSnapshot(System.String,HyperV.Agent.Controllers.VmsController.CreateSnapshotRequest)">
             <summary>Tworzy snapshot maszyny wirtualnej.</summary>
         </member>
         <member name="M:HyperV.Agent.Controllers.VmsController.DeleteVmSnapshot(System.String,System.String)">
@@ -419,7 +454,7 @@
         <member name="M:HyperV.Agent.Controllers.VmsController.ResetVmStorageDrive(System.String,System.String)">
             <summary>Resetuje dysk wirtualny.</summary>
         </member>
-        <member name="M:HyperV.Agent.Controllers.VmsController.LockVmStorageDriveMedia(System.String,System.String,HyperV.Agent.Controllers.LockMediaRequest)">
+        <member name="M:HyperV.Agent.Controllers.VmsController.LockVmStorageDriveMedia(System.String,System.String,HyperV.Agent.Controllers.VmsController.LockMediaRequest)">
             <summary>Blokuje/odblokowuje nośnik w dysku wirtualnym.</summary>
         </member>
         <member name="M:HyperV.Agent.Controllers.VmsController.GetVmStorageDriveCapabilities(System.String,System.String)">
@@ -434,22 +469,28 @@
         <member name="M:HyperV.Agent.Controllers.VmsController.GetWmiVmResourceSettings(System.String)">
             <summary>Gets WMI VM resource settings (memory and CPU).</summary>
         </member>
-        <member name="M:HyperV.Agent.Controllers.VmsController.BulkStartVms(HyperV.Agent.Controllers.BulkVmOperationRequest)">
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetHcsVmUsageMetrics(System.String)">
+            <summary>Gets HCS VM usage metrics.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetWmiVmUsageMetrics(System.String)">
+            <summary>Gets WMI VM usage metrics.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.BulkStartVms(HyperV.Agent.Controllers.VmsController.BulkVmOperationRequest)">
             <summary>Starts multiple VMs in bulk.</summary>
             <param name="request">List of VM IDs to start.</param>
             <returns>Bulk operation response with progress tracking.</returns>
         </member>
-        <member name="M:HyperV.Agent.Controllers.VmsController.BulkStopVms(HyperV.Agent.Controllers.BulkVmOperationRequest)">
+        <member name="M:HyperV.Agent.Controllers.VmsController.BulkStopVms(HyperV.Agent.Controllers.VmsController.BulkVmOperationRequest)">
             <summary>Stops multiple VMs in bulk.</summary>
             <param name="request">List of VM IDs to stop.</param>
             <returns>Bulk operation response with progress tracking.</returns>
         </member>
-        <member name="M:HyperV.Agent.Controllers.VmsController.BulkShutdownVms(HyperV.Agent.Controllers.BulkVmOperationRequest)">
+        <member name="M:HyperV.Agent.Controllers.VmsController.BulkShutdownVms(HyperV.Agent.Controllers.VmsController.BulkVmOperationRequest)">
             <summary>Shuts down multiple VMs in bulk.</summary>
             <param name="request">List of VM IDs to shutdown.</param>
             <returns>Bulk operation response with progress tracking.</returns>
         </member>
-        <member name="M:HyperV.Agent.Controllers.VmsController.BulkTerminateVms(HyperV.Agent.Controllers.BulkVmOperationRequest)">
+        <member name="M:HyperV.Agent.Controllers.VmsController.BulkTerminateVms(HyperV.Agent.Controllers.VmsController.BulkVmOperationRequest)">
             <summary>Terminates multiple VMs in bulk.</summary>
             <param name="request">List of VM IDs to terminate.</param>
             <returns>Bulk operation response with progress tracking.</returns>
@@ -481,6 +522,9 @@
         <member name="M:HyperV.Agent.Controllers.VmsController.EnumerateResourcePoolMetrics(System.String,System.String,System.String)">
             <summary>Enumerates metrics for a resource pool.</summary>
         </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmUsageMetrics(System.String)">
+            <summary>Gets comprehensive VM resource usage metrics.</summary>
+        </member>
         <member name="M:HyperV.Agent.Controllers.VmsController.GetVmGeneration(System.String)">
             <summary>Gets VM generation type.</summary>
         </member>
@@ -496,7 +540,7 @@
         <member name="M:HyperV.Agent.Controllers.VmsController.SetBootOrder(System.String,System.String[])">
             <summary>Sets boot order for a VM.</summary>
         </member>
-        <member name="M:HyperV.Agent.Controllers.VmsController.MigrateVm(System.String,HyperV.Agent.Controllers.MigrateRequest)">
+        <member name="M:HyperV.Agent.Controllers.VmsController.MigrateVm(System.String,HyperV.Agent.Controllers.VmsController.MigrateRequest)">
             <summary>Migrates a VM to another host.</summary>
             <param name="name">VM name.</param>
             <param name="request">Migration parameters.</param>
@@ -507,38 +551,199 @@
             <param name="name">VM name.</param>
             <returns>OK response with health status.</returns>
         </member>
-        <member name="M:HyperV.Agent.Controllers.VmsController.CopyFileToGuest(System.String,HyperV.Agent.Controllers.GuestFileRequest)">
+        <member name="M:HyperV.Agent.Controllers.VmsController.CopyFileToGuest(System.String,HyperV.Agent.Controllers.VmsController.GuestFileRequest)">
             <summary>Copies a file to the guest VM.</summary>
             <param name="name">VM name.</param>
             <param name="request">File copy parameters.</param>
             <returns>OK response with job ID.</returns>
         </member>
-        <member name="T:HyperV.Agent.Controllers.LockMediaRequest">
+        <member name="T:HyperV.Agent.Controllers.VmsController.LockMediaRequest">
             <summary>Request model for locking/unlocking media.</summary>
         </member>
-        <member name="T:HyperV.Agent.Controllers.VmConfigurationRequest">
+        <member name="T:HyperV.Agent.Controllers.VmsController.VmConfigurationRequest">
             <summary>Request model for VM configuration.</summary>
         </member>
-        <member name="T:HyperV.Agent.Controllers.CreateSnapshotRequest">
+        <member name="T:HyperV.Agent.Controllers.VmsController.CreateSnapshotRequest">
             <summary>Request model for creating snapshots.</summary>
         </member>
-        <member name="T:HyperV.Agent.Controllers.MigrateRequest">
+        <member name="T:HyperV.Agent.Controllers.VmsController.MigrateRequest">
             <summary>Request model for VM migration.</summary>
         </member>
-        <member name="T:HyperV.Agent.Controllers.AppHealthResponse">
+        <member name="T:HyperV.Agent.Controllers.VmsController.AppHealthResponse">
             <summary>Response model for app health.</summary>
         </member>
-        <member name="T:HyperV.Agent.Controllers.GuestFileRequest">
+        <member name="T:HyperV.Agent.Controllers.VmsController.GuestFileRequest">
             <summary>Request model for guest file copy.</summary>
         </member>
-        <member name="T:HyperV.Agent.Controllers.BulkVmOperationRequest">
+        <member name="T:HyperV.Agent.Controllers.VmsController.BulkVmOperationRequest">
             <summary>Request model for bulk VM operations.</summary>
         </member>
-        <member name="T:HyperV.Agent.Controllers.BulkVmOperationResponse">
+        <member name="T:HyperV.Agent.Controllers.VmsController.BulkVmOperationResponse">
             <summary>Response model for bulk VM operations.</summary>
         </member>
-        <member name="T:HyperV.Agent.Controllers.BulkVmOperationResult">
+        <member name="T:HyperV.Agent.Controllers.VmsController.BulkVmOperationResult">
             <summary>Result model for individual VM operation in bulk operations.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmTemplates">
+            <summary>Get available VM templates.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.CreateVmFromTemplate(HyperV.Contracts.Models.CreateVmFromTemplateRequest)">
+            <summary>Create VM from template.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmWizardRecommendations(HyperV.Contracts.Models.VmWizardRequest)">
+            <summary>Get VM creation wizard recommendations.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.CreateVmViaWizard(HyperV.Contracts.Models.VmWizardRequest)">
+            <summary>Create VM using wizard recommendations.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetAvailableTemplates">
+            <summary>Gets available VM templates with their configurations.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetTemplateConfiguration(HyperV.Contracts.Models.VmTemplateType)">
+            <summary>Gets template configuration by type.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.BuildCreateVmRequestFromTemplate(HyperV.Contracts.Models.CreateVmFromTemplateRequest,HyperV.Contracts.Models.VmTemplateConfiguration)">
+            <summary>Builds CreateVmRequest from template and user overrides.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GenerateWizardRecommendations(HyperV.Contracts.Models.VmWizardRequest)">
+            <summary>Generates wizard recommendations based on workload and preferences.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetResourceMultiplier(HyperV.Contracts.Models.VmResourceLevel)">
+            <summary>Gets resource multiplier based on resource level.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.CloneVm(System.String,HyperV.Contracts.Models.CloneVmRequest)">
+            <summary>Clone an existing VM with optional modifications.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.CreateTemplateFromVm(HyperV.Contracts.Models.CreateTemplateFromVmRequest)">
+            <summary>Create a template from an existing VM.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.ListTemplates">
+            <summary>Get all available VM templates.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetTemplate(System.String)">
+            <summary>Get a specific template by ID.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.UpdateTemplate(System.String,HyperV.Contracts.Models.UpdateTemplateRequest)">
+            <summary>Update an existing template.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.DeleteTemplate(System.String)">
+            <summary>Delete a template.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.PerformVmClone(System.String,HyperV.Contracts.Models.CloneVmRequest)">
+            <summary>Performs the actual VM cloning operation.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetVmProperties(System.String,HyperV.Contracts.Models.VmCreationMode)">
+            <summary>Gets VM properties for cloning purposes.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.CreateVmTemplate(HyperV.Contracts.Models.CreateTemplateFromVmRequest)">
+            <summary>Creates a VM template from a VM.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.UpdateTemplateFromRequest(HyperV.Contracts.Models.VmTemplate,HyperV.Contracts.Models.UpdateTemplateRequest)">
+            <summary>Updates a template from update request.</summary>
+        </member>
+        <member name="F:HyperV.Agent.Controllers.VmsController._templateStorage">
+            <summary>Simple in-memory template storage (would be replaced with proper persistence).</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.SaveTemplate(HyperV.Contracts.Models.VmTemplate)">
+            <summary>Saves a template to storage.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetStoredTemplates">
+            <summary>Gets all stored templates.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.GetStoredTemplate(System.String)">
+            <summary>Gets a specific template by ID.</summary>
+        </member>
+        <member name="M:HyperV.Agent.Controllers.VmsController.DeleteStoredTemplate(System.String)">
+            <summary>Deletes a template from storage.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.VmsController.VmProperties">
+            <summary>VM properties helper class.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.VmHealthMetrics">
+            <summary>VM health metrics model.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.VmMetricsHistory">
+            <summary>VM metrics history model.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.AlertRule">
+            <summary>Alert rule model.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.Alert">
+            <summary>Alert model.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.DashboardData">
+            <summary>Dashboard data model.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.VmSummary">
+            <summary>VM summary model.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.SystemHealthOverview">
+            <summary>System health overview model.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.MonitoringConfiguration">
+            <summary>Monitoring configuration model.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.AlertMetric">
+            <summary>Alert metric enum.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.AlertCondition">
+            <summary>Alert condition enum.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.AlertSeverity">
+            <summary>Alert severity enum.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.VmUsageSummary">
+            <summary>Comprehensive VM resource usage summary.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.CpuUsage">
+            <summary>CPU usage metrics.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.MemoryUsage">
+            <summary>Memory usage metrics.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.DiskUsage">
+            <summary>Disk usage metrics.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.NetworkUsage">
+            <summary>Network adapter usage metrics.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Controllers.StorageAdapterUsage">
+            <summary>Storage adapter usage metrics.</summary>
+        </member>
+        <member name="T:HyperV.Agent.Middleware.RateLimitingMiddleware">
+            <summary>
+            Simple rate limiting middleware based on IP address
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Middleware.RateLimitingMiddlewareExtensions">
+            <summary>
+            Extension method for adding rate limiting middleware
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Middleware.SecurityHeadersMiddleware">
+            <summary>
+            Middleware to add security headers to HTTP responses
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Middleware.SecurityHeadersMiddlewareExtensions">
+            <summary>
+            Extension method for adding security headers middleware
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Services.WmiHealthCheck">
+            <summary>
+            Custom health check for WMI connectivity
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Services.HcsHealthCheck">
+            <summary>
+            Custom health check for HCS connectivity
+            </summary>
+        </member>
+        <member name="T:HyperV.Agent.Services.DiskSpaceHealthCheck">
+            <summary>
+            Custom health check for disk space
+            </summary>
         </member>
         <member name="T:HyperV.Agent.Services.InMemoryJobService">
             <summary>

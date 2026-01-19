@@ -54,6 +54,7 @@
           "Serilog.AspNetCore": "8.0.1",
           "Swashbuckle.AspNetCore": "6.6.2",
           "Swashbuckle.AspNetCore.Annotations": "6.6.2",
+          "System.ServiceProcess.ServiceController": "9.0.0",
           "xunit": "2.9.3",
           "HyperV.HyperV.Contracts.Reference": "1.0.0.0",
           "HyperV.HyperV.Core.Hcn.Reference": "1.0.0.0",
@@ -1205,6 +1206,28 @@
         },
         "compile": {
           "lib/net9.0/System.Management.dll": {}
+        }
+      },
+      "System.ServiceProcess.ServiceController/9.0.0": {
+        "dependencies": {
+          "System.Diagnostics.EventLog": "9.0.10"
+        },
+        "runtime": {
+          "lib/net9.0/System.ServiceProcess.ServiceController.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.24.52809"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net9.0/System.ServiceProcess.ServiceController.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.24.52809"
+          }
+        },
+        "compile": {
+          "lib/net9.0/System.ServiceProcess.ServiceController.dll": {}
         }
       },
       "xunit/2.9.3": {
@@ -3661,6 +3684,13 @@
       "sha512": "sha512-D7icHff0OpEEIOLsTgnPL+Ff1VmJ3tzA8y20LNKgv4hx1MFMA3XGAVlWMCkLQfBkyvEwib6rMG6nP27lf98KRA==",
       "path": "system.management/9.0.8",
       "hashPath": "system.management.9.0.8.nupkg.sha512"
+    },
+    "System.ServiceProcess.ServiceController/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ciFstNZEWYf40HbwzdQLdgQpgpnjkleC1z0jMqBKRdkEQqQ6I/Aht0x9fTBODnaQTtcF+scvrdimoDbfNap/aQ==",
+      "path": "system.serviceprocess.servicecontroller/9.0.0",
+      "hashPath": "system.serviceprocess.servicecontroller.9.0.0.nupkg.sha512"
     },
     "xunit/2.9.3": {
       "type": "package",

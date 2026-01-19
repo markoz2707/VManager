@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HyperV.HyperV.CentralManagement</name>
+    </assembly>
+    <members>
+        <member name="T:HyperV.CentralManagement.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:HyperV.CentralManagement.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HyperV.CentralManagement.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HyperV.CentralManagement.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.DatabaseHealthCheck">
+            <summary>
+            Health check for database connectivity
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.LdapHealthCheck">
+            <summary>
+            Health check for LDAP connectivity (if enabled)
+            </summary>
+        </member>
+    </members>
+</doc>
