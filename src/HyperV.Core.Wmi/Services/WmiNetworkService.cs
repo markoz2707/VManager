@@ -885,6 +885,264 @@ public class WmiNetworkService
         return defaultSetting;
     }
 
+    /// <summary>
+    /// Sets VLAN configuration on a VM's network adapter port.
+    /// Uses Msvm_EthernetSwitchPortVlanSettingData.
+    /// </summary>
+    public virtual void SetVlanConfiguration(string vmName, int vlanId, int operationMode, int? nativeVlanId = null, int[]? trunkVlanIds = null)
+    {
+        try
+        {
+            if (!_scope.IsConnected) _scope.Connect();
+
+            // Find the VM
+            var vm = WmiUtilities.GetVirtualMachine(vmName, _scope);
+            if (vm == null)
+                throw new InvalidOperationException($"VM '{vmName}' not found");
+
+            using (vm)
+            {
+                // Get VM settings
+                var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
+                using (vmSettings)
+                {
+                    // Find ethernet port allocation settings (network adapters)
+                    var ethernetPorts = vmSettings.GetRelated("Msvm_EthernetPortAllocationSettingData");
+                    ManagementObject? targetPort = null;
+
+                    foreach (ManagementObject port in ethernetPorts)
+                    {
+                        targetPort = port;
+                        break; // Use first adapter
+                    }
+
+                    if (targetPort == null)
+                        throw new InvalidOperationException($"No network adapter found on VM '{vmName}'");
+
+                    using (targetPort)
+                    {
+                        // Get or create VLAN setting data for this port
+                        var existingVlanSettings = targetPort.GetRelated("Msvm_EthernetSwitchPortVlanSettingData");
+                        ManagementObject? vlanSetting = null;
+                        bool isNew = false;
+
+                        foreach (ManagementObject existing in existingVlanSettings)
+                        {
+                            vlanSetting = existing;
+                            break;
+                        }
+
+                        if (vlanSetting == null)
+                        {
+                            // Create new VLAN setting from default
+                            isNew = true;
+                            var defaultVlan = GetDefaultFeatureSetting("Msvm_EthernetSwitchPortVlanSettingData");
+                            vlanSetting = defaultVlan;
+                        }
+
+                        using (vlanSetting)
+                        {
+                            // Set VLAN properties
+                            vlanSetting["AccessVlanId"] = vlanId;
+                            vlanSetting["OperationMode"] = (uint)operationMode;
+
+                            if (operationMode == 2) // Trunk mode
+                            {
+                                if (nativeVlanId.HasValue)
+                                    vlanSetting["NativeVlanId"] = nativeVlanId.Value;
+                                if (trunkVlanIds != null && trunkVlanIds.Length > 0)
+                                    vlanSetting["TrunkVlanIdArray"] = trunkVlanIds;
+                            }
+
+                            var vlanSettingText = vlanSetting.GetText(TextFormat.WmiDtd20);
+
+                            // Get the switch management service
+                            using var switchService = GetEthernetSwitchManagementService();
+
+                            if (isNew)
+                            {
+                                // Add new feature settings
+                                using var inParams = switchService.GetMethodParameters("AddFeatureSettings");
+                                inParams["AffectedConfiguration"] = targetPort.Path.Path;
+                                inParams["FeatureSettings"] = new[] { vlanSettingText };
+
+                                using var outParams = switchService.InvokeMethod("AddFeatureSettings", inParams, null);
+                                WmiUtilities.ValidateOutput(outParams, _scope, true, true);
+                            }
+                            else
+                            {
+                                // Modify existing feature settings
+                                using var inParams = switchService.GetMethodParameters("ModifyFeatureSettings");
+                                inParams["FeatureSettings"] = new[] { vlanSettingText };
+
+                                using var outParams = switchService.InvokeMethod("ModifyFeatureSettings", inParams, null);
+                                WmiUtilities.ValidateOutput(outParams, _scope, true, true);
+                            }
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine($"VLAN {vlanId} (mode {operationMode}) set on VM '{vmName}'");
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to set VLAN configuration on VM '{vmName}': {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Gets the current VLAN configuration for a VM's network adapter.
+    /// </summary>
+    public virtual object? GetVlanConfiguration(string vmName)
+    {
+        try
+        {
+            if (!_scope.IsConnected) _scope.Connect();
+
+            var vm = WmiUtilities.GetVirtualMachine(vmName, _scope);
+            if (vm == null)
+                throw new InvalidOperationException($"VM '{vmName}' not found");
+
+            using (vm)
+            {
+                var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
+                using (vmSettings)
+                {
+                    var ethernetPorts = vmSettings.GetRelated("Msvm_EthernetPortAllocationSettingData");
+
+                    foreach (ManagementObject port in ethernetPorts)
+                    {
+                        using (port)
+                        {
+                            var vlanSettings = port.GetRelated("Msvm_EthernetSwitchPortVlanSettingData");
+
+                            foreach (ManagementObject vlanSetting in vlanSettings)
+                            {
+                                using (vlanSetting)
+                                {
+                                    var accessVlanId = Convert.ToInt32(vlanSetting["AccessVlanId"]);
+                                    var operationMode = Convert.ToInt32(vlanSetting["OperationMode"]);
+                                    var nativeVlanId = vlanSetting["NativeVlanId"] != null ? Convert.ToInt32(vlanSetting["NativeVlanId"]) : (int?)null;
+                                    var trunkVlanIdArray = vlanSetting["TrunkVlanIdArray"] as int[];
+
+                                    return new
+                                    {
+                                        VlanId = accessVlanId,
+                                        OperationMode = operationMode,
+                                        OperationModeName = operationMode switch
+                                        {
+                                            1 => "Access",
+                                            2 => "Trunk",
+                                            3 => "Private",
+                                            _ => "Unknown"
+                                        },
+                                        NativeVlanId = nativeVlanId,
+                                        TrunkVlanIds = trunkVlanIdArray
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new { VlanId = 0, OperationMode = 0, OperationModeName = "None", NativeVlanId = (int?)null, TrunkVlanIds = (int[]?)null };
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to get VLAN configuration for VM '{vmName}': {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Removes VLAN configuration from a VM's network adapter.
+    /// </summary>
+    public virtual void RemoveVlanConfiguration(string vmName)
+    {
+        try
+        {
+            if (!_scope.IsConnected) _scope.Connect();
+
+            var vm = WmiUtilities.GetVirtualMachine(vmName, _scope);
+            if (vm == null)
+                throw new InvalidOperationException($"VM '{vmName}' not found");
+
+            using (vm)
+            {
+                var vmSettings = WmiUtilities.GetVirtualMachineSettings(vm);
+                using (vmSettings)
+                {
+                    var ethernetPorts = vmSettings.GetRelated("Msvm_EthernetPortAllocationSettingData");
+
+                    foreach (ManagementObject port in ethernetPorts)
+                    {
+                        using (port)
+                        {
+                            var vlanSettings = port.GetRelated("Msvm_EthernetSwitchPortVlanSettingData");
+
+                            foreach (ManagementObject vlanSetting in vlanSettings)
+                            {
+                                using (vlanSetting)
+                                {
+                                    using var switchService = GetEthernetSwitchManagementService();
+                                    using var inParams = switchService.GetMethodParameters("RemoveFeatureSettings");
+                                    inParams["FeatureSettings"] = new[] { vlanSetting.Path.Path };
+
+                                    using var outParams = switchService.InvokeMethod("RemoveFeatureSettings", inParams, null);
+                                    WmiUtilities.ValidateOutput(outParams, _scope, true, true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine($"VLAN configuration removed from VM '{vmName}'");
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to remove VLAN configuration from VM '{vmName}': {ex.Message}", ex);
+        }
+    }
+
+    private ManagementObject GetDefaultFeatureSetting(string className)
+    {
+        using var featureCapClass = new ManagementClass(_scope, new ManagementPath("Msvm_EthernetSwitchFeatureCapabilities"), null);
+
+        foreach (ManagementObject capabilities in featureCapClass.GetInstances())
+        {
+            var featureId = capabilities["FeatureId"]?.ToString() ?? "";
+
+            // Match by class name in the caption/description
+            var caption = capabilities["Caption"]?.ToString() ?? "";
+            if (caption.Contains("Vlan", StringComparison.OrdinalIgnoreCase) ||
+                featureId.Contains("vlan", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (ManagementObject settingAssociation in capabilities.GetRelationships("Msvm_SettingsDefineCapabilities"))
+                {
+                    if ((ushort)settingAssociation["ValueRole"] == 0) // Default
+                    {
+                        var settingPath = (string)settingAssociation["PartComponent"];
+                        settingAssociation.Dispose();
+
+                        var setting = new ManagementObject(settingPath);
+                        setting.Scope = _scope;
+                        setting.Get();
+                        capabilities.Dispose();
+                        return setting;
+                    }
+                    settingAssociation.Dispose();
+                }
+            }
+            capabilities.Dispose();
+        }
+
+        // Fallback: create instance directly
+        using var vlanClass = new ManagementClass(_scope, new ManagementPath(className), null);
+        return vlanClass.CreateInstance();
+    }
+
     public enum WmiSwitchType : ushort
     {
         Unknown = 0,

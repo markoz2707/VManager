@@ -1,3 +1,4 @@
+using HyperV.Contracts.Models.Common;
 using HyperV.Contracts.Services;
 using HyperV.Core.Hcn.Services;
 using HyperV.Core.Wmi.Services;
@@ -606,6 +607,63 @@ public sealed class NetworksController : ControllerBase
         {
             _logger.LogError(ex, "Failed to create virtual FC port for VM {VmName}: {Message}", vmName, ex.Message);
             return BadRequest(new { error = $"Failed to create virtual FC port: {ex.Message}" });
+        }
+    }
+
+    /// <summary>Sets VLAN configuration on a VM's network adapter.</summary>
+    [HttpPut("vms/{vmName}/vlan")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [SwaggerOperation(Summary = "Set VLAN Configuration", Description = "Sets VLAN configuration (Access, Trunk, or Private mode) on a VM's network adapter.")]
+    public IActionResult SetVlanConfiguration([FromRoute] string vmName, [FromBody] SetVlanRequest request)
+    {
+        try
+        {
+            _wmiSvc.SetVlanConfiguration(vmName, request.VlanId, (int)request.OperationMode, request.NativeVlanId, request.TrunkVlanIds);
+            return Ok(new { message = $"VLAN {request.VlanId} configured on VM '{vmName}'" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to set VLAN configuration on VM {VmName}", vmName);
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>Gets VLAN configuration for a VM's network adapter.</summary>
+    [HttpGet("vms/{vmName}/vlan")]
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(400)]
+    [SwaggerOperation(Summary = "Get VLAN Configuration", Description = "Gets VLAN configuration for a VM's network adapter port.")]
+    public IActionResult GetVlanConfiguration([FromRoute] string vmName)
+    {
+        try
+        {
+            var config = _wmiSvc.GetVlanConfiguration(vmName);
+            return Ok(config);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get VLAN configuration for VM {VmName}", vmName);
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>Removes VLAN configuration from a VM's network adapter.</summary>
+    [HttpDelete("vms/{vmName}/vlan")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [SwaggerOperation(Summary = "Remove VLAN Configuration", Description = "Removes VLAN configuration from a VM's network adapter.")]
+    public IActionResult RemoveVlanConfiguration([FromRoute] string vmName)
+    {
+        try
+        {
+            _wmiSvc.RemoveVlanConfiguration(vmName);
+            return Ok(new { message = $"VLAN configuration removed from VM '{vmName}'" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to remove VLAN configuration for VM {VmName}", vmName);
+            return BadRequest(new { error = ex.Message });
         }
     }
 

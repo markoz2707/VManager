@@ -1,9 +1,13 @@
 using System.Text;
+using HyperV.CentralManagement.Authorization;
 using HyperV.CentralManagement.Data;
+using HyperV.CentralManagement.Hubs;
 using HyperV.CentralManagement.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,14 +25,34 @@ builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddSingleton<LdapAuthService>();
 builder.Services.AddHostedService<DatabaseSeedService>();
 builder.Services.AddHttpClient("central");
+builder.Services.AddHttpClient("AgentClient")
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+    });
 builder.Services.AddScoped<AuthSession>();
 builder.Services.AddScoped<CentralApiClient>();
 builder.Services.AddScoped<AuditLogService>();
 builder.Services.AddScoped<AgentApiClient>();
+builder.Services.AddScoped<VmInventoryService>();
+builder.Services.AddScoped<PermissionService>();
+builder.Services.AddScoped<MigrationOrchestrator>();
+builder.Services.AddScoped<AlertService>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<ContentLibraryService>();
+builder.Services.AddHostedService<VmSyncBackgroundService>();
+builder.Services.AddHostedService<AlertEvaluationService>();
+builder.Services.AddHostedService<MetricsCollectionService>();
+builder.Services.AddHostedService<MetricsRetentionService>();
+builder.Services.AddHostedService<HaEngine>();
+builder.Services.AddHostedService<DrsEngine>();
 
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+// Authorization - RBAC permission system
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 
 var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>() ?? new JwtOptions();
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret));
@@ -50,6 +74,23 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtOptions.Audience,
         IssuerSigningKey = key
     };
+
+    // Allow SignalR to receive JWT from query string
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthorization();
@@ -60,7 +101,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -74,7 +114,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
+app.MapMetrics(); // Prometheus /metrics endpoint
+app.MapHub<VManagerHub>("/hubs/vmanager");
+app.MapFallbackToFile("index.html");
 
 app.Run();

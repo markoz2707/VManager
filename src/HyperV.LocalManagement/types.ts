@@ -67,6 +67,20 @@ export interface PhysicalAdapterInfo {
     pnpDeviceId: string;
 }
 
+export enum VlanOperationMode {
+    ACCESS = 1,
+    TRUNK = 2,
+    PRIVATE = 3,
+}
+
+export interface VlanConfiguration {
+    vlanId: number;
+    operationMode: VlanOperationMode;
+    operationModeName: string;
+    nativeVlanId?: number;
+    trunkVlanIds?: number[];
+}
+
 export interface ServiceInfo {
   name: string;
   version: string;

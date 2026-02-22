@@ -93,6 +93,29 @@ export const getVmAppHealth = async (vmName: string): Promise<AppHealthStatus> =
     return fetchApi(`/vms/${encodeURIComponent(vmName)}/apphealth`);
 };
 
+export const migrateVmStorage = async (vmName: string, destinationPath: string): Promise<{ jobId: string }> => {
+    return fetchApi(`/vms/${encodeURIComponent(vmName)}/migrate-storage`, {
+        method: 'POST',
+        body: JSON.stringify({ destinationPath })
+    });
+};
+
+export const getVmConsoleInfo = async (vmName: string): Promise<{
+    vmId: string;
+    vmName: string;
+    state: string;
+    rdpHost: string;
+    rdpPort: number;
+    protocol: string;
+}> => {
+    return fetchApi(`/vms/${encodeURIComponent(vmName)}/console`);
+};
+
+export const getVmConsoleRdpUrl = (vmName: string): string => {
+    const baseUrl = (window as any).__API_BASE_URL__ || '';
+    return `${baseUrl}/api/v1/vms/${encodeURIComponent(vmName)}/console/rdp`;
+};
+
 export const copyFileToGuest = async (vmName: string, sourcePath: string, destPath: string, overwrite: boolean = false): Promise<{ jobId: string }> => {
     return fetchApi(`/vms/${encodeURIComponent(vmName)}/guestfilecopy`, {
         method: 'POST',

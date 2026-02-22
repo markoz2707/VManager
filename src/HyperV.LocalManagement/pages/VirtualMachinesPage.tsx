@@ -28,7 +28,7 @@ const statusColors: Record<string, string> = {
     [VmStatus.UNKNOWN]: 'text-gray-400',
 };
 
-const ActionDropdown: React.FC<{ vm: VirtualMachine, onAction: (name: string, action: VmAction) => void, onOpenModal: (type: 'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy', vm: VirtualMachine) => void, isBusy: boolean }> = 
+const ActionDropdown: React.FC<{ vm: VirtualMachine, onAction: (name: string, action: VmAction) => void, onOpenModal: (type: 'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy' | 'storage-migrate' | 'console', vm: VirtualMachine) => void, isBusy: boolean }> =
 ({ vm, onAction, onOpenModal, isBusy }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -36,7 +36,7 @@ const ActionDropdown: React.FC<{ vm: VirtualMachine, onAction: (name: string, ac
         onAction(vm.name, action);
         setIsOpen(false);
     }
-    const handleModalClick = (type: 'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy') => {
+    const handleModalClick = (type: 'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy' | 'storage-migrate' | 'console') => {
         onOpenModal(type, vm);
         setIsOpen(false);
     }
@@ -49,7 +49,9 @@ const ActionDropdown: React.FC<{ vm: VirtualMachine, onAction: (name: string, ac
             {isOpen && (
                  <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                     <div className="py-1" role="menu" aria-orientation="vertical">
+                        <a href="#" onClick={() => handleModalClick('console')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Open Console</a>
                         <a href="#" onClick={() => handleModalClick('migrate')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Migrate</a>
+                        <a href="#" onClick={() => handleModalClick('storage-migrate')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Migrate Storage</a>
                         <a href="#" onClick={() => handleModalClick('health')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">App Health</a>
                         <a href="#" onClick={() => handleModalClick('filecopy')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Copy File to Guest</a>
                         <div className="border-t my-1"></div>
@@ -76,7 +78,7 @@ export const VirtualMachinesPage = () => {
     const [selectedVm, setSelectedVm] = useState<VirtualMachine | null>(null);
     
     // Modals states
-    const [activeModal, setActiveModal] = useState<'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy' | null>(null);
+    const [activeModal, setActiveModal] = useState<'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy' | 'storage-migrate' | 'console' | null>(null);
     
     // Snapshot state
     const [snapshots, setSnapshots] = useState<VmSnapshot[]>([]);
@@ -91,6 +93,12 @@ export const VirtualMachinesPage = () => {
     
     // File Copy state
     const [fileCopyForm, setFileCopyForm] = useState({ sourcePath: '', destPath: '', overwrite: false });
+
+    // Storage Migration state
+    const [storageMigrateForm, setStorageMigrateForm] = useState({ destinationPath: '' });
+
+    // Console state
+    const [consoleInfo, setConsoleInfo] = useState<{ vmId: string; vmName: string; state: string; rdpHost: string; rdpPort: number; protocol: string } | null>(null);
 
 
     const fetchVms = useCallback(async () => {
@@ -145,7 +153,7 @@ export const VirtualMachinesPage = () => {
         fetchVms();
     };
     
-    const handleOpenModal = async (type: 'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy', vm: VirtualMachine) => {
+    const handleOpenModal = async (type: 'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy' | 'storage-migrate' | 'console', vm: VirtualMachine) => {
         setSelectedVm(vm);
         setActiveModal(type);
         if (type === 'snapshot') {
@@ -163,6 +171,15 @@ export const VirtualMachinesPage = () => {
                 setAppHealth(health);
             } catch (err: any) {
                 addNotification('error', `Failed to get app health: ${err.message}`);
+            }
+        }
+        if (type === 'console') {
+            setConsoleInfo(null);
+            try {
+                const info = await api.vmService.getVmConsoleInfo(vm.name);
+                setConsoleInfo(info);
+            } catch (err: any) {
+                addNotification('error', `Failed to get console info: ${err.message}`);
             }
         }
     };
@@ -252,6 +269,24 @@ export const VirtualMachinesPage = () => {
         } catch (err: any) {
             addNotification('error', `File copy failed: ${err.message}`);
         }
+    };
+
+    const handleStorageMigrate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if(!selectedVm) return;
+        try {
+            await api.vmService.migrateVmStorage(selectedVm.name, storageMigrateForm.destinationPath);
+            addNotification('success', `Storage migration for ${selectedVm.name} initiated.`);
+            handleCloseModal();
+        } catch (err: any) {
+            addNotification('error', `Storage migration failed: ${err.message}`);
+        }
+    };
+
+    const handleDownloadRdp = () => {
+        if (!selectedVm) return;
+        const url = api.vmService.getVmConsoleRdpUrl(selectedVm.name);
+        window.open(url, '_blank');
     };
 
     return (
@@ -384,6 +419,36 @@ export const VirtualMachinesPage = () => {
                     <div className="flex items-center"><input type="checkbox" checked={fileCopyForm.overwrite} onChange={e => setFileCopyForm({...fileCopyForm, overwrite: e.target.checked})} className="h-4 w-4" /><label className="ml-2">Overwrite if exists</label></div>
                     <div className="mt-6 flex justify-end"><Button type="submit">Copy File</Button></div>
                 </form>
+            </Modal>
+
+            <Modal isOpen={activeModal === 'storage-migrate'} onClose={handleCloseModal} title={`Migrate Storage - ${selectedVm?.name}`}>
+                <form onSubmit={handleStorageMigrate} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Destination Path</label>
+                        <input className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3" value={storageMigrateForm.destinationPath} onChange={e => setStorageMigrateForm({...storageMigrateForm, destinationPath: e.target.value})} placeholder="e.g. D:\Hyper-V\VMs" required />
+                        <p className="mt-1 text-xs text-gray-500">VM virtual hard disks will be moved to this location without downtime.</p>
+                    </div>
+                    <div className="mt-6 flex justify-end"><Button type="submit">Start Storage Migration</Button></div>
+                </form>
+            </Modal>
+
+            <Modal isOpen={activeModal === 'console'} onClose={handleCloseModal} title={`Console - ${selectedVm?.name}`}>
+                <div className="space-y-4">
+                    {!consoleInfo ? <Spinner/> : (
+                        <div className="space-y-3">
+                            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                                <p><strong>VM:</strong> {consoleInfo.vmName}</p>
+                                <p><strong>State:</strong> {consoleInfo.state}</p>
+                                <p><strong>Protocol:</strong> {consoleInfo.protocol}</p>
+                                <p><strong>Host:</strong> {consoleInfo.rdpHost}:{consoleInfo.rdpPort}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                                <Button onClick={handleDownloadRdp}>Download .rdp File</Button>
+                            </div>
+                            <p className="text-xs text-gray-500">Open the downloaded .rdp file with Remote Desktop Connection to access the VM console.</p>
+                        </div>
+                    )}
+                </div>
             </Modal>
         </div>
     );

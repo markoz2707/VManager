@@ -1,5 +1,5 @@
 import { fetchApi, ApiError } from './baseService';
-import { VirtualNetwork, FibreChannelSan } from '../types';
+import { VirtualNetwork, FibreChannelSan, VlanConfiguration, VlanOperationMode } from '../types';
 
 export const createNatNetwork = async (name: string, prefix: string = '192.168.100.0/24'): Promise<string> => {
     const response = await fetchApi(`/networks/nat?name=${encodeURIComponent(name)}&prefix=${encodeURIComponent(prefix)}`, {
@@ -85,5 +85,23 @@ export const addFibreChannelPortToVm = async (vmName: string, sanPoolId: string,
     return fetchApi(`/vms/${encodeURIComponent(vmName)}/fibrechannel/port`, {
         method: 'POST',
         body: JSON.stringify({ sanPoolId, wwpn, wwnn })
+    });
+};
+
+// VLAN Configuration
+export const setVlanConfiguration = async (vmName: string, vlanId: number, operationMode: VlanOperationMode, nativeVlanId?: number, trunkVlanIds?: number[]): Promise<void> => {
+    await fetchApi(`/networks/vms/${encodeURIComponent(vmName)}/vlan`, {
+        method: 'PUT',
+        body: JSON.stringify({ vmName, vlanId, operationMode, nativeVlanId, trunkVlanIds })
+    });
+};
+
+export const getVlanConfiguration = async (vmName: string): Promise<VlanConfiguration> => {
+    return fetchApi(`/networks/vms/${encodeURIComponent(vmName)}/vlan`);
+};
+
+export const removeVlanConfiguration = async (vmName: string): Promise<void> => {
+    await fetchApi(`/networks/vms/${encodeURIComponent(vmName)}/vlan`, {
+        method: 'DELETE'
     });
 };

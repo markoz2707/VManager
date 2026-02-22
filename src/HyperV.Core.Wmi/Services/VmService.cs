@@ -978,27 +978,216 @@ public class VmService
         }
     }
 
-    /// <summary>Migrates VM to another host.</summary>
+    /// <summary>Migrates VM to another host using Msvm_VirtualSystemMigrationService.</summary>
     public virtual string MigrateVm(string vmId, string destinationHost, bool live, bool storage)
     {
         try
         {
             var scope = new ManagementScope(@"root\virtualization\v2");
             scope.Connect();
-            
+
             var vm = FindVmByName(scope, vmId);
             if (vm == null)
             {
                 throw new InvalidOperationException($"VM {vmId} not found");
             }
-            
-            // This is a placeholder implementation
-            return Guid.NewGuid().ToString();
+
+            // Get the migration service singleton
+            using var migrationServiceClass = new ManagementClass(scope, new ManagementPath("Msvm_VirtualSystemMigrationService"), null);
+            ManagementObject? migrationService = null;
+            foreach (ManagementObject instance in migrationServiceClass.GetInstances())
+            {
+                migrationService = instance;
+                break;
+            }
+            if (migrationService == null)
+            {
+                throw new InvalidOperationException("Msvm_VirtualSystemMigrationService not found");
+            }
+
+            using (migrationService)
+            {
+                // Determine migration type: Live=32768, Offline=32769, Storage=32770
+                ushort migrationType;
+                if (storage)
+                    migrationType = 32770;
+                else if (live)
+                    migrationType = 32768;
+                else
+                    migrationType = 32769;
+
+                // Create migration setting data
+                using var migrationSettingClass = new ManagementClass(scope, new ManagementPath("Msvm_VirtualSystemMigrationSettingData"), null);
+                using var migrationSettings = migrationSettingClass.CreateInstance();
+                migrationSettings["MigrationType"] = migrationType;
+
+                // For live migration, set transport type (5 = TCP)
+                if (live && !storage)
+                {
+                    migrationSettings["TransportType"] = (ushort)5;
+                }
+
+                var migrationSettingsText = migrationSettings.GetText(TextFormat.WmiDtd20);
+                var vmPath = vm.Path.Path;
+
+                // Invoke MigrateVirtualSystemToHost
+                using var inParams = migrationService.GetMethodParameters("MigrateVirtualSystemToHost");
+                inParams["ComputerSystem"] = vmPath;
+                inParams["DestinationHost"] = destinationHost;
+                inParams["MigrationSettingData"] = migrationSettingsText;
+
+                using var outParams = migrationService.InvokeMethod("MigrateVirtualSystemToHost", inParams, null);
+                WmiUtilities.ValidateOutput(outParams, scope, true, true);
+
+                // Return the job path as ID if async, otherwise return a generated ID
+                if ((uint)outParams["ReturnValue"] == 4096)
+                {
+                    var jobPath = (string)outParams["Job"];
+                    return jobPath;
+                }
+
+                return Guid.NewGuid().ToString();
+            }
         }
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to migrate VM: {ex.Message}", ex);
         }
+    }
+
+    /// <summary>Moves VM storage to a new location (Storage Live Migration).</summary>
+    public virtual string MoveVmStorage(string vmId, string destinationPath)
+    {
+        try
+        {
+            var scope = new ManagementScope(@"root\virtualization\v2");
+            scope.Connect();
+
+            var vm = FindVmByName(scope, vmId);
+            if (vm == null)
+            {
+                throw new InvalidOperationException($"VM {vmId} not found");
+            }
+
+            // Get the migration service singleton
+            using var migrationServiceClass = new ManagementClass(scope, new ManagementPath("Msvm_VirtualSystemMigrationService"), null);
+            ManagementObject? migrationService = null;
+            foreach (ManagementObject instance in migrationServiceClass.GetInstances())
+            {
+                migrationService = instance;
+                break;
+            }
+            if (migrationService == null)
+            {
+                throw new InvalidOperationException("Msvm_VirtualSystemMigrationService not found");
+            }
+
+            using (migrationService)
+            {
+                // Storage migration type = 32770
+                using var migrationSettingClass = new ManagementClass(scope, new ManagementPath("Msvm_VirtualSystemMigrationSettingData"), null);
+                using var migrationSettings = migrationSettingClass.CreateInstance();
+                migrationSettings["MigrationType"] = (ushort)32770;
+
+                var migrationSettingsText = migrationSettings.GetText(TextFormat.WmiDtd20);
+                var vmPath = vm.Path.Path;
+
+                // For storage migration, use MigrateVirtualSystemToHost with localhost as destination
+                // and the storage path in the NewResourceSettingData
+                using var inParams = migrationService.GetMethodParameters("MigrateVirtualSystemToHost");
+                inParams["ComputerSystem"] = vmPath;
+                inParams["DestinationHost"] = Environment.MachineName;
+                inParams["MigrationSettingData"] = migrationSettingsText;
+
+                // Build new resource settings pointing to the destination path
+                var newResourceSettings = BuildStorageMigrationResourceSettings(scope, vm, destinationPath);
+                if (newResourceSettings.Length > 0)
+                {
+                    inParams["NewResourceSettingData"] = newResourceSettings;
+                }
+
+                using var outParams = migrationService.InvokeMethod("MigrateVirtualSystemToHost", inParams, null);
+                WmiUtilities.ValidateOutput(outParams, scope, true, true);
+
+                if ((uint)outParams["ReturnValue"] == 4096)
+                {
+                    return (string)outParams["Job"];
+                }
+
+                return Guid.NewGuid().ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to move VM storage: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>Gets VM connection info for console access.</summary>
+    public virtual object GetVmConnectInfo(string vmId)
+    {
+        try
+        {
+            var scope = new ManagementScope(@"root\virtualization\v2");
+            scope.Connect();
+
+            var vm = FindVmByName(scope, vmId);
+            if (vm == null)
+            {
+                throw new InvalidOperationException($"VM {vmId} not found");
+            }
+
+            var vmGuid = vm["Name"]?.ToString() ?? "";
+            var enabledState = (ushort)vm["EnabledState"];
+
+            return new
+            {
+                VmId = vmGuid,
+                VmName = vm["ElementName"]?.ToString(),
+                State = GetVmStateString(enabledState),
+                RdpHost = "localhost",
+                RdpPort = 2179,
+                EnhancedSessionAvailable = true,
+                Protocol = "RDP"
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to get VM connection info: {ex.Message}", ex);
+        }
+    }
+
+    private string[] BuildStorageMigrationResourceSettings(ManagementScope scope, ManagementObject vm, string destinationPath)
+    {
+        var settings = new List<string>();
+
+        // Get VHD settings for the VM and update paths
+        var vmSettings = vm.GetRelated("Msvm_VirtualSystemSettingData");
+        foreach (ManagementObject settingData in vmSettings)
+        {
+            using (settingData)
+            {
+                var storageAllocs = settingData.GetRelated("Msvm_StorageAllocationSettingData");
+                foreach (ManagementObject storageAlloc in storageAllocs)
+                {
+                    using (storageAlloc)
+                    {
+                        var hostResource = storageAlloc["HostResource"] as string[];
+                        if (hostResource != null && hostResource.Length > 0)
+                        {
+                            var originalPath = hostResource[0];
+                            var fileName = System.IO.Path.GetFileName(originalPath);
+                            var newPath = System.IO.Path.Combine(destinationPath, fileName);
+
+                            storageAlloc["HostResource"] = new[] { newPath };
+                            settings.Add(storageAlloc.GetText(TextFormat.WmiDtd20));
+                        }
+                    }
+                }
+            }
+        }
+
+        return settings.ToArray();
     }
 
     /// <summary>Gets application health status.</summary>

@@ -1797,6 +1797,94 @@ public IActionResult MigrateVm([FromRoute] string name, [FromBody] MigrateReques
     }
 }
 
+/// <summary>Migrate VM storage to a new location.</summary>
+[HttpPost("{name}/migrate-storage")]
+[ProducesResponseType(typeof(object), 202)]
+[ProducesResponseType(400)]
+[ProducesResponseType(404)]
+[SwaggerOperation(Summary = "Migrate VM Storage", Description = "Moves VM storage (VHDs) to a new location without downtime.")]
+public IActionResult MigrateVmStorage([FromRoute] string name, [FromBody] MigrateStorageRequest request)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(request?.DestinationPath))
+        {
+            return BadRequest(new { error = "DestinationPath is required" });
+        }
+
+        if (!_wmiVm.IsVmPresent(name))
+        {
+            return NotFound(new { error = $"VM '{name}' not found" });
+        }
+
+        var jobId = _wmiVm.MoveVmStorage(name, request.DestinationPath);
+        return Accepted(new { jobId, message = $"Storage migration initiated for VM '{name}'" });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { error = ex.Message });
+    }
+}
+
+/// <summary>Gets VM console connection info.</summary>
+[HttpGet("{name}/console")]
+[ProducesResponseType(typeof(object), 200)]
+[ProducesResponseType(404)]
+[SwaggerOperation(Summary = "Get VM Console Info", Description = "Gets connection information for VM console access including RDP details.")]
+public IActionResult GetConsoleInfo([FromRoute] string name)
+{
+    try
+    {
+        if (!_wmiVm.IsVmPresent(name))
+        {
+            return NotFound(new { error = $"VM '{name}' not found" });
+        }
+
+        var connectInfo = _wmiVm.GetVmConnectInfo(name);
+        return Ok(connectInfo);
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { error = ex.Message });
+    }
+}
+
+/// <summary>Generates an RDP file for VM console access.</summary>
+[HttpGet("{name}/console/rdp")]
+[ProducesResponseType(typeof(FileContentResult), 200)]
+[ProducesResponseType(404)]
+[SwaggerOperation(Summary = "Download RDP File", Description = "Generates and downloads an .rdp file for connecting to the VM console.")]
+public IActionResult DownloadRdpFile([FromRoute] string name)
+{
+    try
+    {
+        if (!_wmiVm.IsVmPresent(name))
+        {
+            return NotFound(new { error = $"VM '{name}' not found" });
+        }
+
+        var connectInfo = _wmiVm.GetVmConnectInfo(name);
+        var host = Request.Host.Host;
+
+        var rdpContent = $"""
+            full address:s:{host}:2179
+            pcb:s:{name}
+            server port:i:2179
+            negotiate security layer:i:1
+            authentication level:i:0
+            prompt for credentials:i:1
+            use redirection server name:i:1
+            """;
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(rdpContent);
+        return File(bytes, "application/x-rdp", $"{name}.rdp");
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { error = ex.Message });
+    }
+}
+
 /// <summary>Gets application health status for a VM.</summary>
 /// <param name="name">VM name.</param>
 /// <returns>OK response with health status.</returns>
@@ -1916,6 +2004,14 @@ public class CreateSnapshotRequest
 
     [StringLength(1024, ErrorMessage = "Notes cannot exceed 1024 characters")]
     public string? Notes { get; set; }
+}
+
+/// <summary>Request model for VM storage migration.</summary>
+public class MigrateStorageRequest
+{
+    [Required(ErrorMessage = "Destination path is required")]
+    [StringLength(500, ErrorMessage = "Destination path cannot exceed 500 characters")]
+    public string DestinationPath { get; set; } = string.Empty;
 }
 
 /// <summary>Request model for VM migration.</summary>
