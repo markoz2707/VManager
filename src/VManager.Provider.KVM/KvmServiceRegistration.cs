@@ -15,6 +15,8 @@ public static class KvmServiceRegistration
         services.AddSingleton<IStorageProvider, KvmStorageProvider>();
         services.AddSingleton<IContainerProvider, KvmContainerProvider>();
         services.AddSingleton<IGuestAgentProvider, KvmGuestAgentProvider>();
+        services.AddSingleton<IEventLogProvider, KvmEventLogProvider>();
+        services.AddSingleton<IBackupProvider, KvmBackupProvider>();
         return services;
     }
 }

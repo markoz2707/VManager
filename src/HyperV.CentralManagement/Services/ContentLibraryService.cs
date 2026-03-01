@@ -260,6 +260,69 @@ public class ContentLibraryService
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task<DeploymentResult> DeployTemplateAsync(
+        Guid libraryItemId,
+        Guid targetAgentId,
+        DeployVmSpec spec,
+        CancellationToken ct = default)
+    {
+        var item = await _db.ContentLibraryItems.FindAsync(new object[] { libraryItemId }, ct);
+        if (item == null)
+            throw new InvalidOperationException($"Content library item {libraryItemId} not found");
+
+        if (item.Type != ContentLibraryItemType.Template && item.Type != ContentLibraryItemType.OVF)
+            throw new InvalidOperationException($"Item '{item.Name}' is not a deployable template (type: {item.Type})");
+
+        var agent = await _db.AgentHosts.FindAsync(new object[] { targetAgentId }, ct);
+        if (agent == null)
+            throw new InvalidOperationException($"Agent host {targetAgentId} not found");
+
+        if (agent.Status != Models.AgentStatus.Online)
+            throw new InvalidOperationException($"Agent '{agent.Hostname}' is not online");
+
+        _logger.LogInformation("Deploying template '{TemplateName}' to agent '{AgentHost}' as VM '{VmName}'",
+            item.Name, agent.Hostname, spec.VmName);
+
+        try
+        {
+            var createRequest = new CreateVmApiRequest
+            {
+                Name = spec.VmName,
+                CpuCount = spec.CpuCount > 0 ? spec.CpuCount : 2,
+                MemoryMB = spec.MemoryMB > 0 ? spec.MemoryMB : 2048,
+                Generation = spec.Generation > 0 ? spec.Generation : 2,
+                DiskSizeGB = spec.DiskSizeGB > 0 ? spec.DiskSizeGB : 40,
+                NetworkName = spec.NetworkName
+            };
+
+            var response = await _agentClient.CreateVmAsync(agent.ApiBaseUrl, createRequest);
+
+            await _audit.WriteAsync("CONTENT_LIBRARY_DEPLOY_VM", null,
+                $"Deployed template '{item.Name}' as VM '{spec.VmName}' to agent '{agent.Hostname}'");
+
+            return new DeploymentResult
+            {
+                Success = true,
+                VmName = spec.VmName,
+                AgentHostname = agent.Hostname,
+                Message = $"VM '{spec.VmName}' created successfully on '{agent.Hostname}'"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to deploy template '{TemplateName}' to agent '{AgentHost}'",
+                item.Name, agent.Hostname);
+
+            return new DeploymentResult
+            {
+                Success = false,
+                VmName = spec.VmName,
+                AgentHostname = agent.Hostname,
+                Message = $"Deployment failed: {ex.Message}"
+            };
+        }
+    }
+
     public async Task SyncItemAsync(Guid itemId, CancellationToken ct = default)
     {
         var item = await _db.ContentLibraryItems
@@ -277,4 +340,22 @@ public class ContentLibraryService
 
         await _audit.WriteAsync("CONTENT_LIBRARY_SYNC", null, $"Synced '{item.Name}' to {item.Subscriptions.Count} subscribers");
     }
+}
+
+public class DeployVmSpec
+{
+    public string VmName { get; set; } = string.Empty;
+    public int CpuCount { get; set; } = 2;
+    public long MemoryMB { get; set; } = 2048;
+    public int Generation { get; set; } = 2;
+    public long DiskSizeGB { get; set; } = 40;
+    public string? NetworkName { get; set; }
+}
+
+public class DeploymentResult
+{
+    public bool Success { get; set; }
+    public string VmName { get; set; } = string.Empty;
+    public string AgentHostname { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
 }

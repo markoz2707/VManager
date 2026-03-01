@@ -347,6 +347,90 @@ public class AddStorageDeviceSpec
     public Dictionary<string, object>? ExtendedProperties { get; set; }
 }
 
+// Event log models
+public class LogEntryDto
+{
+    public string Id { get; set; } = string.Empty;
+    public DateTime Timestamp { get; set; }
+    public string Level { get; set; } = "Information"; // Information, Warning, Error, Critical
+    public string Source { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public int? EventId { get; set; }
+    public string? Category { get; set; }
+}
+
+public class LogsResponse
+{
+    public List<LogEntryDto> Entries { get; set; } = new();
+    public int TotalCount { get; set; }
+    public List<string> Sources { get; set; } = new();
+}
+
+// Pagination models
+public class PaginatedResult<T>
+{
+    public List<T> Items { get; set; } = new();
+    public int TotalCount { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public bool HasMore { get; set; }
+}
+
+// Backup models
+public class BackupResultDto
+{
+    public string BackupId { get; set; } = string.Empty;
+    public bool Success { get; set; }
+    public string? Message { get; set; }
+    public long SizeBytes { get; set; }
+}
+
+public class RestoreResultDto
+{
+    public bool Success { get; set; }
+    public string? RestoredVmName { get; set; }
+    public string? Message { get; set; }
+}
+
+public class BackupInfoDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string VmName { get; set; } = string.Empty;
+    public DateTime CreatedUtc { get; set; }
+    public long SizeBytes { get; set; }
+    public string BackupPath { get; set; } = string.Empty;
+    public string HypervisorType { get; set; } = string.Empty;
+    public bool IncludesSnapshots { get; set; }
+}
+
+public class BackupOptions
+{
+    public bool IncludeSnapshots { get; set; }
+    public string? Description { get; set; }
+}
+
+// Scheduled task models
+public class ScheduledTaskDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string CronExpression { get; set; } = string.Empty;
+    public string Action { get; set; } = string.Empty; // start, stop, shutdown, snapshot
+    public string[] TargetVms { get; set; } = Array.Empty<string>();
+    public bool IsEnabled { get; set; }
+    public DateTime? LastRunUtc { get; set; }
+    public DateTime? NextRunUtc { get; set; }
+    public string? LastRunResult { get; set; }
+}
+
+public class CreateScheduledTaskRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string CronExpression { get; set; } = string.Empty;
+    public string Action { get; set; } = string.Empty;
+    public string[] TargetVms { get; set; } = Array.Empty<string>();
+}
+
 // Migration models
 public class MigrationResultDto
 {

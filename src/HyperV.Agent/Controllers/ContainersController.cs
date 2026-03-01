@@ -3,6 +3,7 @@ using HyperV.Contracts.Models.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Linq;
 
 namespace HyperV.Agent.Controllers;
 
@@ -43,12 +44,26 @@ public class ContainersController : ControllerBase
     /// <summary>Lists all containers.</summary>
     [HttpGet]
     [SwaggerOperation(Summary = "List containers", Description = "Lists all containers from the current hypervisor.")]
-    public async Task<IActionResult> ListContainers()
+    public async Task<IActionResult> ListContainers([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         try
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 1;
+            if (pageSize > 200) pageSize = 200;
+
             var containers = await _containerProvider.ListContainersAsync();
-            return Ok(containers);
+            var totalCount = containers.Count;
+            var items = containers.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return Ok(new PaginatedResult<ContainerSummaryDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                HasMore = (page * pageSize) < totalCount
+            });
         }
         catch (Exception ex)
         {

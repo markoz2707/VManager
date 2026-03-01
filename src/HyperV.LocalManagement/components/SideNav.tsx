@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { VmIcon, NetworkIcon, HostIcon, StorageIcon, ContainerIcon, ReplicationIcon, MetricsIcon, HypervisorIcon, LogsIcon } from './Icons';
+import { VmIcon, NetworkIcon, HostIcon, StorageIcon, ContainerIcon, ReplicationIcon, MetricsIcon, HypervisorIcon, LogsIcon, ScheduleIcon, BackupIcon } from './Icons';
 import { useHostContext } from '../hooks/useHostContext';
 
 const NavItem = ({ to, icon, label, count }: { to: string, icon: React.ReactNode, label: string, count?: number }) => {
@@ -45,6 +45,8 @@ export const SideNav = ({ counts }: { counts: { vms: number; networks: number } 
                 {isHyperV && <NavItem to="/replication" icon={<ReplicationIcon className="h-5 w-5" />} label="Replication" />}
                 <NavItem to="/metrics" icon={<MetricsIcon className="h-5 w-5" />} label="Metrics" />
                 <NavItem to="/logs" icon={<LogsIcon className="h-5 w-5" />} label="System Logs" />
+                <NavItem to="/schedules" icon={<ScheduleIcon className="h-5 w-5" />} label="Schedules" />
+                <NavItem to="/backups" icon={<BackupIcon className="h-5 w-5" />} label="Backups" />
                 <NavItem to="/hypervisor" icon={<HypervisorIcon className="h-5 w-5" />} label="Hypervisor" />
             </nav>
         </aside>

@@ -118,8 +118,9 @@ public class VmsControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnedVms = Assert.IsType<List<VmSummaryDto>>(okResult.Value);
-        Assert.Equal(2, returnedVms.Count);
+        var paginated = Assert.IsType<PaginatedResult<VmSummaryDto>>(okResult.Value);
+        Assert.Equal(2, paginated.Items.Count);
+        Assert.Equal(2, paginated.TotalCount);
     }
 
     [Fact]
@@ -130,6 +131,111 @@ public class VmsControllerTests
 
         // Act
         var result = await _controller.ListVms();
+
+        // Assert
+        var statusResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(500, statusResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task ListVms_DefaultPagination_ReturnsFirstPage()
+    {
+        // Arrange
+        var vms = Enumerable.Range(1, 60).Select(i => new VmSummaryDto
+        {
+            Id = i.ToString(),
+            Name = $"VM{i}",
+            State = i % 2 == 0 ? "Running" : "Off"
+        }).ToList();
+        _vmProviderMock.Setup(x => x.ListVmsAsync()).ReturnsAsync(vms);
+
+        // Act
+        var result = await _controller.ListVms();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var paginated = Assert.IsType<PaginatedResult<VmSummaryDto>>(okResult.Value);
+        Assert.Equal(50, paginated.Items.Count);
+        Assert.Equal(60, paginated.TotalCount);
+        Assert.Equal(1, paginated.Page);
+        Assert.Equal(50, paginated.PageSize);
+        Assert.True(paginated.HasMore);
+    }
+
+    [Fact]
+    public async Task ListVms_SecondPage_ReturnsCorrectSlice()
+    {
+        // Arrange
+        var vms = Enumerable.Range(1, 60).Select(i => new VmSummaryDto
+        {
+            Id = i.ToString(),
+            Name = $"VM{i}",
+            State = "Running"
+        }).ToList();
+        _vmProviderMock.Setup(x => x.ListVmsAsync()).ReturnsAsync(vms);
+
+        // Act
+        var result = await _controller.ListVms(page: 2, pageSize: 50);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var paginated = Assert.IsType<PaginatedResult<VmSummaryDto>>(okResult.Value);
+        Assert.Equal(10, paginated.Items.Count);
+        Assert.Equal(60, paginated.TotalCount);
+        Assert.Equal(2, paginated.Page);
+        Assert.False(paginated.HasMore);
+        Assert.Equal("VM51", paginated.Items[0].Name);
+    }
+
+    [Fact]
+    public async Task ListVms_PageSizeLargerThanCount_ReturnsAll()
+    {
+        // Arrange
+        var vms = new List<VmSummaryDto>
+        {
+            new VmSummaryDto { Id = "1", Name = "VM1", State = "Running" },
+            new VmSummaryDto { Id = "2", Name = "VM2", State = "Off" },
+            new VmSummaryDto { Id = "3", Name = "VM3", State = "Running" }
+        };
+        _vmProviderMock.Setup(x => x.ListVmsAsync()).ReturnsAsync(vms);
+
+        // Act
+        var result = await _controller.ListVms(page: 1, pageSize: 100);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var paginated = Assert.IsType<PaginatedResult<VmSummaryDto>>(okResult.Value);
+        Assert.Equal(3, paginated.Items.Count);
+        Assert.Equal(3, paginated.TotalCount);
+        Assert.Equal(1, paginated.Page);
+        Assert.False(paginated.HasMore);
+    }
+
+    [Fact]
+    public async Task ListVms_EmptyList_ReturnsEmptyPaginated()
+    {
+        // Arrange
+        _vmProviderMock.Setup(x => x.ListVmsAsync()).ReturnsAsync(new List<VmSummaryDto>());
+
+        // Act
+        var result = await _controller.ListVms();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var paginated = Assert.IsType<PaginatedResult<VmSummaryDto>>(okResult.Value);
+        Assert.Empty(paginated.Items);
+        Assert.Equal(0, paginated.TotalCount);
+        Assert.False(paginated.HasMore);
+    }
+
+    [Fact]
+    public async Task ListVms_WhenProviderThrows_Returns500_List()
+    {
+        // Arrange
+        _vmProviderMock.Setup(x => x.ListVmsAsync()).ThrowsAsync(new Exception("Connection timeout"));
+
+        // Act
+        var result = await _controller.ListVms(page: 1, pageSize: 25);
 
         // Assert
         var statusResult = Assert.IsType<ObjectResult>(result);

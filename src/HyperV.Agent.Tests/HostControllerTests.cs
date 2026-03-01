@@ -15,6 +15,7 @@ public class HostControllerTests
 {
     private readonly Mock<IHostProvider> _hostProviderMock;
     private readonly Mock<IMetricsProvider> _metricsProviderMock;
+    private readonly Mock<IEventLogProvider> _eventLogProviderMock;
     private readonly Mock<ILogger<HostController>> _loggerMock;
     private readonly HostController _controller;
 
@@ -22,8 +23,9 @@ public class HostControllerTests
     {
         _hostProviderMock = new Mock<IHostProvider>();
         _metricsProviderMock = new Mock<IMetricsProvider>();
+        _eventLogProviderMock = new Mock<IEventLogProvider>();
         _loggerMock = new Mock<ILogger<HostController>>();
-        _controller = new HostController(_hostProviderMock.Object, _metricsProviderMock.Object, _loggerMock.Object);
+        _controller = new HostController(_hostProviderMock.Object, _metricsProviderMock.Object, _eventLogProviderMock.Object, _loggerMock.Object);
     }
 
     // ──────────────────── GetHardwareInfo ────────────────────
@@ -337,5 +339,251 @@ public class HostControllerTests
         // Assert
         var statusResult = Assert.IsType<ObjectResult>(result);
         Assert.Equal(500, statusResult.StatusCode);
+    }
+
+    // ──────────────────── GetLogs ────────────────────
+
+    [Fact]
+    public async Task GetLogs_ReturnsOkWithEntries()
+    {
+        // Arrange
+        var response = new LogsResponse
+        {
+            Entries = new List<LogEntryDto>
+            {
+                new LogEntryDto { Id = "1", Timestamp = DateTime.UtcNow, Level = "Information", Source = "HyperV-VMMS", Message = "VM started" },
+                new LogEntryDto { Id = "2", Timestamp = DateTime.UtcNow, Level = "Warning", Source = "HyperV-Worker", Message = "Memory pressure" }
+            },
+            TotalCount = 2,
+            Sources = new List<string> { "HyperV-VMMS", "HyperV-Worker" }
+        };
+        _eventLogProviderMock
+            .Setup(p => p.GetLogsAsync(null, null, null, null, 100, null))
+            .ReturnsAsync(response);
+
+        // Act
+        var result = await _controller.GetLogs();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returned = Assert.IsType<LogsResponse>(okResult.Value);
+        Assert.Equal(2, returned.Entries.Count);
+        Assert.Equal(2, returned.TotalCount);
+    }
+
+    [Fact]
+    public async Task GetLogs_WithFilters_PassesFiltersToProvider()
+    {
+        // Arrange
+        var start = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var end = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc);
+        var response = new LogsResponse
+        {
+            Entries = new List<LogEntryDto>
+            {
+                new LogEntryDto { Id = "1", Timestamp = start, Level = "Error", Source = "HyperV-VMMS", Message = "Disk error" }
+            },
+            TotalCount = 1,
+            Sources = new List<string> { "HyperV-VMMS" }
+        };
+        _eventLogProviderMock
+            .Setup(p => p.GetLogsAsync("HyperV-VMMS", "Error", start, end, 50, "disk"))
+            .ReturnsAsync(response);
+
+        // Act
+        var result = await _controller.GetLogs(source: "HyperV-VMMS", level: "Error", start: start, end: end, limit: 50, search: "disk");
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returned = Assert.IsType<LogsResponse>(okResult.Value);
+        Assert.Single(returned.Entries);
+        Assert.Equal("Error", returned.Entries[0].Level);
+        _eventLogProviderMock.Verify(p => p.GetLogsAsync("HyperV-VMMS", "Error", start, end, 50, "disk"), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetLogs_WhenProviderThrows_Returns500()
+    {
+        // Arrange
+        _eventLogProviderMock
+            .Setup(p => p.GetLogsAsync(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<int>(), It.IsAny<string?>()))
+            .ThrowsAsync(new Exception("Event log service unavailable"));
+
+        // Act
+        var result = await _controller.GetLogs();
+
+        // Assert
+        var statusResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(500, statusResult.StatusCode);
+    }
+
+    // ──────────────────── GetLogSources ────────────────────
+
+    [Fact]
+    public async Task GetLogSources_ReturnsOkWithSourceList()
+    {
+        // Arrange
+        var sources = new List<string> { "HyperV-VMMS", "HyperV-Worker", "System", "Application" };
+        _eventLogProviderMock.Setup(p => p.GetLogSourcesAsync()).ReturnsAsync(sources);
+
+        // Act
+        var result = await _controller.GetLogSources();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var returned = Assert.IsType<List<string>>(okResult.Value);
+        Assert.Equal(4, returned.Count);
+        Assert.Contains("HyperV-VMMS", returned);
+    }
+
+    [Fact]
+    public async Task GetLogSources_WhenProviderThrows_Returns500()
+    {
+        // Arrange
+        _eventLogProviderMock.Setup(p => p.GetLogSourcesAsync())
+            .ThrowsAsync(new Exception("Cannot enumerate log sources"));
+
+        // Act
+        var result = await _controller.GetLogSources();
+
+        // Assert
+        var statusResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(500, statusResult.StatusCode);
+    }
+
+    // ──────────────────── ExportLogs ────────────────────
+
+    [Fact]
+    public async Task ExportLogs_Json_ReturnsFileResult()
+    {
+        // Arrange
+        var response = new LogsResponse
+        {
+            Entries = new List<LogEntryDto>
+            {
+                new LogEntryDto { Id = "1", Timestamp = DateTime.UtcNow, Level = "Information", Source = "System", Message = "Test message" }
+            },
+            TotalCount = 1,
+            Sources = new List<string> { "System" }
+        };
+        _eventLogProviderMock
+            .Setup(p => p.GetLogsAsync(null, null, null, null, 1000, null))
+            .ReturnsAsync(response);
+
+        // Act
+        var result = await _controller.ExportLogs(format: "json");
+
+        // Assert
+        var fileResult = Assert.IsType<FileContentResult>(result);
+        Assert.Equal("application/json", fileResult.ContentType);
+        Assert.Equal("logs.json", fileResult.FileDownloadName);
+        Assert.True(fileResult.FileContents.Length > 0);
+    }
+
+    [Fact]
+    public async Task ExportLogs_Csv_ReturnsCsvFile()
+    {
+        // Arrange
+        var response = new LogsResponse
+        {
+            Entries = new List<LogEntryDto>
+            {
+                new LogEntryDto { Id = "1", Timestamp = new DateTime(2026, 1, 15, 10, 30, 0, DateTimeKind.Utc), Level = "Warning", Source = "HyperV-Worker", Message = "High memory usage" }
+            },
+            TotalCount = 1,
+            Sources = new List<string> { "HyperV-Worker" }
+        };
+        _eventLogProviderMock
+            .Setup(p => p.GetLogsAsync(null, null, null, null, 1000, null))
+            .ReturnsAsync(response);
+
+        // Act
+        var result = await _controller.ExportLogs(format: "csv");
+
+        // Assert
+        var fileResult = Assert.IsType<FileContentResult>(result);
+        Assert.Equal("text/csv", fileResult.ContentType);
+        Assert.Equal("logs.csv", fileResult.FileDownloadName);
+        var csv = System.Text.Encoding.UTF8.GetString(fileResult.FileContents);
+        Assert.Contains("Timestamp,Level,Source,Message,EventId,Category", csv);
+        Assert.Contains("High memory usage", csv);
+    }
+
+    [Fact]
+    public async Task ExportLogs_WhenProviderThrows_Returns500()
+    {
+        // Arrange
+        _eventLogProviderMock
+            .Setup(p => p.GetLogsAsync(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<int>(), It.IsAny<string?>()))
+            .ThrowsAsync(new Exception("Export failed"));
+
+        // Act
+        var result = await _controller.ExportLogs();
+
+        // Assert
+        var statusResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(500, statusResult.StatusCode);
+    }
+
+    // ──────────────────── ShutdownHost ────────────────────
+
+    [Fact]
+    public async Task ShutdownHost_WithConfirm_ReturnsOk()
+    {
+        // Arrange
+        _hostProviderMock.Setup(p => p.ShutdownHostAsync(false)).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _controller.ShutdownHost(confirm: true);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.NotNull(okResult.Value);
+        var valueType = okResult.Value!.GetType();
+        Assert.Equal("shutdown_initiated", valueType.GetProperty("status")!.GetValue(okResult.Value));
+        _hostProviderMock.Verify(p => p.ShutdownHostAsync(false), Times.Once);
+    }
+
+    [Fact]
+    public async Task ShutdownHost_WithoutConfirm_ReturnsBadRequest()
+    {
+        // Act
+        var result = await _controller.ShutdownHost(confirm: false);
+
+        // Assert
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.NotNull(badRequest.Value);
+        _hostProviderMock.Verify(p => p.ShutdownHostAsync(It.IsAny<bool>()), Times.Never);
+    }
+
+    // ──────────────────── RebootHost ────────────────────
+
+    [Fact]
+    public async Task RebootHost_WithConfirm_ReturnsOk()
+    {
+        // Arrange
+        _hostProviderMock.Setup(p => p.RebootHostAsync(false)).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _controller.RebootHost(confirm: true);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.NotNull(okResult.Value);
+        var valueType = okResult.Value!.GetType();
+        Assert.Equal("reboot_initiated", valueType.GetProperty("status")!.GetValue(okResult.Value));
+        _hostProviderMock.Verify(p => p.RebootHostAsync(false), Times.Once);
+    }
+
+    [Fact]
+    public async Task RebootHost_WithoutConfirm_ReturnsBadRequest()
+    {
+        // Act
+        var result = await _controller.RebootHost(confirm: false);
+
+        // Assert
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.NotNull(badRequest.Value);
+        _hostProviderMock.Verify(p => p.RebootHostAsync(It.IsAny<bool>()), Times.Never);
     }
 }

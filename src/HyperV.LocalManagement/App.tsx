@@ -11,6 +11,8 @@ import { HypervisorPage } from './pages/HypervisorPage';
 import { ReplicationPage } from './pages/ReplicationPage';
 import { MetricsPage } from './pages/MetricsPage';
 import { SystemLogsPage } from './pages/SystemLogsPage';
+import { SchedulesPage } from './pages/SchedulesPage';
+import { BackupPage } from './pages/BackupPage';
 import { LoginPage } from './pages/LoginPage';
 import { Notification, NotificationType } from './types';
 import { AuthProvider, useAuth } from './hooks/useAuth';
@@ -114,6 +116,8 @@ const App = () => {
                             <Route path="replication" element={<ReplicationPage />} />
                             <Route path="metrics" element={<MetricsPage />} />
                             <Route path="logs" element={<SystemLogsPage />} />
+                            <Route path="schedules" element={<SchedulesPage />} />
+                            <Route path="backups" element={<BackupPage />} />
                             <Route path="hypervisor" element={<HypervisorPage />} />
                         </Route>
                     </Routes>

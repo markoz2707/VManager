@@ -71,7 +71,7 @@ public class DrsEngine : BackgroundService
         var nodes = await context.ClusterNodes
             .Where(cn => cn.ClusterId == config.ClusterId)
             .Include(cn => cn.AgentHost)
-            .Where(cn => cn.AgentHost != null && cn.AgentHost.Status == AgentStatus.Online)
+            .Where(cn => cn.AgentHost != null && cn.AgentHost.Status == AgentStatus.Online && !cn.AgentHost.IsInMaintenanceMode)
             .ToListAsync(ct);
 
         if (nodes.Count < 2) return;
@@ -168,6 +168,56 @@ public class DrsEngine : BackgroundService
                           r.Status == DrsRecommendationStatus.Pending, ct);
 
         if (existingRec) return;
+
+        // Check affinity rules - mandatory anti-affinity prevents placing on same host
+        var affinityRules = await context.DrsAffinityRules
+            .Where(r => r.DrsConfigurationId == config.Id && r.IsEnabled)
+            .Include(r => r.VmMembers)
+            .ToListAsync(ct);
+
+        foreach (var rule in affinityRules)
+        {
+            var memberVmIds = rule.VmMembers.Select(m => m.VmInventoryId).ToHashSet();
+            if (!memberVmIds.Contains(candidate.Id)) continue;
+
+            if (rule.Type == AffinityRuleType.Affinity)
+            {
+                // Affinity: VMs should be on the same host
+                // If other members are on a different host, prefer that host
+                var otherMembers = await context.VmInventory
+                    .Where(v => memberVmIds.Contains(v.Id) && v.Id != candidate.Id)
+                    .ToListAsync(ct);
+
+                if (otherMembers.Any() && otherMembers.All(m => m.AgentHostId == underloaded.AgentHostId))
+                {
+                    // Destination already has affinity group members - good
+                }
+                else if (rule.IsMandatory && otherMembers.Any())
+                {
+                    // Must go where the group is
+                    var groupHostId = otherMembers.First().AgentHostId;
+                    if (groupHostId != underloaded.AgentHostId && hostUsage.ContainsKey(groupHostId))
+                    {
+                        // Override destination to match affinity group
+                        underloaded = hostUsage[groupHostId];
+                    }
+                }
+            }
+            else if (rule.Type == AffinityRuleType.AntiAffinity)
+            {
+                // Anti-affinity: VMs must NOT be on the same host
+                var membersOnDest = await context.VmInventory
+                    .AnyAsync(v => memberVmIds.Contains(v.Id) && v.Id != candidate.Id &&
+                                   v.AgentHostId == underloaded.AgentHostId, ct);
+
+                if (membersOnDest && rule.IsMandatory)
+                {
+                    _logger.LogInformation("DRS: Skipping migration of '{VmName}' to {Dest} due to mandatory anti-affinity rule '{RuleName}'",
+                        candidate.Name, underloaded.Hostname, rule.Name);
+                    return; // Block this migration
+                }
+            }
+        }
 
         var reason = $"{imbalanceType} imbalance - CPU: {cpuImbalance:F1}% (src: {overloaded.CpuUsagePercent:F1}%, dst: {underloaded.CpuUsagePercent:F1}%), " +
                      $"Memory: {memoryImbalance:F1}% (src: {overloaded.MemoryUsagePercent:F1}%, dst: {underloaded.MemoryUsagePercent:F1}%)";

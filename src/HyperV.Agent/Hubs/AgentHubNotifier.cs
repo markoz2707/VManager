@@ -42,4 +42,24 @@ public class AgentHubNotifier : IAgentHubNotifier
         await _hubContext.Clients.Group("containers")
             .SendAsync("ContainerStateChanged", containerId, oldState, newState);
     }
+
+    public async Task NotifyVmCreatedAsync(object vmSummary)
+    {
+        _logger.LogDebug("Broadcasting VmCreated");
+        await _hubContext.Clients.Group("vm-events")
+            .SendAsync("VmCreated", vmSummary);
+    }
+
+    public async Task NotifyVmDeletedAsync(string vmId)
+    {
+        _logger.LogDebug("Broadcasting VmDeleted: {VmId}", vmId);
+        await _hubContext.Clients.Group("vm-events")
+            .SendAsync("VmDeleted", vmId);
+    }
+
+    public async Task NotifyMetricSnapshotAsync(string metricName, double value)
+    {
+        await _hubContext.Clients.Group("metrics")
+            .SendAsync("MetricSnapshot", metricName, value);
+    }
 }

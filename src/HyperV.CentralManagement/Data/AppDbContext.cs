@@ -46,6 +46,14 @@ public class AppDbContext : DbContext
     public DbSet<DrsConfiguration> DrsConfigurations => Set<DrsConfiguration>();
     public DbSet<DrsRecommendation> DrsRecommendations => Set<DrsRecommendation>();
 
+    // DRS Affinity Rules
+    public DbSet<DrsAffinityRule> DrsAffinityRules => Set<DrsAffinityRule>();
+    public DbSet<DrsAffinityRuleVm> DrsAffinityRuleVms => Set<DrsAffinityRuleVm>();
+
+    // Resource Pools
+    public DbSet<ResourcePool> ResourcePools => Set<ResourcePool>();
+    public DbSet<ResourcePoolVm> ResourcePoolVms => Set<ResourcePoolVm>();
+
     // Content Library
     public DbSet<ContentLibraryItem> ContentLibraryItems => Set<ContentLibraryItem>();
     public DbSet<ContentLibrarySubscription> ContentLibrarySubscriptions => Set<ContentLibrarySubscription>();
@@ -200,6 +208,40 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<DrsRecommendation>()
             .HasIndex(d => d.Status);
+
+        // DRS Affinity Rules
+        modelBuilder.Entity<DrsAffinityRule>()
+            .HasOne(r => r.DrsConfiguration)
+            .WithMany()
+            .HasForeignKey(r => r.DrsConfigurationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DrsAffinityRuleVm>()
+            .HasOne(rv => rv.DrsAffinityRule)
+            .WithMany(r => r.VmMembers)
+            .HasForeignKey(rv => rv.DrsAffinityRuleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DrsAffinityRuleVm>()
+            .HasIndex(rv => new { rv.DrsAffinityRuleId, rv.VmInventoryId })
+            .IsUnique();
+
+        // Resource Pools
+        modelBuilder.Entity<ResourcePool>()
+            .HasOne(rp => rp.Cluster)
+            .WithMany()
+            .HasForeignKey(rp => rp.ClusterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ResourcePoolVm>()
+            .HasOne(rpv => rpv.ResourcePool)
+            .WithMany(rp => rp.AssignedVms)
+            .HasForeignKey(rpv => rpv.ResourcePoolId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ResourcePoolVm>()
+            .HasIndex(rpv => new { rpv.ResourcePoolId, rpv.VmInventoryId })
+            .IsUnique();
 
         // Content Library
         modelBuilder.Entity<ContentLibraryItem>()

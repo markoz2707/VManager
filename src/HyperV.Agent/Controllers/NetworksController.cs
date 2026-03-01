@@ -22,14 +22,28 @@ public sealed class NetworksController : ControllerBase
 
     /// <summary>List all virtual networks.</summary>
     [HttpGet]
-    [ProducesResponseType(typeof(List<VirtualNetworkInfo>), 200)]
+    [ProducesResponseType(typeof(PaginatedResult<VirtualNetworkInfo>), 200)]
     [SwaggerOperation(Summary = "List networks", Description = "Lists all virtual networks from the current hypervisor.")]
-    public async Task<IActionResult> ListNetworks()
+    public async Task<IActionResult> ListNetworks([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         try
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 1;
+            if (pageSize > 200) pageSize = 200;
+
             var networks = await _networkProvider.ListNetworksAsync();
-            return Ok(networks);
+            var totalCount = networks.Count;
+            var items = networks.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return Ok(new PaginatedResult<VirtualNetworkInfo>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                HasMore = (page * pageSize) < totalCount
+            });
         }
         catch (Exception ex)
         {

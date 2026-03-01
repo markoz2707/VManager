@@ -2,10 +2,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Card } from '../components/Card';
 import { Spinner } from '../components/Spinner';
+import { Modal } from '../components/Modal';
 import { getDashboardStats, getHostDetails, jobService, hostService } from '../services/hypervService';
 import { Button } from '../components/Button';
-// DO add comment above each fix.
-// Fix: Added missing CheckCircleIcon to the imports from Icons component.
 import { ShutdownIcon, RebootIcon, RefreshIcon, ActionsIcon, PlusIcon, CheckCircleIcon } from '../components/Icons';
 import { OutletContextType } from '../App';
 import { HostDetails, HostPerformance, StorageJob, Stats } from '../types';
@@ -46,6 +45,8 @@ export const HostPage = () => {
   const [performance, setPerformance] = useState<HostPerformance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'shutdown' | 'reboot' | null>(null);
+  const [isActionBusy, setIsActionBusy] = useState(false);
   const { addNotification } = useOutletContext<OutletContextType>();
   const { capabilities } = useHostContext();
 
@@ -78,6 +79,25 @@ export const HostPage = () => {
     fetchData();
   };
 
+  const handleHostPowerAction = async () => {
+    if (!confirmAction) return;
+    setIsActionBusy(true);
+    try {
+        if (confirmAction === 'shutdown') {
+            await hostService.shutdownHost();
+            addNotification('success', 'Host shutdown initiated.');
+        } else {
+            await hostService.rebootHost();
+            addNotification('success', 'Host reboot initiated.');
+        }
+    } catch (err: any) {
+        addNotification('error', `Failed to ${confirmAction} host: ${err.message}`);
+    } finally {
+        setIsActionBusy(false);
+        setConfirmAction(null);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -108,8 +128,8 @@ export const HostPage = () => {
         </div>
         <div className="flex items-center space-x-1">
             <Button variant="toolbar" size="md" onClick={() => setIsWizardOpen(true)} leftIcon={<PlusIcon className="h-4 w-4"/>}>Create/Register VM</Button>
-            <Button variant="toolbar" size="md" leftIcon={<ShutdownIcon className="h-4 w-4"/>}>Shut down</Button>
-            <Button variant="toolbar" size="md" leftIcon={<RebootIcon className="h-4 w-4"/>}>Reboot</Button>
+            <Button variant="toolbar" size="md" leftIcon={<ShutdownIcon className="h-4 w-4"/>} onClick={() => setConfirmAction('shutdown')}>Shut down</Button>
+            <Button variant="toolbar" size="md" leftIcon={<RebootIcon className="h-4 w-4"/>} onClick={() => setConfirmAction('reboot')}>Reboot</Button>
             <Button variant="toolbar" size="md" leftIcon={<RefreshIcon className="h-4 w-4"/>} onClick={fetchData}>Refresh</Button>
             <Button variant="toolbar" size="md" leftIcon={<ActionsIcon className="h-4 w-4"/>}>Actions</Button>
         </div>
@@ -291,6 +311,23 @@ export const HostPage = () => {
         </main>
       </div>
       {isWizardOpen && <CreateVmWizard isOpen={isWizardOpen} onClose={() => setIsWizardOpen(false)} onComplete={handleCreationComplete} />}
+
+      <Modal isOpen={confirmAction !== null} onClose={() => setConfirmAction(null)} title={`Confirm ${confirmAction === 'shutdown' ? 'Shutdown' : 'Reboot'}`}>
+        <div className="space-y-4">
+            <p className="text-sm text-gray-700">
+                Are you sure you want to <strong>{confirmAction}</strong> this host?
+                {confirmAction === 'shutdown'
+                    ? ' All running VMs will be stopped and the host will power off.'
+                    : ' All running VMs will be stopped and the host will restart.'}
+            </p>
+            <div className="flex justify-end space-x-2">
+                <Button variant="toolbar" onClick={() => setConfirmAction(null)} disabled={isActionBusy}>Cancel</Button>
+                <Button variant="danger" onClick={handleHostPowerAction} disabled={isActionBusy}>
+                    {isActionBusy ? <Spinner size="sm" /> : `Yes, ${confirmAction === 'shutdown' ? 'Shut down' : 'Reboot'}`}
+                </Button>
+            </div>
+        </div>
+      </Modal>
     </div>
   );
 };

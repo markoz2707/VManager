@@ -10,4 +10,7 @@ public interface IHostProvider
     Task<HostInfoDto> GetHostInfoAsync();
     Task<HostPerformanceMetrics> GetPerformanceMetricsAsync();
     Task<HypervisorCapabilities> GetCapabilitiesAsync();
+
+    Task ShutdownHostAsync(bool force = false);
+    Task RebootHostAsync(bool force = false);
 }

@@ -82,14 +82,28 @@ public class VmsController : ControllerBase
 
     /// <summary>Listuje wszystkie maszyny wirtualne.</summary>
     [HttpGet]
-    [ProducesResponseType(typeof(List<VmSummaryDto>), 200)]
-    [SwaggerOperation(Summary = "List VMs", Description = "Lists all VMs from the configured provider.")]
-    public async Task<IActionResult> ListVms()
+    [ProducesResponseType(typeof(PaginatedResult<VmSummaryDto>), 200)]
+    [SwaggerOperation(Summary = "List VMs", Description = "Lists all VMs from the configured provider with optional pagination.")]
+    public async Task<IActionResult> ListVms([FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         try
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 1;
+            if (pageSize > 200) pageSize = 200;
+
             var vms = await _vmProvider.ListVmsAsync();
-            return Ok(vms);
+            var totalCount = vms.Count;
+            var items = vms.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return Ok(new PaginatedResult<VmSummaryDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                HasMore = (page * pageSize) < totalCount
+            });
         }
         catch (Exception ex)
         {

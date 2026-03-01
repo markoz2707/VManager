@@ -50,6 +50,9 @@ public class AgentHost
     [MaxLength(200)]
     public string? ClusterName { get; set; }
 
+    public bool IsInMaintenanceMode { get; set; }
+    public DateTimeOffset? MaintenanceModeStartedUtc { get; set; }
+
     public Guid? DatacenterId { get; set; }
     public Datacenter? Datacenter { get; set; }
 }

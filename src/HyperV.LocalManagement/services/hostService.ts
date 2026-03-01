@@ -24,3 +24,11 @@ export const getRecentTasks = async (limit: number = 10): Promise<HostTask[]> =>
 export const getCapabilities = async (): Promise<HostCapabilities> => {
     return fetchApi('/host/capabilities');
 };
+
+export const shutdownHost = async (): Promise<void> => {
+    await fetchApi('/host/shutdown?confirm=true', { method: 'POST' });
+};
+
+export const rebootHost = async (): Promise<void> => {
+    await fetchApi('/host/reboot?confirm=true', { method: 'POST' });
+};

@@ -45,6 +45,7 @@ builder.Services.AddScoped<MigrationOrchestrator>();
 builder.Services.AddScoped<AlertService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<ContentLibraryService>();
+builder.Services.AddScoped<MaintenanceModeService>();
 builder.Services.AddScoped<SignalRClientService>();
 builder.Services.AddHostedService<VmSyncBackgroundService>();
 builder.Services.AddHostedService<AlertEvaluationService>();

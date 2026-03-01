@@ -42,8 +42,9 @@ public class ContainersControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var returned = Assert.IsType<List<ContainerSummaryDto>>(okResult.Value);
-        Assert.Equal(2, returned.Count);
+        var paginated = Assert.IsType<PaginatedResult<ContainerSummaryDto>>(okResult.Value);
+        Assert.Equal(2, paginated.Items.Count);
+        Assert.Equal(2, paginated.TotalCount);
         _containerProviderMock.Verify(p => p.ListContainersAsync(), Times.Once);
     }
 
@@ -58,8 +59,9 @@ public class ContainersControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var returned = Assert.IsType<List<ContainerSummaryDto>>(okResult.Value);
-        Assert.Empty(returned);
+        var paginated = Assert.IsType<PaginatedResult<ContainerSummaryDto>>(okResult.Value);
+        Assert.Empty(paginated.Items);
+        Assert.Equal(0, paginated.TotalCount);
     }
 
     [Fact]

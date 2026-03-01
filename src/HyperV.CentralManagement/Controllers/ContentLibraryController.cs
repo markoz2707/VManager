@@ -172,6 +172,35 @@ public class ContentLibraryController : ControllerBase
         }
     }
 
+    /// <summary>Deploys a template as a new VM on the specified agent.</summary>
+    [HttpPost("{id:guid}/deploy")]
+    [RequirePermission("content-library", "write")]
+    public async Task<IActionResult> DeployTemplate(Guid id, [FromBody] DeployTemplateRequest request, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(request.VmName))
+            return BadRequest(new { error = "VmName is required" });
+
+        try
+        {
+            var spec = new DeployVmSpec
+            {
+                VmName = request.VmName,
+                CpuCount = request.CpuCount,
+                MemoryMB = request.MemoryMB,
+                Generation = request.Generation,
+                DiskSizeGB = request.DiskSizeGB,
+                NetworkName = request.NetworkName
+            };
+
+            var result = await _service.DeployTemplateAsync(id, request.TargetAgentId, spec, ct);
+            return result.Success ? Ok(result) : StatusCode(500, result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+    }
+
     /// <summary>Triggers synchronization of a content library item to all its subscribers.</summary>
     [HttpPost("{id:guid}/sync")]
     [RequirePermission("content-library", "write")]
@@ -187,6 +216,17 @@ public class ContentLibraryController : ControllerBase
             return NotFound(new { error = ex.Message });
         }
     }
+}
+
+public class DeployTemplateRequest
+{
+    public Guid TargetAgentId { get; set; }
+    public string VmName { get; set; } = string.Empty;
+    public int CpuCount { get; set; } = 2;
+    public long MemoryMB { get; set; } = 2048;
+    public int Generation { get; set; } = 2;
+    public long DiskSizeGB { get; set; } = 40;
+    public string? NetworkName { get; set; }
 }
 
 public class UpdateContentLibraryItemRequest

@@ -19,11 +19,26 @@ const mapVmStatus = (apiStatus: string | undefined): VmStatus => {
     }
 };
 
-export const getVms = async (): Promise<{ WMI: VirtualMachine[], HCS: VirtualMachine[] }> => {
-    const data = await fetchApi('/vms');
+export const getVms = async (page: number = 1, pageSize: number = 50): Promise<{ WMI: VirtualMachine[], HCS: VirtualMachine[], totalCount?: number, hasMore?: boolean }> => {
+    const data = await fetchApi(`/vms?page=${page}&pageSize=${pageSize}`);
+
+    // Handle paginated response (new format)
+    if (data.items) {
+        const vms = (data.items || []).map((vm: any) => ({
+            id: vm.Id || vm.id || vm.ID,
+            name: vm.Name || vm.name || vm.ID || vm.id,
+            status: mapVmStatus(vm.State || vm.state),
+            environment: 'WMI' as VmEnvironment,
+            cpuCount: vm.Processors || vm.processors,
+            memoryMB: vm.Memory || vm.memory
+        }));
+        return { WMI: vms, HCS: [], totalCount: data.totalCount, hasMore: data.hasMore };
+    }
+
+    // Legacy format
     const wmiData = data.wmi || data.WMI || {};
     const hcsData = data.hcs || data.HCS || {};
-    
+
     return {
         WMI: (wmiData.VMs || wmiData.vms || []).map((vm: any) => ({
             id: vm.Id || vm.id || vm.ID,

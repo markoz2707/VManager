@@ -25,6 +25,12 @@ export interface ContainerStateChangedEvent {
     newState: string;
 }
 
+export interface VmCreatedEvent {
+    vmId: string;
+    vmName: string;
+    state: string;
+}
+
 export type SignalRGroup = 'vm-events' | 'metrics' | 'jobs' | 'containers';
 
 interface UseSignalROptions {
@@ -38,6 +44,10 @@ interface UseSignalROptions {
     onJobProgress?: (event: JobProgressEvent) => void;
     /** Called when a container state changes */
     onContainerStateChanged?: (event: ContainerStateChangedEvent) => void;
+    /** Called when a new VM is created */
+    onVmCreated?: (event: VmCreatedEvent) => void;
+    /** Called when a VM is deleted */
+    onVmDeleted?: (vmId: string) => void;
     /** Whether the connection should be active (default: true) */
     enabled?: boolean;
 }
@@ -94,6 +104,18 @@ export function useSignalR(options: UseSignalROptions = {}) {
 
         connection.on('ContainerStateChanged', (containerId: string, oldState: string, newState: string) => {
             callbacksRef.current.onContainerStateChanged?.({ containerId, oldState, newState });
+        });
+
+        connection.on('VmCreated', (vmSummary: any) => {
+            callbacksRef.current.onVmCreated?.({
+                vmId: vmSummary.vmId || vmSummary.id,
+                vmName: vmSummary.vmName || vmSummary.name,
+                state: vmSummary.state || 'Unknown',
+            });
+        });
+
+        connection.on('VmDeleted', (vmId: string) => {
+            callbacksRef.current.onVmDeleted?.(vmId);
         });
 
         connection.onreconnected(async () => {

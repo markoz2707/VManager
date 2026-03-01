@@ -15,6 +15,8 @@ public static class HyperVServiceRegistration
         services.AddSingleton<IStorageProvider, HyperVStorageProvider>();
         services.AddSingleton<IContainerProvider, HyperVContainerProvider>();
         services.AddSingleton<IGuestAgentProvider, HyperVGuestAgentProvider>();
+        services.AddSingleton<IEventLogProvider, HyperVEventLogProvider>();
+        services.AddSingleton<IBackupProvider, HyperVBackupProvider>();
         return services;
     }
 }

@@ -84,6 +84,19 @@ public class AgentApiClient
         return response.IsSuccessStatusCode;
     }
 
+    // VM Creation (for Content Library deploy)
+    public async Task<CreateVmResponse?> CreateVmAsync(string apiBaseUrl, CreateVmApiRequest request)
+    {
+        using var client = CreateClient(apiBaseUrl);
+        var response = await client.PostAsJsonAsync("api/v1/vms", request, _jsonOptions);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"CreateVM failed ({response.StatusCode}): {errorContent}");
+        }
+        return await response.Content.ReadFromJsonAsync<CreateVmResponse>(_jsonOptions);
+    }
+
     // VM Migration
     public async Task<MigrationResponse?> MigrateVmAsync(string apiBaseUrl, string vmName, MigrationRequest request)
     {
@@ -98,6 +111,17 @@ public class AgentApiClient
     {
         using var client = CreateClient(apiBaseUrl);
         return await client.GetFromJsonAsync<VmMetricsResponse>($"api/v1/vms/{vmName}/metrics/usage", _jsonOptions);
+    }
+
+    // VM Disk Metrics
+    public async Task<VmDiskMetricsResponse?> GetVmDiskMetricsAsync(string apiBaseUrl, string vmName)
+    {
+        using var client = CreateClient(apiBaseUrl);
+        try
+        {
+            return await client.GetFromJsonAsync<VmDiskMetricsResponse>($"api/v1/vms/{vmName}/metrics/usage", _jsonOptions);
+        }
+        catch { return null; }
     }
 
     // Host Metrics
@@ -196,4 +220,40 @@ public class HostMemoryMetrics
     public long AvailableMB { get; set; }
     public long UsedMB { get; set; }
     public double UsagePercent { get; set; }
+}
+
+public class VmDiskMetricsResponse
+{
+    public VmDiskIo? Disk { get; set; }
+    public VmNetIo? Network { get; set; }
+}
+
+public class VmDiskIo
+{
+    public long ReadBytesPerSec { get; set; }
+    public long WriteBytesPerSec { get; set; }
+}
+
+public class VmNetIo
+{
+    public long BytesSentPerSec { get; set; }
+    public long BytesReceivedPerSec { get; set; }
+}
+
+public class CreateVmApiRequest
+{
+    public string Name { get; set; } = "";
+    public int CpuCount { get; set; } = 1;
+    public long MemoryMB { get; set; } = 1024;
+    public int Generation { get; set; } = 2;
+    public long DiskSizeGB { get; set; } = 40;
+    public string? NetworkName { get; set; }
+    public string? IsoPath { get; set; }
+}
+
+public class CreateVmResponse
+{
+    public string? Id { get; set; }
+    public string? Name { get; set; }
+    public string? Status { get; set; }
 }

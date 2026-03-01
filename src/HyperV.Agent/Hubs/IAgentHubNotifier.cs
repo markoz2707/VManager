@@ -17,4 +17,13 @@ public interface IAgentHubNotifier
 
     /// <summary>Notify subscribed clients that a container changed state.</summary>
     Task NotifyContainerStateChanged(string containerId, string oldState, string newState);
+
+    /// <summary>Notify that a new VM was created.</summary>
+    Task NotifyVmCreatedAsync(object vmSummary);
+
+    /// <summary>Notify that a VM was deleted.</summary>
+    Task NotifyVmDeletedAsync(string vmId);
+
+    /// <summary>Broadcast a single metric value to the "metrics" group.</summary>
+    Task NotifyMetricSnapshotAsync(string metricName, double value);
 }

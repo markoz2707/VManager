@@ -42,8 +42,9 @@ public class NetworksControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnedNetworks = Assert.IsType<List<VirtualNetworkInfo>>(okResult.Value);
-        Assert.Equal(2, returnedNetworks.Count);
+        var paginated = Assert.IsType<PaginatedResult<VirtualNetworkInfo>>(okResult.Value);
+        Assert.Equal(2, paginated.Items.Count);
+        Assert.Equal(2, paginated.TotalCount);
         _networkProviderMock.Verify(p => p.ListNetworksAsync(), Times.Once);
     }
 
@@ -58,8 +59,9 @@ public class NetworksControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var returnedNetworks = Assert.IsType<List<VirtualNetworkInfo>>(okResult.Value);
-        Assert.Empty(returnedNetworks);
+        var paginated = Assert.IsType<PaginatedResult<VirtualNetworkInfo>>(okResult.Value);
+        Assert.Empty(paginated.Items);
+        Assert.Equal(0, paginated.TotalCount);
     }
 
     [Fact]

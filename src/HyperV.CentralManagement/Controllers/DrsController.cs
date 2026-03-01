@@ -139,6 +139,106 @@ public class DrsController : ControllerBase
         return Ok();
     }
 
+    #region Affinity Rules
+
+    [HttpGet("rules/{clusterId:guid}")]
+    [RequirePermission("cluster", "read")]
+    public async Task<IActionResult> GetAffinityRules(Guid clusterId)
+    {
+        var configId = await _db.DrsConfigurations
+            .Where(d => d.ClusterId == clusterId)
+            .Select(d => d.Id)
+            .FirstOrDefaultAsync();
+
+        if (configId == Guid.Empty) return Ok(Array.Empty<object>());
+
+        var rules = await _db.DrsAffinityRules
+            .Where(r => r.DrsConfigurationId == configId)
+            .Include(r => r.VmMembers)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return Ok(rules.Select(r => new
+        {
+            r.Id,
+            r.Name,
+            Type = r.Type.ToString(),
+            r.IsEnabled,
+            r.IsMandatory,
+            VmMembers = r.VmMembers.Select(vm => vm.VmInventoryId),
+            r.CreatedUtc
+        }));
+    }
+
+    [HttpPost("rules/{clusterId:guid}")]
+    [RequirePermission("cluster", "update")]
+    public async Task<IActionResult> CreateAffinityRule(Guid clusterId, [FromBody] AffinityRuleDto dto)
+    {
+        var config = await _db.DrsConfigurations.FirstOrDefaultAsync(d => d.ClusterId == clusterId);
+        if (config == null)
+            return NotFound(new { error = "DRS not configured for this cluster" });
+
+        var rule = new DrsAffinityRule
+        {
+            DrsConfigurationId = config.Id,
+            Name = dto.Name,
+            Type = dto.Type,
+            IsEnabled = dto.IsEnabled,
+            IsMandatory = dto.IsMandatory,
+            VmMembers = dto.VmIds.Select(vmId => new DrsAffinityRuleVm { VmInventoryId = vmId }).ToList()
+        };
+
+        _db.DrsAffinityRules.Add(rule);
+        await _db.SaveChangesAsync();
+
+        await _audit.WriteAsync(User.Identity?.Name, "drs_rule_created", $"{rule.Name} ({rule.Type})");
+        return Created($"/api/drs/rules/{clusterId}/{rule.Id}", new { rule.Id, rule.Name });
+    }
+
+    [HttpPut("rules/{clusterId:guid}/{ruleId:guid}")]
+    [RequirePermission("cluster", "update")]
+    public async Task<IActionResult> UpdateAffinityRule(Guid clusterId, Guid ruleId, [FromBody] AffinityRuleDto dto)
+    {
+        var rule = await _db.DrsAffinityRules
+            .Include(r => r.VmMembers)
+            .FirstOrDefaultAsync(r => r.Id == ruleId);
+
+        if (rule == null) return NotFound();
+
+        rule.Name = dto.Name;
+        rule.Type = dto.Type;
+        rule.IsEnabled = dto.IsEnabled;
+        rule.IsMandatory = dto.IsMandatory;
+
+        // Replace VM members
+        _db.DrsAffinityRuleVms.RemoveRange(rule.VmMembers);
+        rule.VmMembers = dto.VmIds.Select(vmId => new DrsAffinityRuleVm
+        {
+            DrsAffinityRuleId = rule.Id,
+            VmInventoryId = vmId
+        }).ToList();
+
+        await _db.SaveChangesAsync();
+        await _audit.WriteAsync(User.Identity?.Name, "drs_rule_updated", rule.Name);
+        return Ok(new { rule.Id, rule.Name });
+    }
+
+    [HttpDelete("rules/{clusterId:guid}/{ruleId:guid}")]
+    [RequirePermission("cluster", "update")]
+    public async Task<IActionResult> DeleteAffinityRule(Guid clusterId, Guid ruleId)
+    {
+        var rule = await _db.DrsAffinityRules.FindAsync(ruleId);
+        if (rule == null) return NotFound();
+
+        _db.DrsAffinityRules.Remove(rule);
+        await _db.SaveChangesAsync();
+
+        await _audit.WriteAsync(User.Identity?.Name, "drs_rule_deleted", rule.Name);
+        return Ok(new { message = "Deleted" });
+    }
+
+    #endregion
+
     [HttpGet("balance/{clusterId:guid}")]
     [RequirePermission("cluster", "read")]
     public async Task<IActionResult> GetClusterBalance(Guid clusterId)
@@ -178,6 +278,15 @@ public class DrsController : ControllerBase
 
         return Ok(new { clusterId, hosts = balance });
     }
+}
+
+public class AffinityRuleDto
+{
+    public string Name { get; set; } = string.Empty;
+    public AffinityRuleType Type { get; set; }
+    public bool IsEnabled { get; set; } = true;
+    public bool IsMandatory { get; set; }
+    public List<Guid> VmIds { get; set; } = new();
 }
 
 public class DrsConfigDto

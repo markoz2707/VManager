@@ -81,6 +81,12 @@ export const VirtualMachinesPage = () => {
     const [selectedVm, setSelectedVm] = useState<VirtualMachine | null>(null);
     const [selectedVmIds, setSelectedVmIds] = useState<Set<string>>(new Set());
     const [isBulkAction, setIsBulkAction] = useState(false);
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(50);
+    const [totalCount, setTotalCount] = useState(0);
+    const [hasMore, setHasMore] = useState(false);
     
     // Modals states
     const [activeModal, setActiveModal] = useState<'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy' | 'storage-migrate' | 'console' | null>(null);
@@ -106,12 +112,16 @@ export const VirtualMachinesPage = () => {
     const [consoleInfo, setConsoleInfo] = useState<{ vmId: string; vmName: string; state: string; rdpHost: string; rdpPort: number; protocol: string } | null>(null);
 
 
-    const fetchVms = useCallback(async () => {
+    const fetchVms = useCallback(async (page?: number) => {
         setIsLoading(true);
         try {
-            const vmList = await api.getVms();
+            const p = page ?? currentPage;
+            const vmList = await api.getVms(p, pageSize);
             const wmiVms = vmList.WMI || [];
-            
+
+            if (vmList.totalCount !== undefined) setTotalCount(vmList.totalCount);
+            if (vmList.hasMore !== undefined) setHasMore(vmList.hasMore);
+
             setVms(wmiVms);
 
             const vmPropsPromises = wmiVms.map(vm =>
@@ -129,16 +139,25 @@ export const VirtualMachinesPage = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [addNotification]);
+    }, [addNotification, currentPage, pageSize]);
 
     useEffect(() => {
         fetchVms();
     }, [fetchVms]);
 
-    // Real-time updates via SignalR
+    // Real-time updates via SignalR (granular)
     useSignalR({
         groups: ['vm-events'],
-        onVmStateChanged: () => fetchVms(),
+        onVmStateChanged: (event) => {
+            setVms(prev => prev.map(vm =>
+                vm.name === event.vmName ? { ...vm, status: event.newState as any } : vm
+            ));
+        },
+        onVmCreated: () => fetchVms(),
+        onVmDeleted: (vmId) => {
+            setVms(prev => prev.filter(vm => vm.id !== vmId));
+            setTotalCount(prev => Math.max(0, prev - 1));
+        },
     });
 
     const handleAction = async (name: string, action: VmAction) => {
@@ -428,6 +447,33 @@ export const VirtualMachinesPage = () => {
                             <p>No virtual machines found. Create your first VM to get started.</p>
                         </div>
                     )
+                )}
+
+                {totalCount > 0 && (
+                    <div className="px-4 py-3 bg-gray-50 border-t border-panel-border flex items-center justify-between">
+                        <div className="text-sm text-gray-600">
+                            Showing {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalCount)} of {totalCount} VMs
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <select
+                                value={pageSize}
+                                onChange={e => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                                className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                            >
+                                <option value={10}>10 / page</option>
+                                <option value={25}>25 / page</option>
+                                <option value={50}>50 / page</option>
+                                <option value={100}>100 / page</option>
+                            </select>
+                            <Button variant="toolbar" size="sm" disabled={currentPage <= 1} onClick={() => { setCurrentPage(p => p - 1); fetchVms(currentPage - 1); }}>
+                                Previous
+                            </Button>
+                            <span className="text-sm text-gray-600">Page {currentPage}</span>
+                            <Button variant="toolbar" size="sm" disabled={!hasMore} onClick={() => { setCurrentPage(p => p + 1); fetchVms(currentPage + 1); }}>
+                                Next
+                            </Button>
+                        </div>
+                    </div>
                 )}
             </main>
             

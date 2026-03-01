@@ -326,3 +326,33 @@ export interface Stats {
   storageUsedTB: number;
   storageCapacityTB: number;
 }
+
+export interface ScheduledTask {
+  id: string;
+  name: string;
+  cronExpression: string;
+  action: string;
+  targetVms: string[];
+  isEnabled: boolean;
+  lastRunUtc?: string;
+  nextRunUtc?: string;
+  lastRunResult?: string;
+}
+
+export interface BackupInfo {
+  backupId: string;
+  vmName: string;
+  backupPath: string;
+  sizeBytes: number;
+  createdUtc: string;
+  hypervisorType?: string;
+  includesSnapshots: boolean;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}

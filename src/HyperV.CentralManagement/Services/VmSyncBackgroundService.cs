@@ -56,7 +56,7 @@ public class VmSyncBackgroundService : BackgroundService
         var agentClient = scope.ServiceProvider.GetRequiredService<AgentApiClient>();
 
         var agents = await context.AgentHosts
-            .Where(a => a.Status == Models.AgentStatus.Online)
+            .Where(a => a.Status == Models.AgentStatus.Online && !a.IsInMaintenanceMode)
             .ToListAsync(stoppingToken);
 
         if (!agents.Any())

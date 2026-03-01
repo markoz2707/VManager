@@ -14,11 +14,13 @@ public class AgentsController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly AuditLogService _audit;
+    private readonly MaintenanceModeService _maintenanceService;
 
-    public AgentsController(AppDbContext db, AuditLogService audit)
+    public AgentsController(AppDbContext db, AuditLogService audit, MaintenanceModeService maintenanceService)
     {
         _db = db;
         _audit = audit;
+        _maintenanceService = maintenanceService;
     }
 
     [HttpGet]
@@ -154,6 +156,36 @@ public class AgentsController : ControllerBase
         await _audit.WriteAsync(User.Identity?.Name, "registration_token_created", token.Token);
 
         return Ok(token);
+    }
+
+    [HttpPost("{id:guid}/maintenance/enter")]
+    [RequirePermission("host", "update")]
+    public async Task<IActionResult> EnterMaintenanceMode(Guid id)
+    {
+        try
+        {
+            var result = await _maintenanceService.EnterMaintenanceModeAsync(id, User.Identity?.Name);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:guid}/maintenance/exit")]
+    [RequirePermission("host", "update")]
+    public async Task<IActionResult> ExitMaintenanceMode(Guid id)
+    {
+        try
+        {
+            var result = await _maintenanceService.ExitMaintenanceModeAsync(id, User.Identity?.Name);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
     }
 }
 

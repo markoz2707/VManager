@@ -147,6 +147,13 @@ hc.AddCheck<HyperV.Agent.Services.DiskSpaceHealthCheck>("disk-space", tags: new[
 // Register SignalR hub notifier
 builder.Services.AddSingleton<IAgentHubNotifier, AgentHubNotifier>();
 
+// Scheduler services
+builder.Services.AddSingleton<HyperV.Agent.Services.ScheduleStore>();
+builder.Services.AddHostedService<HyperV.Agent.Services.ScheduledTaskService>();
+
+// VM State Monitor (polls for changes, emits granular SignalR events)
+builder.Services.AddHostedService<HyperV.Agent.Services.VmStateMonitorService>();
+
 builder.WebHost.ConfigureKestrel(options =>
 {
     var hostIp = IPAddress.Parse(serverConfig.Host);

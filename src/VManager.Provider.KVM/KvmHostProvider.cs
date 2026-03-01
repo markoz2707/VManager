@@ -60,6 +60,22 @@ public class KvmHostProvider : IHostProvider
         });
     }
 
+    public Task ShutdownHostAsync(bool force = false)
+    {
+        _logger.LogWarning("Initiating host shutdown (force={Force})", force);
+        var args = force ? "-h now" : "-h +0";
+        System.Diagnostics.Process.Start("shutdown", args);
+        return Task.CompletedTask;
+    }
+
+    public Task RebootHostAsync(bool force = false)
+    {
+        _logger.LogWarning("Initiating host reboot (force={Force})", force);
+        var args = force ? "-r now" : "-r +0";
+        System.Diagnostics.Process.Start("shutdown", args);
+        return Task.CompletedTask;
+    }
+
     public Task<HypervisorCapabilities> GetCapabilitiesAsync()
     {
         return Task.FromResult(new HypervisorCapabilities
