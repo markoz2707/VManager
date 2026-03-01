@@ -8,7 +8,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     public AppDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        var connectionString = "Host=localhost;Port=5432;Database=hyperv_central;Username=hyperv;Password=hyperv";
+        var connectionString = "Host=localhost;Port=6485;Database=hyperv_central;Username=hyperv;Password=hyperv";
         optionsBuilder.UseNpgsql(connectionString);
 
         return new AppDbContext(optionsBuilder.Options);

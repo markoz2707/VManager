@@ -1,0 +1,222 @@
+@page "/migrations"
+@implements IAsyncDisposable
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+@inject SignalRClientService SignalR
+
+<PageTitle>VManager - Migrations</PageTitle>
+
+<div class="vm-page-header">
+    <h2>VM Migrations</h2>
+    <button class="btn btn-outline-secondary btn-sm" @onclick="LoadData">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-value">@allVms.Count</div>
+            <div class="stat-label">Total VMs</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-value">@agents.Count</div>
+            <div class="stat-label">Available Hosts</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Migrate -->
+<div class="vm-card mb-4">
+    <div class="vm-card-header">
+        <h6><i class="bi bi-arrow-left-right me-2"></i>Initiate Migration</h6>
+    </div>
+    <div class="vm-card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">VM</label>
+                <select class="form-select" @bind="selectedVmId">
+                    <option value="">-- Select VM --</option>
+                    @foreach (var vm in allVms.Where(v => v.State == "Running"))
+                    {
+                        <option value="@vm.Id">@vm.Name (@(vm.AgentHostName ?? "?"))</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Destination Host</label>
+                <select class="form-select" @bind="selectedDestId">
+                    <option value="">-- Select Host --</option>
+                    @foreach (var a in agents)
+                    {
+                        <option value="@a.Id">@a.Hostname</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" @bind="liveMigration" id="migLive" />
+                    <label class="form-check-label" for="migLive">Live Migration</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" @bind="includeStorage" id="migStorage" />
+                    <label class="form-check-label" for="migStorage">Include Storage</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary" @onclick="StartMigration" disabled="@migrating">
+                    @if (migrating) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                    <i class="bi bi-play-fill"></i> Migrate
+                </button>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(migrationError))
+        {
+            <div class="alert alert-danger mt-3 py-2" style="font-size:0.85rem;">@migrationError</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(migrationSuccess))
+        {
+            <div class="alert alert-success mt-3 py-2" style="font-size:0.85rem;">@migrationSuccess</div>
+        }
+    </div>
+</div>
+
+<!-- VMs by Host -->
+<div class="vm-card">
+    <div class="vm-card-header">
+        <h6><i class="bi bi-pc-display me-2"></i>VMs by Host</h6>
+    </div>
+    <div class="vm-card-body p-0">
+        @if (loading)
+        {
+            <div class="vm-loading">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                <span>Loading...</span>
+            </div>
+        }
+        else
+        {
+            @foreach (var group in allVms.GroupBy(v => v.AgentHostName ?? "Unknown"))
+            {
+                <div class="px-3 py-2 bg-light border-bottom">
+                    <strong>@group.Key</strong>
+                    <span class="badge bg-primary-subtle text-primary ms-2">@group.Count() VMs</span>
+                </div>
+                <table class="table table-sm mb-0">
+                    <tbody>
+                        @foreach (var vm in group.Take(10))
+                        {
+                            <tr>
+                                <td style="padding-left:24px;">
+                                    <a href="/vms/@vm.Id">@vm.Name</a>
+                                </td>
+                                <td><span class="status-badge @vm.State.ToLower()">@vm.State</span></td>
+                                <td style="font-size:0.85rem;">@vm.CpuCount vCPU</td>
+                                <td style="font-size:0.85rem;">@vm.MemoryMB MB</td>
+                            </tr>
+                        }
+                        @if (group.Count() > 10)
+                        {
+                            <tr>
+                                <td colspan="4" class="text-muted text-center" style="font-size:0.8rem;">
+                                    +@(group.Count() - 10) more VMs
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private bool loading = true;
+    private List<VmInventoryDto> allVms = new();
+    private List<AgentHost> agents = new();
+
+    private string selectedVmId = string.Empty;
+    private string selectedDestId = string.Empty;
+    private bool liveMigration = true;
+    private bool includeStorage;
+    private bool migrating;
+    private string migrationError = string.Empty;
+    private string migrationSuccess = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadData();
+        SignalR.OnMigrationProgress += _ => InvokeAsync(LoadData);
+        SignalR.OnVmStateChanged += _ => InvokeAsync(LoadData);
+        await SignalR.StartAsync();
+        await SignalR.JoinMigrationsGroupAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        SignalR.OnMigrationProgress -= _ => InvokeAsync(LoadData);
+        SignalR.OnVmStateChanged -= _ => InvokeAsync(LoadData);
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        try
+        {
+            var vmsTask = Api.GetVmsAsync();
+            var agentsTask = Api.GetAgentsAsync();
+            await Task.WhenAll(vmsTask, agentsTask);
+            allVms = (await vmsTask).ToList();
+            agents = (await agentsTask).ToList();
+        }
+        catch { }
+        finally { loading = false; }
+    }
+
+    private async Task StartMigration()
+    {
+        migrationError = string.Empty;
+        migrationSuccess = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(selectedVmId) || string.IsNullOrWhiteSpace(selectedDestId))
+        {
+            migrationError = "Select both a VM and destination host.";
+            return;
+        }
+
+        migrating = true;
+        try
+        {
+            var response = await Api.MigrateVmAsync(Guid.Parse(selectedVmId), new
+            {
+                destinationAgentId = Guid.Parse(selectedDestId),
+                live = liveMigration,
+                includeStorage
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                migrationSuccess = "Migration initiated successfully.";
+                selectedVmId = string.Empty;
+                selectedDestId = string.Empty;
+            }
+            else
+            {
+                migrationError = "Migration failed. Check that the VM and destination are compatible.";
+            }
+        }
+        catch (Exception ex)
+        {
+            migrationError = ex.Message;
+        }
+        finally
+        {
+            migrating = false;
+        }
+    }
+}

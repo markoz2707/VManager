@@ -1,0 +1,364 @@
+@page "/vms/{Id:guid}"
+@implements IAsyncDisposable
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+@inject SignalRClientService SignalR
+
+<PageTitle>VManager - VM Details</PageTitle>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading VM details...</span>
+    </div>
+}
+else if (vm == null)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-exclamation-circle"></i>
+        <p>Virtual machine not found.</p>
+        <a href="/vms" class="btn btn-primary">Back to VMs</a>
+    </div>
+}
+else
+{
+    <div class="vm-page-header">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1" style="font-size:0.8rem;">
+                    <li class="breadcrumb-item"><a href="/vms">Virtual Machines</a></li>
+                    <li class="breadcrumb-item active">@vm.Name</li>
+                </ol>
+            </nav>
+            <h2>
+                <span class="status-badge @vm.State.ToLower() me-2">@vm.State</span>
+                @vm.Name
+            </h2>
+        </div>
+        <div class="d-flex gap-2">
+            @if (vm.State != "Running")
+            {
+                <button class="btn btn-success btn-sm" @onclick="PowerStart">
+                    <i class="bi bi-play-fill"></i> Start
+                </button>
+            }
+            @if (vm.State == "Running")
+            {
+                <button class="btn btn-warning btn-sm" @onclick="PowerShutdown">
+                    <i class="bi bi-power"></i> Shutdown
+                </button>
+                <button class="btn btn-danger btn-sm" @onclick="PowerStop">
+                    <i class="bi bi-stop-fill"></i> Force Stop
+                </button>
+                <button class="btn btn-outline-primary btn-sm" @onclick="PowerPause">
+                    <i class="bi bi-pause-fill"></i> Pause
+                </button>
+            }
+            @if (vm.State == "Paused")
+            {
+                <button class="btn btn-primary btn-sm" @onclick="PowerResume">
+                    <i class="bi bi-play"></i> Resume
+                </button>
+            }
+            <button class="btn btn-outline-info btn-sm" @onclick="OpenConsole">
+                <i class="bi bi-display"></i> Console
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" @onclick="() => showMigrateModal = true">
+                <i class="bi bi-arrow-left-right"></i> Migrate
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <div class="alert alert-danger py-2 mb-3" style="font-size:0.85rem;">@error</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(successMsg))
+    {
+        <div class="alert alert-success py-2 mb-3" style="font-size:0.85rem;">@successMsg</div>
+    }
+
+    <div class="row g-3">
+        <!-- Properties -->
+        <div class="col-lg-6">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6>VM Properties</h6>
+                </div>
+                <div class="vm-card-body p-0">
+                    <dl class="vm-properties mb-0">
+                        <dt>VM ID</dt>
+                        <dd class="font-monospace" style="font-size:0.8rem;">@vm.VmId</dd>
+                        <dt>State</dt>
+                        <dd><span class="status-badge @vm.State.ToLower()">@vm.State</span></dd>
+                        <dt>Host</dt>
+                        <dd>
+                            <a href="/agents/@vm.AgentHostId">@(vm.AgentHostName ?? vm.AgentHostId.ToString())</a>
+                            @{ var hostType = agents.FirstOrDefault(a => a.Id == vm.AgentHostId)?.HostType; }
+                            @if (!string.IsNullOrEmpty(hostType))
+                            {
+                                <span class="badge @(hostType == "KVM" ? "bg-warning-subtle text-warning" : "bg-primary-subtle text-primary") ms-2" style="font-size:0.7rem;">@hostType</span>
+                            }
+                        </dd>
+                        <dt>vCPUs</dt>
+                        <dd>@vm.CpuCount</dd>
+                        <dt>Memory</dt>
+                        <dd>@vm.MemoryMB MB</dd>
+                        <dt>Environment</dt>
+                        <dd>@vm.Environment</dd>
+                        <dt>Folder</dt>
+                        <dd>@(vm.FolderName ?? "None")</dd>
+                        <dt>Tags</dt>
+                        <dd>@(vm.Tags ?? "-")</dd>
+                        <dt>Notes</dt>
+                        <dd>@(vm.Notes ?? "-")</dd>
+                        <dt>Last Sync</dt>
+                        <dd>@vm.LastSyncUtc.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Migration History -->
+        <div class="col-lg-6">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6><i class="bi bi-arrow-left-right me-2"></i>Migration History</h6>
+                </div>
+                <div class="vm-card-body p-0">
+                    @if (migrations.Count == 0)
+                    {
+                        <div class="text-center py-4 text-muted" style="font-size:0.85rem;">
+                            No migration history for this VM.
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="font-size:0.75rem;">Status</th>
+                                    <th style="font-size:0.75rem;">Source</th>
+                                    <th style="font-size:0.75rem;">Destination</th>
+                                    <th style="font-size:0.75rem;">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var m in migrations.Take(10))
+                                {
+                                    <tr>
+                                        <td><span class="status-badge @m.Status.ToString().ToLower()">@m.Status</span></td>
+                                        <td style="font-size:0.85rem;">@m.SourceAgentName</td>
+                                        <td style="font-size:0.85rem;">@m.DestinationAgentName</td>
+                                        <td style="font-size:0.8rem;" class="text-muted">@m.CreatedUtc.ToString("MM/dd HH:mm")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showMigrateModal)
+{
+    <div class="vm-modal-backdrop" @onclick="() => showMigrateModal = false">
+        <div class="vm-modal" @onclick:stopPropagation="true">
+            <div class="vm-modal-header">
+                <h5>Migrate VM</h5>
+                <button class="btn-close" @onclick="() => showMigrateModal = false"></button>
+            </div>
+            <div class="vm-modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Destination Host</label>
+                    <select class="form-select" @bind="migrateDestId">
+                        <option value="">-- Select Host --</option>
+                        @foreach (var a in agents.Where(a => a.Id != vm?.AgentHostId))
+                        {
+                            <option value="@a.Id">@a.Hostname</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" @bind="migrateLive" id="migLive" />
+                    <label class="form-check-label" for="migLive">Live Migration</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" @bind="migrateStorage" id="migStorage" />
+                    <label class="form-check-label" for="migStorage">Include Storage</label>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(migrateError))
+                {
+                    <div class="alert alert-danger py-2" style="font-size:0.85rem;">@migrateError</div>
+                }
+            </div>
+            <div class="vm-modal-footer">
+                <button class="btn btn-secondary" @onclick="() => showMigrateModal = false">Cancel</button>
+                <button class="btn btn-primary" @onclick="MigrateVm" disabled="@migrating">
+                    @if (migrating) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                    Migrate
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private bool loading = true;
+    private VmInventoryDto? vm;
+    private List<MigrationTask> migrations = new();
+    private List<AgentHost> agents = new();
+    private string error = string.Empty;
+    private string successMsg = string.Empty;
+
+    private bool showMigrateModal;
+    private bool migrating;
+    private string migrateDestId = string.Empty;
+    private bool migrateLive = true;
+    private bool migrateStorage;
+    private string migrateError = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+
+        try
+        {
+            var vmTask = Api.GetVmAsync(Id);
+            var migrationsTask = Api.GetMigrationHistoryAsync(Id);
+            var agentsTask = Api.GetAgentsAsync();
+            await Task.WhenAll(vmTask, migrationsTask, agentsTask);
+
+            vm = await vmTask;
+            migrations = (await migrationsTask).ToList();
+            agents = (await agentsTask).ToList();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+
+        SignalR.OnVmStateChanged += OnVmChanged;
+        SignalR.OnMigrationProgress += OnMigrationChanged;
+        await SignalR.StartAsync();
+        await SignalR.JoinMigrationsGroupAsync();
+    }
+
+    private void OnVmChanged(VmStateChangedEvent e) => InvokeAsync(RefreshVm);
+    private void OnMigrationChanged(MigrationProgressEvent e) => InvokeAsync(RefreshVm);
+
+    private async Task RefreshVm()
+    {
+        try
+        {
+            vm = await Api.GetVmAsync(Id);
+            migrations = (await Api.GetMigrationHistoryAsync(Id)).ToList();
+            StateHasChanged();
+        }
+        catch { }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        SignalR.OnVmStateChanged -= OnVmChanged;
+        SignalR.OnMigrationProgress -= OnMigrationChanged;
+    }
+
+    private void OpenConsole()
+    {
+        if (vm == null) return;
+        var agent = agents.FirstOrDefault(a => a.Id == vm.AgentHostId);
+        if (agent == null) { error = "Agent not found."; return; }
+
+        var isKvm = agent.HostType == "KVM";
+        var host = agent.IpAddress ?? agent.Hostname;
+
+        if (isKvm)
+        {
+            successMsg = $"Connect via VNC/SPICE client to {host} for VM '{vm.Name}'. Use: virt-viewer or virt-manager.";
+        }
+        else
+        {
+            successMsg = $"Connect via Remote Desktop (RDP) to {host} and use VMConnect for VM '{vm.Name}'.";
+        }
+    }
+
+    private Task PowerStart() => PowerAction("start");
+    private Task PowerShutdown() => PowerAction("shutdown");
+    private Task PowerStop() => PowerAction("stop");
+    private Task PowerPause() => PowerAction("pause");
+    private Task PowerResume() => PowerAction("resume");
+
+    private async Task PowerAction(string action)
+    {
+        error = string.Empty;
+        successMsg = string.Empty;
+        try
+        {
+            var response = await Api.PowerVmAsync(Id, action);
+            if (response.IsSuccessStatusCode)
+            {
+                successMsg = $"Power operation '{action}' completed.";
+                vm = await Api.GetVmAsync(Id);
+            }
+            else
+            {
+                error = $"Power operation failed.";
+            }
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private async Task MigrateVm()
+    {
+        migrateError = string.Empty;
+        if (string.IsNullOrWhiteSpace(migrateDestId))
+        {
+            migrateError = "Select a destination host.";
+            return;
+        }
+
+        migrating = true;
+        try
+        {
+            var response = await Api.MigrateVmAsync(Id, new
+            {
+                destinationAgentId = Guid.Parse(migrateDestId),
+                live = migrateLive,
+                includeStorage = migrateStorage
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                showMigrateModal = false;
+                successMsg = "Migration initiated.";
+                migrations = (await Api.GetMigrationHistoryAsync(Id)).ToList();
+            }
+            else
+            {
+                migrateError = "Migration failed.";
+            }
+        }
+        catch (Exception ex)
+        {
+            migrateError = ex.Message;
+        }
+        finally
+        {
+            migrating = false;
+        }
+    }
+}

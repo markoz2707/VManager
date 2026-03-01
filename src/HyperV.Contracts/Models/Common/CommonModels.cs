@@ -189,12 +189,16 @@ public class HostPerformanceMetrics
 
 public class HypervisorCapabilities
 {
+    public string HypervisorType { get; set; } = string.Empty;
     public bool SupportsLiveMigration { get; set; }
     public bool SupportsSnapshots { get; set; }
     public bool SupportsDynamicMemory { get; set; }
     public bool SupportsNestedVirtualization { get; set; }
     public bool SupportsContainers { get; set; }
     public bool SupportsReplication { get; set; }
+    public bool SupportsFibreChannel { get; set; }
+    public bool SupportsStorageQoS { get; set; }
+    public string ConsoleType { get; set; } = "rdp"; // "rdp", "vnc", "spice"
     public int MaxVmCount { get; set; }
     public int MaxCpuPerVm { get; set; }
     public long MaxMemoryPerVmMB { get; set; }
@@ -233,6 +237,114 @@ public class NetworkMetricsDto
 {
     public long BytesSentPerSec { get; set; }
     public long BytesReceivedPerSec { get; set; }
+}
+
+// Container models
+public class ContainerSummaryDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string State { get; set; } = "Unknown";
+    public string Image { get; set; } = string.Empty;
+    public string Backend { get; set; } = string.Empty; // "HCS", "WMI", "Docker", "Podman"
+    public Dictionary<string, object>? ExtendedProperties { get; set; }
+}
+
+public class ContainerDetailsDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string State { get; set; } = "Unknown";
+    public string Image { get; set; } = string.Empty;
+    public string Backend { get; set; } = string.Empty;
+    public int CpuCount { get; set; }
+    public long MemoryMB { get; set; }
+    public DateTime? CreatedTime { get; set; }
+    public Dictionary<string, object>? ExtendedProperties { get; set; }
+}
+
+public class CreateContainerSpec
+{
+    public string Name { get; set; } = string.Empty;
+    public string Image { get; set; } = string.Empty;
+    public int CpuCount { get; set; } = 1;
+    public long MemoryMB { get; set; } = 512;
+    public long StorageSizeGB { get; set; } = 20;
+    public Dictionary<string, object>? ExtendedProperties { get; set; }
+}
+
+// Guest agent models
+public class GuestInfoDto
+{
+    public string? Hostname { get; set; }
+    public string? OsType { get; set; }
+    public string? OsVersion { get; set; }
+    public string? IpAddress { get; set; }
+    public bool IsAgentAvailable { get; set; }
+    public Dictionary<string, object>? ExtendedProperties { get; set; }
+}
+
+// Bulk operation models
+public class BulkOperationResultDto
+{
+    public int TotalCount { get; set; }
+    public int SuccessCount { get; set; }
+    public int FailureCount { get; set; }
+    public List<BulkOperationItemResult> Results { get; set; } = new();
+}
+
+public class BulkOperationItemResult
+{
+    public string VmName { get; set; } = string.Empty;
+    public bool Success { get; set; }
+    public string? ErrorMessage { get; set; }
+}
+
+// VM configuration spec
+public class VmConfigurationSpec
+{
+    public int? CpuCount { get; set; }
+    public long? MemoryMB { get; set; }
+    public string? Notes { get; set; }
+    public bool? EnableDynamicMemory { get; set; }
+    public long? MinMemoryMB { get; set; }
+    public long? MaxMemoryMB { get; set; }
+    public int? NumaNodesCount { get; set; }
+    public int? NumaMemoryPerNode { get; set; }
+    public Dictionary<string, object>? ExtendedProperties { get; set; }
+}
+
+// Storage device models
+public class StorageDeviceDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty; // "VirtualHardDisk", "VirtualDVD", "VirtualFloppy", "disk", "cdrom"
+    public string? Path { get; set; }
+    public string? ControllerType { get; set; }
+    public int? ControllerNumber { get; set; }
+    public int? ControllerLocation { get; set; }
+    public Dictionary<string, object>? ExtendedProperties { get; set; }
+}
+
+public class StorageControllerDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty; // "IDE", "SCSI", "virtio-scsi", "sata"
+    public int ControllerNumber { get; set; }
+    public int MaxDevices { get; set; }
+    public Dictionary<string, object>? ExtendedProperties { get; set; }
+}
+
+public class AddStorageDeviceSpec
+{
+    public string Type { get; set; } = "VirtualHardDisk"; // VirtualHardDisk, VirtualDVD, disk, cdrom
+    public string? Path { get; set; }
+    public string? ControllerType { get; set; }
+    public int? ControllerNumber { get; set; }
+    public int? ControllerLocation { get; set; }
+    public Dictionary<string, object>? ExtendedProperties { get; set; }
 }
 
 // Migration models

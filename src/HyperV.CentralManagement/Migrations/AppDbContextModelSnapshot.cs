@@ -41,6 +41,9 @@ namespace HyperV.CentralManagement.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<Guid?>("DatacenterId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("HostType")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -78,6 +81,8 @@ namespace HyperV.CentralManagement.Migrations
                         .HasColumnType("character varying(2000)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DatacenterId");
 
                     b.ToTable("AgentHosts");
                 });
@@ -237,6 +242,9 @@ namespace HyperV.CentralManagement.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("DatacenterId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
@@ -247,6 +255,8 @@ namespace HyperV.CentralManagement.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DatacenterId");
 
                     b.ToTable("Clusters");
                 });
@@ -365,6 +375,32 @@ namespace HyperV.CentralManagement.Migrations
                         .IsUnique();
 
                     b.ToTable("ContentLibrarySubscriptions");
+                });
+
+            modelBuilder.Entity("HyperV.CentralManagement.Models.Datacenter", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Datacenters");
                 });
 
             modelBuilder.Entity("HyperV.CentralManagement.Models.DrsConfiguration", b =>
@@ -952,6 +988,16 @@ namespace HyperV.CentralManagement.Migrations
                     b.ToTable("VmInventory");
                 });
 
+            modelBuilder.Entity("HyperV.CentralManagement.Models.AgentHost", b =>
+                {
+                    b.HasOne("HyperV.CentralManagement.Models.Datacenter", "Datacenter")
+                        .WithMany()
+                        .HasForeignKey("DatacenterId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Datacenter");
+                });
+
             modelBuilder.Entity("HyperV.CentralManagement.Models.AlertInstance", b =>
                 {
                     b.HasOne("HyperV.CentralManagement.Models.AlertDefinition", "AlertDefinition")
@@ -980,6 +1026,16 @@ namespace HyperV.CentralManagement.Migrations
                     b.Navigation("AlertDefinition");
 
                     b.Navigation("NotificationChannel");
+                });
+
+            modelBuilder.Entity("HyperV.CentralManagement.Models.Cluster", b =>
+                {
+                    b.HasOne("HyperV.CentralManagement.Models.Datacenter", "Datacenter")
+                        .WithMany()
+                        .HasForeignKey("DatacenterId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Datacenter");
                 });
 
             modelBuilder.Entity("HyperV.CentralManagement.Models.ClusterNode", b =>

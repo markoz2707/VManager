@@ -1,0 +1,148 @@
+@page "/content-library"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - Content Library</PageTitle>
+
+<div class="vm-page-header">
+    <h2>Content Library</h2>
+    <button class="btn btn-outline-secondary btn-sm" @onclick="LoadData">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+</div>
+
+<!-- Filters -->
+<div class="vm-filter-bar">
+    <div class="input-group" style="max-width:300px;">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input class="form-control" placeholder="Search items..." @bind="searchText" @bind:event="oninput" />
+    </div>
+    <select class="form-select" @bind="filterType" style="max-width:160px;">
+        <option value="">All Types</option>
+        <option value="Template">Template</option>
+        <option value="ISO">ISO</option>
+        <option value="Script">Script</option>
+        <option value="OVF">OVF</option>
+    </select>
+    <span class="text-muted ms-auto" style="font-size:0.8rem;">@filteredItems.Count items</span>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading library...</span>
+    </div>
+}
+else if (items.Count == 0)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-archive"></i>
+        <p>Content library is empty. Upload templates, ISOs, or scripts to get started.</p>
+    </div>
+}
+else
+{
+    <div class="vm-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Version</th>
+                    <th>Size</th>
+                    <th>Category</th>
+                    <th>Subscriptions</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in filteredItems)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">
+                                <i class="bi @GetTypeIcon(item.Type) me-1"></i>@item.Name
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(item.Description))
+                            {
+                                <small class="text-muted">@item.Description</small>
+                            }
+                        </td>
+                        <td><span class="badge bg-primary-subtle text-primary" style="font-size:0.7rem;">@item.Type</span></td>
+                        <td style="font-size:0.85rem;">@(item.Version ?? "-")</td>
+                        <td style="font-size:0.85rem;">@FormatSize(item.FileSize)</td>
+                        <td style="font-size:0.85rem;">@(item.Category ?? "-")</td>
+                        <td style="font-size:0.85rem;">@item.SubscriptionCount</td>
+                        <td style="font-size:0.8rem;" class="text-muted">@item.CreatedUtc.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <button class="btn btn-outline-danger btn-action" @onclick="() => DeleteItem(item.Id)" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3" style="font-size:0.85rem;">@error</div>
+}
+
+@code {
+    private bool loading = true;
+    private List<ContentLibraryItemDto> items = new();
+    private string searchText = string.Empty;
+    private string filterType = string.Empty;
+    private string error = string.Empty;
+
+    private List<ContentLibraryItemDto> filteredItems => items
+        .Where(i => string.IsNullOrWhiteSpace(searchText) ||
+            i.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+        .Where(i => string.IsNullOrWhiteSpace(filterType) ||
+            i.Type.Equals(filterType, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        loading = true; error = string.Empty;
+        try { items = (await Api.GetContentLibraryAsync()).ToList(); }
+        catch (Exception ex) { error = ex.Message; }
+        finally { loading = false; }
+    }
+
+    private async Task DeleteItem(Guid id)
+    {
+        error = string.Empty;
+        try { await Api.DeleteContentLibraryItemAsync(id); await LoadData(); }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private string FormatSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        if (bytes < 1024 * 1024 * 1024) return $"{bytes / (1024.0 * 1024):F1} MB";
+        return $"{bytes / (1024.0 * 1024 * 1024):F2} GB";
+    }
+
+    private string GetTypeIcon(string type) => type switch
+    {
+        "Template" => "bi-file-earmark-code",
+        "ISO" => "bi-disc",
+        "Script" => "bi-terminal",
+        "OVF" => "bi-box",
+        _ => "bi-file-earmark"
+    };
+}

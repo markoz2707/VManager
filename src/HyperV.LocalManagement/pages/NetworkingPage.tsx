@@ -10,9 +10,11 @@ import { Modal } from '../components/Modal';
 import { PlusIcon, TrashIcon, RefreshIcon, SettingsIcon, ChipIcon, ConnectIcon } from '../components/Icons';
 import { OutletContextType } from '../App';
 import { Tabs } from '../components/Tabs';
+import { useHostContext } from '../hooks/useHostContext';
 
 export const NetworkingPage = () => {
     const { addNotification } = useOutletContext<OutletContextType>();
+    const { isHyperV, isKVM } = useHostContext();
 
     // Data states
     const [allNetworks, setAllNetworks] = useState<{ WMI: VirtualNetwork[], HCS: VirtualNetwork[] }>({ WMI: [], HCS: [] });
@@ -159,7 +161,7 @@ export const NetworkingPage = () => {
 
     const renderVirtualSwitches = () => (
         <>
-            <Tabs tabs={['WMI', 'HCS']} activeTab={activeSubTab} onTabClick={(tab) => setActiveSubTab(tab as VmEnvironment)} />
+            {isHyperV && <Tabs tabs={['WMI', 'HCS']} activeTab={activeSubTab} onTabClick={(tab) => setActiveSubTab(tab as VmEnvironment)} />}
             <div className="bg-panel-bg border border-panel-border shadow-sm overflow-hidden">
                 <table className="min-w-full text-sm">
                      <thead className="bg-gray-100 border-b border-panel-border">
@@ -205,17 +207,18 @@ export const NetworkingPage = () => {
             <header className="p-4 bg-panel-bg border-b border-panel-border flex items-center justify-between">
                 <h1 className="text-lg font-semibold">Networking</h1>
                 <div>
-                    {activeMainTab === 'Virtual Switches' && <Button onClick={() => setIsCreateSwitchOpen(true)} leftIcon={<PlusIcon/>}>Create Switch</Button>}
-                    {activeMainTab === 'Virtual Switches' && <Button variant="toolbar" onClick={openVlanConfigModal} leftIcon={<SettingsIcon/>}>VLAN Config</Button>}
-                    {activeMainTab === 'Fibre Channel' && <Button onClick={() => setIsCreateSanOpen(true)} leftIcon={<PlusIcon/>}>Create SAN</Button>}
+                    {activeMainTab === 'Virtual Switches' && <Button onClick={() => setIsCreateSwitchOpen(true)} leftIcon={<PlusIcon/>}>Create {isKVM ? 'Network' : 'Switch'}</Button>}
+                    {activeMainTab === 'Virtual Switches' && isHyperV && <Button variant="toolbar" onClick={openVlanConfigModal} leftIcon={<SettingsIcon/>}>VLAN Config</Button>}
+                    {activeMainTab === 'Fibre Channel' && isHyperV && <Button onClick={() => setIsCreateSanOpen(true)} leftIcon={<PlusIcon/>}>Create SAN</Button>}
                     <Button variant="toolbar" onClick={fetchData} leftIcon={<RefreshIcon/>}>Refresh</Button>
                 </div>
             </header>
             
             <main className="flex-1 overflow-y-auto p-4">
-                {/* Fix: Corrected the onTabClick handler to satisfy TypeScript's type checking by casting the tab string to the expected union type. */}
-                <Tabs tabs={['Virtual Switches', 'Fibre Channel']} activeTab={activeMainTab} onTabClick={(tab) => setActiveMainTab(tab as 'Virtual Switches' | 'Fibre Channel')} />
-                {isLoading ? <Spinner/> : (activeMainTab === 'Virtual Switches' ? renderVirtualSwitches() : renderFibreChannel())}
+                {isHyperV ? (
+                    <Tabs tabs={['Virtual Switches', 'Fibre Channel']} activeTab={activeMainTab} onTabClick={(tab) => setActiveMainTab(tab as 'Virtual Switches' | 'Fibre Channel')} />
+                ) : null}
+                {isLoading ? <Spinner/> : (activeMainTab === 'Virtual Switches' || isKVM ? renderVirtualSwitches() : renderFibreChannel())}
             </main>
             
             <Modal isOpen={isConnectVmOpen} onClose={() => setIsConnectVmOpen(false)} title={`Connect VM to ${connectVmForm.switchName}`}>

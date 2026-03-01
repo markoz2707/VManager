@@ -335,9 +335,71 @@ public class ContainerService
     /// <summary>Modifies a WMI container by name.</summary>
     public virtual void ModifyContainer(string containerName, string configuration)
     {
-        // WMI container modification would require specific implementation
-        // based on what aspects need to be modified
-        throw new NotImplementedException("WMI container modification not yet implemented");
+        var container = GetContainer(containerName);
+        if (container == null)
+            throw new InvalidOperationException($"WMI container {containerName} not found");
+
+        using (container)
+        {
+            // Parse the incoming configuration JSON to extract modifiable properties
+            var config = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(configuration)
+                ?? new Dictionary<string, JsonElement>();
+
+            // Get the Virtual System Management Service
+            var service = GetVirtualSystemManagementService();
+            using (service)
+            {
+                // Get the container's current settings
+                var settingsQuery = $"SELECT * FROM Msvm_VirtualSystemSettingData WHERE SystemName = '{container["Name"]}'";
+                var settingsSearcher = new ManagementObjectSearcher(_scope, new ObjectQuery(settingsQuery));
+                var settings = settingsSearcher.Get().Cast<ManagementObject>().FirstOrDefault();
+
+                if (settings == null)
+                    throw new InvalidOperationException($"Settings not found for container {containerName}");
+
+                using (settings)
+                {
+                    // Apply configurable properties
+                    if (config.ContainsKey("Notes"))
+                        settings["Notes"] = config["Notes"].GetString();
+
+                    if (config.ContainsKey("ElementName"))
+                        settings["ElementName"] = config["ElementName"].GetString();
+
+                    if (config.ContainsKey("NumberOfProcessors"))
+                        settings["NumberOfProcessors"] = config["NumberOfProcessors"].GetInt32();
+
+                    // Apply the changes using ModifySystemSettings
+                    var inParams = service.GetMethodParameters("ModifySystemSettings");
+                    inParams["SystemSettings"] = settings.GetText(TextFormat.WmiDtd20);
+
+                    var outParams = service.InvokeMethod("ModifySystemSettings", inParams, null);
+                    var returnValue = Convert.ToUInt32(outParams["ReturnValue"]);
+
+                    if (returnValue == 0)
+                    {
+                        Console.WriteLine($"Container {containerName} modified successfully");
+                    }
+                    else if (returnValue == 4096)
+                    {
+                        // Job started - wait for completion
+                        var job = outParams["Job"] as ManagementObject;
+                        if (job != null)
+                        {
+                            var jobResult = WaitForJob(job);
+                            if (!jobResult.Success)
+                            {
+                                throw new InvalidOperationException($"Container modification job failed: {jobResult.Message}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Container modification failed with return value: {returnValue}");
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>Executes a state change operation on a container.</summary>

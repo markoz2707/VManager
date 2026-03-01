@@ -15,7 +15,21 @@ public class UserAccount
     [MaxLength(500)]
     public string PasswordHash { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Legacy role field kept for backward compatibility during migration
+    /// </summary>
     [Required]
     [MaxLength(100)]
     public string Role { get; set; } = "Admin";
+
+    [MaxLength(300)]
+    public string? Email { get; set; }
+
+    public bool IsActive { get; set; } = true;
+
+    public DateTimeOffset CreatedUtc { get; set; } = DateTimeOffset.UtcNow;
+
+    public DateTimeOffset? LastLoginUtc { get; set; }
+
+    public List<UserRole> UserRoles { get; set; } = new();
 }

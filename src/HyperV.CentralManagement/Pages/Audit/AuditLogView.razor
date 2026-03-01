@@ -1,0 +1,114 @@
+@page "/audit"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - Audit Log</PageTitle>
+
+<div class="vm-page-header">
+    <h2>Audit Log</h2>
+    <button class="btn btn-outline-secondary btn-sm" @onclick="LoadData">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+</div>
+
+<!-- Filters -->
+<div class="vm-filter-bar">
+    <div class="input-group" style="max-width:250px;">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input class="form-control" placeholder="Filter by user..." @bind="filterUser" @bind:event="oninput" />
+    </div>
+    <div class="input-group" style="max-width:250px;">
+        <span class="input-group-text"><i class="bi bi-funnel"></i></span>
+        <input class="form-control" placeholder="Filter by action..." @bind="filterAction" @bind:event="oninput" />
+    </div>
+    <span class="text-muted ms-auto" style="font-size:0.8rem;">@filteredLogs.Count entries</span>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading audit logs...</span>
+    </div>
+}
+else if (logs.Count == 0)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-journal-text"></i>
+        <p>No audit log entries.</p>
+    </div>
+}
+else
+{
+    <div class="vm-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Timestamp (UTC)</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in filteredLogs)
+                {
+                    <tr>
+                        <td style="font-size:0.8rem;" class="text-muted text-nowrap">
+                            @log.TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss")
+                        </td>
+                        <td style="font-size:0.85rem;">
+                            @if (!string.IsNullOrWhiteSpace(log.Username))
+                            {
+                                <i class="bi bi-person me-1"></i>@log.Username
+                            }
+                            else
+                            {
+                                <span class="text-muted">System</span>
+                            }
+                        </td>
+                        <td><code style="font-size:0.8rem;">@log.Action</code></td>
+                        <td style="font-size:0.85rem; max-width:400px;" class="text-truncate">
+                            @(log.Details ?? "-")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3" style="font-size:0.85rem;">@error</div>
+}
+
+@code {
+    private bool loading = true;
+    private List<AuditLog> logs = new();
+    private string filterUser = string.Empty;
+    private string filterAction = string.Empty;
+    private string error = string.Empty;
+
+    private List<AuditLog> filteredLogs => logs
+        .Where(l => string.IsNullOrWhiteSpace(filterUser) ||
+            (l.Username ?? "").Contains(filterUser, StringComparison.OrdinalIgnoreCase))
+        .Where(l => string.IsNullOrWhiteSpace(filterAction) ||
+            l.Action.Contains(filterAction, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        loading = true; error = string.Empty;
+        try { logs = (await Api.GetAuditLogsAsync()).ToList(); }
+        catch (Exception ex) { error = ex.Message; }
+        finally { loading = false; }
+    }
+}

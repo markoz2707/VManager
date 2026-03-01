@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "JPM9vWoQQ7M=",
+  "dgSpecHash": "aQs2PXlhOAc=",
   "success": true,
   "projectFilePath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\mkozn\\.nuget\\packages\\microsoft.codeanalysis.netanalyzers\\9.0.0\\microsoft.codeanalysis.netanalyzers.9.0.0.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\microsoft.openapi\\1.6.14\\microsoft.openapi.1.6.14.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\swashbuckle.aspnetcore.annotations\\6.6.2\\swashbuckle.aspnetcore.annotations.6.6.2.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.6.2\\swashbuckle.aspnetcore.swagger.6.6.2.nupkg.sha512",

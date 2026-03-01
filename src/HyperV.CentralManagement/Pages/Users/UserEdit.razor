@@ -1,0 +1,249 @@
+@page "/users/{Id:guid}"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - Edit User</PageTitle>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading user...</span>
+    </div>
+}
+else if (user == null)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-exclamation-circle"></i>
+        <p>User not found.</p>
+        <a href="/users" class="btn btn-primary">Back to Users</a>
+    </div>
+}
+else
+{
+    <div class="vm-page-header">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1" style="font-size:0.8rem;">
+                    <li class="breadcrumb-item"><a href="/users">Users</a></li>
+                    <li class="breadcrumb-item active">@user.Username</li>
+                </ol>
+            </nav>
+            <h2><i class="bi bi-person me-2"></i>@user.Username</h2>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- User Properties -->
+        <div class="col-lg-6">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6>User Properties</h6>
+                </div>
+                <div class="vm-card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input class="form-control" @bind="editEmail" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">New Password (leave blank to keep current)</label>
+                        <input class="form-control" type="password" @bind="editPassword" />
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" @bind="editIsActive" id="userActive" />
+                        <label class="form-check-label" for="userActive">Account Active</label>
+                    </div>
+
+                    <button class="btn btn-primary" @onclick="SaveUser" disabled="@saving">
+                        @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        <i class="bi bi-check-lg"></i> Save
+                    </button>
+
+                    @if (!string.IsNullOrWhiteSpace(successMsg))
+                    {
+                        <div class="alert alert-success mt-3 py-2" style="font-size:0.85rem;">@successMsg</div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(error))
+                    {
+                        <div class="alert alert-danger mt-3 py-2" style="font-size:0.85rem;">@error</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Role Assignments -->
+        <div class="col-lg-6">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6><i class="bi bi-shield-lock me-2"></i>Role Assignments</h6>
+                    <button class="btn btn-primary btn-action" @onclick="() => showAssignModal = true">
+                        <i class="bi bi-plus"></i> Assign
+                    </button>
+                </div>
+                <div class="vm-card-body p-0">
+                    @if (user.Roles.Count == 0)
+                    {
+                        <div class="text-center py-4 text-muted" style="font-size:0.85rem;">No roles assigned.</div>
+                    }
+                    else
+                    {
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="font-size:0.75rem;">Role</th>
+                                    <th style="font-size:0.75rem;">Scope</th>
+                                    <th style="font-size:0.75rem;">Assigned</th>
+                                    <th style="font-size:0.75rem;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ur in user.Roles)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@ur.RoleName</td>
+                                        <td style="font-size:0.8rem;" class="text-muted">
+                                            @if (ur.ClusterId == null && ur.AgentHostId == null)
+                                            { <span>Global</span> }
+                                            else if (ur.ClusterId != null)
+                                            { <span>Cluster-scoped</span> }
+                                            else
+                                            { <span>Host-scoped</span> }
+                                        </td>
+                                        <td style="font-size:0.8rem;" class="text-muted">@ur.AssignedUtc.ToString("yyyy-MM-dd")</td>
+                                        <td>
+                                            <button class="btn btn-outline-danger btn-action" @onclick="() => RemoveRole(ur.Id)" title="Remove">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <div class="vm-card mt-3">
+                <div class="vm-card-body p-0">
+                    <dl class="vm-properties mb-0">
+                        <dt>Created</dt>
+                        <dd>@user.CreatedUtc.ToString("yyyy-MM-dd HH:mm")</dd>
+                        <dt>Last Login</dt>
+                        <dd>@(user.LastLoginUtc?.ToString("yyyy-MM-dd HH:mm") ?? "Never")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showAssignModal)
+{
+    <div class="vm-modal-backdrop" @onclick="() => showAssignModal = false">
+        <div class="vm-modal" @onclick:stopPropagation="true" style="max-width:400px;">
+            <div class="vm-modal-header">
+                <h5>Assign Role</h5>
+                <button class="btn-close" @onclick="() => showAssignModal = false"></button>
+            </div>
+            <div class="vm-modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Role</label>
+                    <select class="form-select" @bind="assignRoleId">
+                        <option value="">-- Select Role --</option>
+                        @foreach (var r in allRoles)
+                        {
+                            <option value="@r.Id">@r.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="vm-modal-footer">
+                <button class="btn btn-secondary" @onclick="() => showAssignModal = false">Cancel</button>
+                <button class="btn btn-primary" @onclick="AssignRole">Assign</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private bool loading = true;
+    private bool saving;
+    private UserDto? user;
+    private List<RoleDto> allRoles = new();
+    private string editEmail = string.Empty;
+    private string editPassword = string.Empty;
+    private bool editIsActive = true;
+    private string error = string.Empty;
+    private string successMsg = string.Empty;
+
+    private bool showAssignModal;
+    private string assignRoleId = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        loading = true;
+        try
+        {
+            user = await Api.GetUserAsync(Id);
+            allRoles = (await Api.GetRolesAsync()).ToList();
+            if (user != null)
+            {
+                editEmail = user.Email ?? string.Empty;
+                editIsActive = user.IsActive;
+            }
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { loading = false; }
+    }
+
+    private async Task SaveUser()
+    {
+        error = string.Empty; successMsg = string.Empty; saving = true;
+        try
+        {
+            var payload = new Dictionary<string, object?>();
+            payload["email"] = editEmail;
+            payload["isActive"] = editIsActive;
+            if (!string.IsNullOrWhiteSpace(editPassword))
+                payload["password"] = editPassword;
+
+            var response = await Api.UpdateUserAsync(Id, payload);
+            if (response.IsSuccessStatusCode)
+            {
+                successMsg = "User updated.";
+                editPassword = string.Empty;
+            }
+            else error = "Update failed.";
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { saving = false; }
+    }
+
+    private async Task AssignRole()
+    {
+        if (string.IsNullOrWhiteSpace(assignRoleId)) return;
+        try
+        {
+            await Api.AssignRoleAsync(Id, new { roleId = Guid.Parse(assignRoleId) });
+            showAssignModal = false;
+            assignRoleId = string.Empty;
+            user = await Api.GetUserAsync(Id);
+        }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private async Task RemoveRole(Guid userRoleId)
+    {
+        try
+        {
+            await Api.RemoveRoleAssignmentAsync(Id, userRoleId);
+            user = await Api.GetUserAsync(Id);
+        }
+        catch (Exception ex) { error = ex.Message; }
+    }
+}

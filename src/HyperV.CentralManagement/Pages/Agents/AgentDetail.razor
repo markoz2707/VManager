@@ -1,0 +1,308 @@
+@page "/agents/{Id:guid}"
+@implements IAsyncDisposable
+@inject CentralApiClient Api
+@inject AgentApiClient AgentApi
+@inject AuthSession Session
+@inject NavigationManager Nav
+@inject SignalRClientService SignalR
+
+<PageTitle>VManager - Agent Details</PageTitle>
+
+@if (agent == null && !loading)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-exclamation-circle"></i>
+        <p>Agent not found.</p>
+        <a href="/agents" class="btn btn-primary">Back to Agents</a>
+    </div>
+}
+else if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading agent details...</span>
+    </div>
+}
+else
+{
+    <div class="vm-page-header">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1" style="font-size:0.8rem;">
+                    <li class="breadcrumb-item"><a href="/agents">Agents</a></li>
+                    <li class="breadcrumb-item active">@agent!.Hostname</li>
+                </ol>
+            </nav>
+            <h2>
+                <span class="status-dot @GetStatusClass(agent.Status)"></span>
+                @agent.Hostname
+            </h2>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm" @onclick="CheckHealth" disabled="@checkingHealth">
+                @if (checkingHealth) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                <i class="bi bi-heart-pulse"></i> Health Check
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" @onclick="LoadVms" disabled="@loadingVms">
+                @if (loadingVms) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                <i class="bi bi-pc-display"></i> Load VMs
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(healthStatus))
+    {
+        <div class="alert alert-success py-2 mb-3" style="font-size:0.85rem;">
+            <i class="bi bi-check-circle me-1"></i> Agent health: <strong>@healthStatus</strong>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <div class="alert alert-danger py-2 mb-3" style="font-size:0.85rem;">
+            <i class="bi bi-exclamation-circle me-1"></i> @error
+        </div>
+    }
+
+    <div class="row g-3">
+        <!-- Agent Properties -->
+        <div class="col-lg-6">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6>Agent Properties</h6>
+                </div>
+                <div class="vm-card-body p-0">
+                    <dl class="vm-properties mb-0">
+                        <dt>API URL</dt>
+                        <dd>@agent.ApiBaseUrl</dd>
+                        <dt>IP Address</dt>
+                        <dd>@(agent.IpAddress ?? "-")</dd>
+                        <dt>Host Type</dt>
+                        <dd>@agent.HostType</dd>
+                        <dt>Status</dt>
+                        <dd>
+                            <span class="status-dot @GetStatusClass(agent.Status)"></span>
+                            @agent.Status
+                        </dd>
+                        <dt>Hyper-V Version</dt>
+                        <dd>@(agent.HyperVVersion ?? "-")</dd>
+                        <dt>Hypervisor</dt>
+                        <dd>@(agent.HypervisorVersion ?? "-")</dd>
+                        <dt>OS</dt>
+                        <dd>@(agent.OperatingSystem ?? "-")</dd>
+                        <dt>Agent Version</dt>
+                        <dd>@(agent.AgentVersion ?? "-")</dd>
+                        <dt>Last Seen</dt>
+                        <dd>@(agent.LastSeenUtc == DateTimeOffset.MinValue ? "Never" : agent.LastSeenUtc.ToString("yyyy-MM-dd HH:mm:ss"))</dd>
+                        <dt>Cluster</dt>
+                        <dd>@(agent.ClusterName ?? "Not assigned")</dd>
+                        <dt>Tags</dt>
+                        <dd>@(agent.Tags ?? "-")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- VMs on this Host (from inventory) -->
+        <div class="col-lg-6">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6><i class="bi bi-pc-display me-2"></i>VMs on this Host (Inventory)</h6>
+                    <span class="badge bg-primary">@inventoryVms.Count</span>
+                </div>
+                <div class="vm-card-body p-0">
+                    @if (inventoryVms.Count == 0)
+                    {
+                        <div class="text-center py-4 text-muted" style="font-size:0.85rem;">
+                            No VMs in inventory for this agent.
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="font-size:0.75rem;">Name</th>
+                                    <th style="font-size:0.75rem;">State</th>
+                                    <th style="font-size:0.75rem;">CPU</th>
+                                    <th style="font-size:0.75rem;">Memory</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var vm in inventoryVms)
+                                {
+                                    <tr>
+                                        <td style="font-size:0.85rem;"><a href="/vms/@vm.Id">@vm.Name</a></td>
+                                        <td>
+                                            <span class="status-badge @vm.State.ToLower()">@vm.State</span>
+                                        </td>
+                                        <td style="font-size:0.85rem;">@vm.CpuCount vCPU</td>
+                                        <td style="font-size:0.85rem;">@vm.MemoryMB MB</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Direct Agent VMs (loaded from agent) -->
+    @if (agentVms != null)
+    {
+        <div class="mt-3">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6><i class="bi bi-cloud-download me-2"></i>Live VMs from Agent</h6>
+                    <span class="badge bg-info">HCS: @agentVms.Hcs.Count | WMI: @agentVms.Wmi.Count</span>
+                </div>
+                <div class="vm-card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th style="font-size:0.75rem;">Source</th>
+                                <th style="font-size:0.75rem;">Name</th>
+                                <th style="font-size:0.75rem;">State</th>
+                                <th style="font-size:0.75rem;">CPU</th>
+                                <th style="font-size:0.75rem;">Memory</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var vm in agentVms.Hcs)
+                            {
+                                <tr>
+                                    <td><span class="badge bg-primary-subtle text-primary" style="font-size:0.7rem;">HCS</span></td>
+                                    <td style="font-size:0.85rem;">@vm.Name</td>
+                                    <td><span class="status-badge @vm.State.ToLower()">@vm.State</span></td>
+                                    <td style="font-size:0.85rem;">@vm.CpuCount</td>
+                                    <td style="font-size:0.85rem;">@vm.MemoryMB MB</td>
+                                </tr>
+                            }
+                            @foreach (var vm in agentVms.Wmi)
+                            {
+                                <tr>
+                                    <td><span class="badge bg-warning-subtle text-warning" style="font-size:0.7rem;">WMI</span></td>
+                                    <td style="font-size:0.85rem;">@vm.Name</td>
+                                    <td><span class="status-badge @vm.State.ToLower()">@vm.State</span></td>
+                                    <td style="font-size:0.85rem;">@vm.CpuCount</td>
+                                    <td style="font-size:0.85rem;">@vm.MemoryMB MB</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private bool loading = true;
+    private AgentHost? agent;
+    private List<VmInventoryDto> inventoryVms = new();
+    private VmListResponse? agentVms;
+    private string healthStatus = string.Empty;
+    private string error = string.Empty;
+    private bool checkingHealth;
+    private bool loadingVms;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+
+        try
+        {
+            var agentTask = Api.GetAgentAsync(Id);
+            var vmsTask = Api.GetVmsByAgentAsync(Id);
+            await Task.WhenAll(agentTask, vmsTask);
+            agent = await agentTask;
+            inventoryVms = (await vmsTask).ToList();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+
+        SignalR.OnAgentStatusChanged += OnAgentChanged;
+        SignalR.OnVmStateChanged += OnVmChanged;
+        await SignalR.StartAsync();
+        await SignalR.JoinAgentGroupAsync(Id);
+    }
+
+    private void OnAgentChanged(AgentStatusChangedEvent e) => InvokeAsync(RefreshAgent);
+    private void OnVmChanged(VmStateChangedEvent e) => InvokeAsync(RefreshAgent);
+
+    private async Task RefreshAgent()
+    {
+        try
+        {
+            agent = await Api.GetAgentAsync(Id);
+            inventoryVms = (await Api.GetVmsByAgentAsync(Id)).ToList();
+            StateHasChanged();
+        }
+        catch { }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        SignalR.OnAgentStatusChanged -= OnAgentChanged;
+        SignalR.OnVmStateChanged -= OnVmChanged;
+    }
+
+    private async Task CheckHealth()
+    {
+        if (agent == null) return;
+        error = string.Empty;
+        healthStatus = string.Empty;
+        checkingHealth = true;
+
+        try
+        {
+            var health = await AgentApi.GetHealthAsync(agent.ApiBaseUrl);
+            healthStatus = health?.Status ?? "unknown";
+        }
+        catch (Exception ex)
+        {
+            error = $"Health check failed: {ex.Message}";
+        }
+        finally
+        {
+            checkingHealth = false;
+        }
+    }
+
+    private async Task LoadVms()
+    {
+        if (agent == null) return;
+        error = string.Empty;
+        agentVms = null;
+        loadingVms = true;
+
+        try
+        {
+            agentVms = await AgentApi.GetVmsAsync(agent.ApiBaseUrl);
+        }
+        catch (Exception ex)
+        {
+            error = $"VM load failed: {ex.Message}";
+        }
+        finally
+        {
+            loadingVms = false;
+        }
+    }
+
+    private string GetStatusClass(AgentStatus status) => status switch
+    {
+        AgentStatus.Online => "online",
+        AgentStatus.Offline => "offline",
+        _ => "unknown"
+    };
+}

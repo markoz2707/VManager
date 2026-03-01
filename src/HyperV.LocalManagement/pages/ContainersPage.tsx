@@ -8,6 +8,8 @@ import { Modal } from '../components/Modal';
 import { PlayIcon, StopIcon, PauseIcon, PlusIcon, TrashIcon, ResumeIcon } from '../components/Icons';
 import { OutletContextType } from '../App';
 import { Tabs } from '../components/Tabs';
+import { useSignalR } from '../hooks/useSignalR';
+import { useHostContext } from '../hooks/useHostContext';
 
 type ContainerAction = 'start' | 'stop' | 'pause' | 'resume' | 'terminate';
 
@@ -64,15 +66,17 @@ const ContainerCard: React.FC<{
 
 export const ContainersPage = () => {
     const { addNotification } = useOutletContext<OutletContextType>();
+    const { isHyperV, isKVM } = useHostContext();
     const [allContainers, setAllContainers] = useState<{ WMI: Container[], HCS: Container[] }>({ WMI: [], HCS: [] });
     const [activeTab, setActiveTab] = useState<VmEnvironment>('HCS');
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [busyContainer, setBusyContainer] = useState<string | null>(null);
 
+    const defaultImage = isKVM ? 'alpine:latest' : 'mcr.microsoft.com/windows/servercore:ltsc2022';
     const [newContainer, setNewContainer] = useState({
         name: '',
-        image: 'mcr.microsoft.com/windows/servercore:ltsc2022',
+        image: defaultImage,
         memoryMB: '2048',
         cpuCount: '2',
         storageSizeGB: '20'
@@ -93,6 +97,12 @@ export const ContainersPage = () => {
         setIsLoading(true);
         fetchContainers();
     }, [fetchContainers]);
+
+    // Real-time updates via SignalR
+    useSignalR({
+        groups: ['containers'],
+        onContainerStateChanged: () => fetchContainers(),
+    });
 
     const handleAction = async (id: string, action: ContainerAction) => {
         setBusyContainer(id);
@@ -146,7 +156,7 @@ export const ContainersPage = () => {
             setIsModalOpen(false);
             setNewContainer({
                 name: '',
-                image: 'mcr.microsoft.com/windows/servercore:ltsc2022',
+                image: defaultImage,
                 memoryMB: '2048',
                 cpuCount: '2',
                 storageSizeGB: '20'
@@ -163,11 +173,11 @@ export const ContainersPage = () => {
         <div className="flex flex-col h-full">
             <header className="p-4 bg-panel-bg border-b border-panel-border flex items-center justify-between flex-shrink-0">
                 <h1 className="text-lg font-semibold text-gray-800">Containers</h1>
-                <Button onClick={() => setIsModalOpen(true)} leftIcon={<PlusIcon />}>Create {activeTab} Container</Button>
+                <Button onClick={() => setIsModalOpen(true)} leftIcon={<PlusIcon />}>Create {isKVM ? 'Docker' : activeTab} Container</Button>
             </header>
 
             <main className="flex-1 overflow-y-auto p-4">
-                <Tabs tabs={['HCS', 'WMI']} activeTab={activeTab} onTabClick={(tab) => setActiveTab(tab as VmEnvironment)} />
+                {isHyperV && <Tabs tabs={['HCS', 'WMI']} activeTab={activeTab} onTabClick={(tab) => setActiveTab(tab as VmEnvironment)} />}
 
                 {isLoading ? <div className="flex justify-center items-center h-96"><Spinner /></div> : (
                     displayedContainers.length > 0 ? (
@@ -182,13 +192,13 @@ export const ContainersPage = () => {
                         </div>
                     ) : (
                         <div className="text-center py-12 text-gray-500">
-                            <p>No containers found in the {activeTab} environment.</p>
+                            <p>No containers found{isHyperV ? ` in the ${activeTab} environment` : ''}.</p>
                         </div>
                     )
                 )}
             </main>
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Create New ${activeTab} Container`}>
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isKVM ? 'Create New Docker Container' : `Create New ${activeTab} Container`}>
                 <form onSubmit={handleCreateContainer}>
                     <div className="space-y-4">
                         <div>

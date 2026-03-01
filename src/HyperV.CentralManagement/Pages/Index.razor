@@ -1,16 +1,308 @@
 @page "/"
+@implements IAsyncDisposable
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+@inject SignalRClientService SignalR
 
-<PageTitle>Hyper-V Central</PageTitle>
+<PageTitle>VManager - Dashboard</PageTitle>
 
-<h1>Hyper-V Central Management</h1>
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading dashboard...</span>
+    </div>
+}
+else if (dashboard == null)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-exclamation-triangle"></i>
+        <p>Unable to load dashboard data. Make sure you are logged in.</p>
+    </div>
+}
+else
+{
+    <div class="vm-page-header">
+        <h2>Dashboard</h2>
+        <button class="btn btn-outline-secondary btn-sm" @onclick="LoadData">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+    </div>
 
-<p>
-    Central panel for Hyper-V hosts and clusters. Use <strong>Login</strong> to obtain a JWT session,
-    then manage registered agents and cluster topology.
-</p>
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div>
+                        <div class="stat-value">@dashboard.TotalAgents</div>
+                        <div class="stat-label">Total Agents</div>
+                        <div class="stat-detail mt-1">
+                            <span class="text-success">@dashboard.OnlineAgents online</span> /
+                            <span class="text-danger">@(dashboard.TotalAgents - dashboard.OnlineAgents) offline</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon bg-primary-subtle">
+                        <i class="bi bi-hdd-network"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div>
+                        <div class="stat-value">@dashboard.TotalVms</div>
+                        <div class="stat-label">Virtual Machines</div>
+                        <div class="stat-detail mt-1">
+                            <span class="text-success">@dashboard.RunningVms running</span> /
+                            <span class="text-muted">@(dashboard.TotalVms - dashboard.RunningVms) stopped</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon bg-success-subtle">
+                        <i class="bi bi-pc-display"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div>
+                        <div class="stat-value">@dashboard.ActiveAlerts</div>
+                        <div class="stat-label">Active Alerts</div>
+                        <div class="stat-detail mt-1">
+                            @if (dashboard.ActiveAlerts > 0)
+                            {
+                                <span class="text-danger">Requires attention</span>
+                            }
+                            else
+                            {
+                                <span class="text-success">All clear</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="stat-icon @(dashboard.ActiveAlerts > 0 ? "bg-danger-subtle" : "bg-success-subtle")">
+                        <i class="bi bi-bell"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div>
+                        <div class="stat-value">@clusterCount</div>
+                        <div class="stat-label">Clusters</div>
+                        <div class="stat-detail mt-1">
+                            <span class="text-muted">Managed groups</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon bg-info-subtle">
+                        <i class="bi bi-diagram-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<ul>
-    <li>Agents: inventory, heartbeat status, tags, and API endpoints.</li>
-    <li>Clusters: group hosts into logical clusters for coordinated actions.</li>
-    <li>Direct UI-to-agent calls are supported once you have the agent API URL.</li>
-</ul>
+    <div class="row g-3">
+        <!-- Recent Alerts -->
+        <div class="col-lg-6">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6><i class="bi bi-bell me-2"></i>Recent Alerts</h6>
+                    <a href="/alerts" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="vm-card-body p-0">
+                    @if (activeAlerts.Count == 0)
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-check-circle" style="font-size:1.5rem;"></i>
+                            <p class="mt-2 mb-0" style="font-size:0.85rem;">No active alerts</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="font-size:0.75rem;">Severity</th>
+                                    <th style="font-size:0.75rem;">Host / VM</th>
+                                    <th style="font-size:0.75rem;">Value</th>
+                                    <th style="font-size:0.75rem;">Fired</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var alert in activeAlerts.Take(5))
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="severity-badge @GetSeverityClass(alert.AlertDefinition?.Severity)">
+                                                @(alert.AlertDefinition?.Severity.ToString() ?? "Unknown")
+                                            </span>
+                                        </td>
+                                        <td style="font-size:0.85rem;">@(alert.AgentHostName ?? alert.VmName ?? "-")</td>
+                                        <td style="font-size:0.85rem;">@alert.CurrentValue.ToString("F1")</td>
+                                        <td style="font-size:0.8rem;" class="text-muted">@alert.FiredUtc.ToString("MM/dd HH:mm")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Events -->
+        <div class="col-lg-6">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6><i class="bi bi-journal-text me-2"></i>Recent Events</h6>
+                    <a href="/audit" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="vm-card-body p-0">
+                    @if (auditLogs.Count == 0)
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <p class="mb-0" style="font-size:0.85rem;">No recent events</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="font-size:0.75rem;">Time</th>
+                                    <th style="font-size:0.75rem;">User</th>
+                                    <th style="font-size:0.75rem;">Action</th>
+                                    <th style="font-size:0.75rem;">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var log in auditLogs.Take(8))
+                                {
+                                    <tr>
+                                        <td style="font-size:0.8rem;" class="text-muted text-nowrap">@log.TimestampUtc.ToString("MM/dd HH:mm")</td>
+                                        <td style="font-size:0.85rem;">@(log.Username ?? "-")</td>
+                                        <td style="font-size:0.85rem;"><code>@log.Action</code></td>
+                                        <td style="font-size:0.8rem; max-width:200px;" class="text-muted text-truncate">@(log.Details ?? "-")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agents Overview -->
+    <div class="mt-3">
+        <div class="vm-card">
+            <div class="vm-card-header">
+                <h6><i class="bi bi-hdd-network me-2"></i>Agent Hosts</h6>
+                <a href="/agents" class="btn btn-sm btn-outline-primary">Manage</a>
+            </div>
+            <div class="vm-card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th style="font-size:0.75rem;">Status</th>
+                            <th style="font-size:0.75rem;">Hostname</th>
+                            <th style="font-size:0.75rem;">Type</th>
+                            <th style="font-size:0.75rem;">Last Seen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var agent in dashboard.Agents.Take(10))
+                        {
+                            <tr>
+                                <td>
+                                    <span class="status-dot @(agent.Status == "Online" ? "online" : agent.Status == "Offline" ? "offline" : "unknown")"></span>
+                                    @agent.Status
+                                </td>
+                                <td style="font-size:0.85rem;"><a href="/agents/@agent.Id">@agent.Hostname</a></td>
+                                <td style="font-size:0.85rem;">@agent.HostType</td>
+                                <td style="font-size:0.8rem;" class="text-muted">@agent.LastSeenUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool loading = true;
+    private DashboardData? dashboard;
+    private List<AlertInstance> activeAlerts = new();
+    private List<AuditLog> auditLogs = new();
+    private int clusterCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token))
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+        await LoadData();
+        await InitSignalR();
+    }
+
+    private async Task InitSignalR()
+    {
+        SignalR.OnAlertFired += _ => InvokeAsync(LoadData);
+        SignalR.OnAlertResolved += _ => InvokeAsync(LoadData);
+        SignalR.OnAgentStatusChanged += _ => InvokeAsync(LoadData);
+        SignalR.OnVmStateChanged += _ => InvokeAsync(LoadData);
+        await SignalR.StartAsync();
+        await SignalR.JoinAlertsGroupAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        SignalR.OnAlertFired -= _ => InvokeAsync(LoadData);
+        SignalR.OnAlertResolved -= _ => InvokeAsync(LoadData);
+        SignalR.OnAgentStatusChanged -= _ => InvokeAsync(LoadData);
+        SignalR.OnVmStateChanged -= _ => InvokeAsync(LoadData);
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        try
+        {
+            var dashTask = Api.GetMetricsDashboardAsync();
+            var alertsTask = Api.GetActiveAlertsAsync();
+            var auditTask = Api.GetAuditLogsAsync();
+            var clusterTask = Api.GetClustersAsync();
+
+            await Task.WhenAll(dashTask, alertsTask, auditTask, clusterTask);
+
+            dashboard = await dashTask;
+            activeAlerts = (await alertsTask).ToList();
+            auditLogs = (await auditTask).ToList();
+            clusterCount = (await clusterTask).Count;
+        }
+        catch
+        {
+            dashboard = new DashboardData();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private string GetSeverityClass(AlertSeverity? severity) => severity switch
+    {
+        AlertSeverity.Critical => "critical",
+        AlertSeverity.Warning => "warning",
+        AlertSeverity.Info => "info",
+        _ => "info"
+    };
+}

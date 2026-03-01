@@ -3,8 +3,15 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>HyperV.LocalShell</RootNamespace>
     <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <AssemblyName>hvsh</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="0.48.0" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.48.0" />
+    <PackageReference Include="System.Management" Version="9.0.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="9.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HyperV.Contracts\HyperV.Contracts.csproj" />
   </ItemGroup>
 </Project>

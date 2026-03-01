@@ -1,0 +1,219 @@
+@page "/users"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - Users</PageTitle>
+
+<div class="vm-page-header">
+    <h2>User Management</h2>
+    <button class="btn btn-primary btn-sm" @onclick="() => showCreateModal = true">
+        <i class="bi bi-person-plus"></i> Create User
+    </button>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading users...</span>
+    </div>
+}
+else
+{
+    <div class="vm-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Roles</th>
+                    <th>Created</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td class="fw-semibold">
+                            <i class="bi bi-person me-1"></i> @user.Username
+                        </td>
+                        <td style="font-size:0.85rem;">@(user.Email ?? "-")</td>
+                        <td>
+                            @if (user.IsActive)
+                            {
+                                <span class="status-badge running">Active</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge off">Disabled</span>
+                            }
+                        </td>
+                        <td>
+                            @foreach (var role in user.Roles.Take(3))
+                            {
+                                <span class="badge bg-primary-subtle text-primary me-1" style="font-size:0.7rem;">@role.RoleName</span>
+                            }
+                            @if (user.Roles.Count > 3)
+                            {
+                                <span class="text-muted" style="font-size:0.7rem;">+@(user.Roles.Count - 3)</span>
+                            }
+                        </td>
+                        <td style="font-size:0.8rem;" class="text-muted">@user.CreatedUtc.ToString("yyyy-MM-dd")</td>
+                        <td style="font-size:0.8rem;" class="text-muted">@(user.LastLoginUtc?.ToString("MM/dd HH:mm") ?? "Never")</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="/users/@user.Id" class="btn btn-outline-primary btn-action" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button class="btn btn-outline-danger btn-action" @onclick="() => DeleteUser(user.Id)" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3" style="font-size:0.85rem;">@error</div>
+}
+
+@if (showCreateModal)
+{
+    <div class="vm-modal-backdrop" @onclick="() => showCreateModal = false">
+        <div class="vm-modal" @onclick:stopPropagation="true">
+            <div class="vm-modal-header">
+                <h5>Create User</h5>
+                <button class="btn-close" @onclick="() => showCreateModal = false"></button>
+            </div>
+            <div class="vm-modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Username</label>
+                    <input class="form-control" @bind="newUser.Username" placeholder="e.g. johndoe" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Password</label>
+                    <input class="form-control" type="password" @bind="newUser.Password" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input class="form-control" type="email" @bind="newUser.Email" placeholder="user@example.com" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Assign Roles</label>
+                    @foreach (var role in allRoles)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                   checked="@selectedRoleIds.Contains(role.Id)"
+                                   @onchange="e => ToggleRole(role.Id, (bool)(e.Value ?? false))" />
+                            <label class="form-check-label">@role.Name</label>
+                        </div>
+                    }
+                </div>
+                @if (!string.IsNullOrWhiteSpace(createError))
+                {
+                    <div class="alert alert-danger py-2" style="font-size:0.85rem;">@createError</div>
+                }
+            </div>
+            <div class="vm-modal-footer">
+                <button class="btn btn-secondary" @onclick="() => showCreateModal = false">Cancel</button>
+                <button class="btn btn-primary" @onclick="CreateUser">Create</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool loading = true;
+    private List<UserDto> users = new();
+    private List<RoleDto> allRoles = new();
+    private string error = string.Empty;
+
+    private bool showCreateModal;
+    private string createError = string.Empty;
+    private NewUserModel newUser = new();
+    private HashSet<Guid> selectedRoleIds = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        try
+        {
+            var usersTask = Api.GetUsersAsync();
+            var rolesTask = Api.GetRolesAsync();
+            await Task.WhenAll(usersTask, rolesTask);
+            users = (await usersTask).ToList();
+            allRoles = (await rolesTask).ToList();
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { loading = false; }
+    }
+
+    private void ToggleRole(Guid roleId, bool isChecked)
+    {
+        if (isChecked) selectedRoleIds.Add(roleId);
+        else selectedRoleIds.Remove(roleId);
+    }
+
+    private async Task CreateUser()
+    {
+        createError = string.Empty;
+        if (string.IsNullOrWhiteSpace(newUser.Username) || string.IsNullOrWhiteSpace(newUser.Password))
+        {
+            createError = "Username and password are required.";
+            return;
+        }
+        try
+        {
+            var response = await Api.CreateUserAsync(new
+            {
+                username = newUser.Username,
+                password = newUser.Password,
+                email = newUser.Email,
+                roleIds = selectedRoleIds.ToList()
+            });
+            if (response.IsSuccessStatusCode)
+            {
+                showCreateModal = false;
+                newUser = new();
+                selectedRoleIds.Clear();
+                await LoadData();
+            }
+            else { createError = "Failed to create user. Username may already exist."; }
+        }
+        catch (Exception ex) { createError = ex.Message; }
+    }
+
+    private async Task DeleteUser(Guid id)
+    {
+        error = string.Empty;
+        try
+        {
+            await Api.DeleteUserAsync(id);
+            await LoadData();
+        }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private class NewUserModel
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string? Email { get; set; }
+    }
+}

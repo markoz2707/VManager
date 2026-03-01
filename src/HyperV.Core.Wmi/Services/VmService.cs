@@ -799,24 +799,66 @@ public class VmService
         }
     }
 
-    /// <summary>Modifies SLP data root.</summary>
+    /// <summary>Modifies SLP data root (configuration data root path for the VM).</summary>
     public virtual void ModifySlpDataRoot(string vmId, string newLocation)
     {
         try
         {
             var scope = new ManagementScope(@"root\virtualization\v2");
             scope.Connect();
-            
+
             var vm = FindVmByName(scope, vmId);
             if (vm == null)
             {
                 throw new InvalidOperationException($"VM {vmId} not found");
             }
-            
-            // This is a placeholder implementation
-            throw new NotImplementedException("SLP data root modification not yet implemented");
+
+            using (vm)
+            {
+                // Get the VM's settings data
+                var settingsQuery = $"SELECT * FROM Msvm_VirtualSystemSettingData WHERE SystemName = '{vm["Name"]}'";
+                using var settingsSearcher = new ManagementObjectSearcher(scope, new ObjectQuery(settingsQuery));
+                var settingsCollection = settingsSearcher.Get();
+                var settings = settingsCollection.Cast<ManagementObject>().FirstOrDefault();
+
+                if (settings == null)
+                {
+                    throw new InvalidOperationException($"VM settings not found for {vmId}");
+                }
+
+                using (settings)
+                {
+                    // Modify the ConfigurationDataRoot property
+                    settings["ConfigurationDataRoot"] = newLocation;
+
+                    // Get the Virtual System Management Service
+                    var mgmtServiceQuery = "SELECT * FROM Msvm_VirtualSystemManagementService";
+                    using var mgmtSearcher = new ManagementObjectSearcher(scope, new ObjectQuery(mgmtServiceQuery));
+                    var mgmtService = mgmtSearcher.Get().Cast<ManagementObject>().FirstOrDefault();
+
+                    if (mgmtService == null)
+                    {
+                        throw new InvalidOperationException("Msvm_VirtualSystemManagementService not found");
+                    }
+
+                    using (mgmtService)
+                    {
+                        // Apply the changes using ModifySystemSettings
+                        var inParams = mgmtService.GetMethodParameters("ModifySystemSettings");
+                        inParams["SystemSettings"] = settings.GetText(TextFormat.WmiDtd20);
+
+                        var outParams = mgmtService.InvokeMethod("ModifySystemSettings", inParams, null);
+                        var returnValue = Convert.ToUInt32(outParams["ReturnValue"]);
+
+                        if (returnValue != 0 && returnValue != 4096)
+                        {
+                            throw new InvalidOperationException($"Failed to modify SLP data root. Return code: {returnValue}");
+                        }
+                    }
+                }
+            }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not InvalidOperationException)
         {
             throw new InvalidOperationException($"Failed to modify SLP data root: {ex.Message}", ex);
         }
@@ -962,17 +1004,60 @@ public class VmService
         {
             var scope = new ManagementScope(@"root\virtualization\v2");
             scope.Connect();
-            
+
             var vm = FindVmByName(scope, vmId);
             if (vm == null)
             {
                 throw new InvalidOperationException($"VM {vmId} not found");
             }
-            
-            // This is a placeholder implementation
-            throw new NotImplementedException("Boot order modification not yet implemented");
+
+            using (vm)
+            {
+                // Get the VM's settings data (SettingType=3 for current snapshot/settings)
+                var settingsQuery = $"SELECT * FROM Msvm_VirtualSystemSettingData WHERE SystemName = '{vm["Name"]}'";
+                using var settingsSearcher = new ManagementObjectSearcher(scope, new ObjectQuery(settingsQuery));
+                var settingsCollection = settingsSearcher.Get();
+                var settings = settingsCollection.Cast<ManagementObject>().FirstOrDefault();
+
+                if (settings == null)
+                {
+                    throw new InvalidOperationException($"VM settings not found for {vmId}");
+                }
+
+                using (settings)
+                {
+                    // Set the BootOrder property on Msvm_VirtualSystemSettingData
+                    // BootOrder is a string array of boot source references
+                    settings["BootOrder"] = bootOrder;
+
+                    // Get the Virtual System Management Service
+                    var mgmtServiceQuery = "SELECT * FROM Msvm_VirtualSystemManagementService";
+                    using var mgmtSearcher = new ManagementObjectSearcher(scope, new ObjectQuery(mgmtServiceQuery));
+                    var mgmtService = mgmtSearcher.Get().Cast<ManagementObject>().FirstOrDefault();
+
+                    if (mgmtService == null)
+                    {
+                        throw new InvalidOperationException("Msvm_VirtualSystemManagementService not found");
+                    }
+
+                    using (mgmtService)
+                    {
+                        // Apply the changes using ModifySystemSettings
+                        var inParams = mgmtService.GetMethodParameters("ModifySystemSettings");
+                        inParams["SystemSettings"] = settings.GetText(TextFormat.WmiDtd20);
+
+                        var outParams = mgmtService.InvokeMethod("ModifySystemSettings", inParams, null);
+                        var returnValue = Convert.ToUInt32(outParams["ReturnValue"]);
+
+                        if (returnValue != 0 && returnValue != 4096) // 0 = Success, 4096 = Job Started
+                        {
+                            throw new InvalidOperationException($"Failed to set boot order. Return code: {returnValue}");
+                        }
+                    }
+                }
+            }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not InvalidOperationException)
         {
             throw new InvalidOperationException($"Failed to set boot order: {ex.Message}", ex);
         }

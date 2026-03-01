@@ -1,0 +1,89 @@
+/* VManager Dark Mode CSS Variables */
+:root {
+  --bg-app: #f0f2f5;
+  --bg-panel: #ffffff;
+  --bg-sidebar: #343d46;
+  --bg-header: #252F39;
+  --border-panel: #e0e0e0;
+  --text-primary: #1a202c;
+  --text-secondary: #718096;
+}
+
+.dark {
+  --bg-app: #0f172a;
+  --bg-panel: #1e293b;
+  --bg-sidebar: #1e293b;
+  --bg-header: #0f172a;
+  --border-panel: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+}
+
+/* Dark mode overrides for common elements */
+.dark .bg-content-bg { background-color: #0f172a; }
+.dark .bg-panel-bg { background-color: #1e293b; }
+.dark .border-panel-border { border-color: #334155; }
+.dark .bg-white { background-color: #1e293b; }
+.dark .bg-gray-50 { background-color: #1e293b; }
+.dark .bg-gray-100 { background-color: #273549; }
+.dark .bg-gray-200 { background-color: #334155; }
+.dark .text-gray-800 { color: #e2e8f0; }
+.dark .text-gray-700 { color: #cbd5e0; }
+.dark .text-gray-600 { color: #94a3b8; }
+.dark .text-gray-500 { color: #64748b; }
+.dark .border-gray-200 { border-color: #334155; }
+.dark .border-gray-300 { border-color: #475569; }
+.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #334155; }
+.dark .hover\:bg-gray-50:hover { background-color: #273549; }
+.dark .hover\:bg-gray-100:hover { background-color: #334155; }
+
+/* Dark mode form elements */
+.dark input, .dark select, .dark textarea {
+  color-scheme: dark;
+}
+.dark input[type="text"],
+.dark input[type="number"],
+.dark input[type="password"],
+.dark input[type="email"],
+.dark select,
+.dark textarea {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+/* Dark mode table */
+.dark table thead { background-color: #273549; }
+.dark table tbody tr:hover { background-color: #273549; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #a0aec0;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.2s ease-out;
+}

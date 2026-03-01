@@ -1,0 +1,31 @@
+[Unit]
+Description=VManager Agent - Multi-Hypervisor Management Agent
+After=network.target libvirtd.service
+Wants=libvirtd.service
+
+[Service]
+Type=notify
+WorkingDirectory=/opt/vmanager-agent
+ExecStart=/opt/vmanager-agent/VManager.Agent
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=vmanager-agent
+
+# Environment
+Environment=DOTNET_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=https://0.0.0.0:5001;http://0.0.0.0:5000
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/vmanager-agent/logs /var/lib/vmanager
+PrivateTmp=true
+
+# Resource limits
+LimitNOFILE=65536
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

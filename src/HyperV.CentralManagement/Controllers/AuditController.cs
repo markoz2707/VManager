@@ -1,5 +1,5 @@
+using HyperV.CentralManagement.Authorization;
 using HyperV.CentralManagement.Data;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +17,7 @@ public class AuditController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [RequirePermission("audit", "read")]
     public async Task<IActionResult> GetAuditLogs()
     {
         var logs = await _db.AuditLogs

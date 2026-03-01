@@ -24,12 +24,17 @@ builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddSingleton<LdapAuthService>();
 builder.Services.AddHostedService<DatabaseSeedService>();
-builder.Services.AddHttpClient("central");
+builder.Services.AddHttpClient("central")
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+    });
 builder.Services.AddHttpClient("AgentClient")
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
     {
         ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
     });
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthSession>();
 builder.Services.AddScoped<CentralApiClient>();
 builder.Services.AddScoped<AuditLogService>();
@@ -40,6 +45,7 @@ builder.Services.AddScoped<MigrationOrchestrator>();
 builder.Services.AddScoped<AlertService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<ContentLibraryService>();
+builder.Services.AddScoped<SignalRClientService>();
 builder.Services.AddHostedService<VmSyncBackgroundService>();
 builder.Services.AddHostedService<AlertEvaluationService>();
 builder.Services.AddHostedService<MetricsCollectionService>();
@@ -53,6 +59,7 @@ builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>() ?? new JwtOptions();
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret));
@@ -116,6 +123,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapMetrics(); // Prometheus /metrics endpoint
 app.MapHub<VManagerHub>("/hubs/vmanager");
-app.MapFallbackToFile("index.html");
+app.MapRazorComponents<HyperV.CentralManagement.App>().AddInteractiveServerRenderMode();
 
 app.Run();

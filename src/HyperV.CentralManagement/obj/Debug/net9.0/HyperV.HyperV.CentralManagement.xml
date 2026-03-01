@@ -4,6 +4,149 @@
         <name>HyperV.HyperV.CentralManagement</name>
     </assembly>
     <members>
+        <member name="T:HyperV.CentralManagement.Authorization.PermissionPolicyProvider">
+            <summary>
+            Dynamic policy provider that creates permission-based policies on demand.
+            Handles policies with format "Permission:{resource}:{action}"
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Authorization.RequirePermissionAttribute">
+            <summary>
+            Require a specific permission (resource + action) to access an endpoint.
+            Usage: [RequirePermission("vm", "power")]
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.ContentLibraryController.ListItems(System.Nullable{HyperV.CentralManagement.Models.ContentLibraryItemType},System.String,System.String,System.Threading.CancellationToken)">
+            <summary>Lists all content library items with optional filtering.</summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.ContentLibraryController.GetItem(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets details of a specific content library item.</summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.ContentLibraryController.CreateItem(System.String,System.String,HyperV.CentralManagement.Models.ContentLibraryItemType,System.String,System.String,System.String,System.Boolean,Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+            <summary>Uploads a new content library item.</summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.ContentLibraryController.UpdateItem(System.Guid,HyperV.CentralManagement.Controllers.UpdateContentLibraryItemRequest,System.Threading.CancellationToken)">
+            <summary>Updates metadata of a content library item.</summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.ContentLibraryController.DeleteItem(System.Guid,System.Threading.CancellationToken)">
+            <summary>Deletes a content library item.</summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.ContentLibraryController.DeployToAgent(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Deploys a content library item to an agent host.</summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.ContentLibraryController.SyncItem(System.Guid,System.Threading.CancellationToken)">
+            <summary>Triggers synchronization of a content library item to all its subscribers.</summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.MetricsController.GetHostMetrics(System.Guid,System.String,System.Nullable{System.DateTimeOffset},System.Nullable{System.DateTimeOffset},System.Int32)">
+            <summary>
+            Get host metrics time series
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.MetricsController.GetVmMetrics(System.Guid,System.String,System.Nullable{System.DateTimeOffset},System.Nullable{System.DateTimeOffset})">
+            <summary>
+            Get VM metrics time series
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.MetricsController.GetClusterSummary(System.Guid)">
+            <summary>
+            Get cluster summary metrics (latest values for all hosts)
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.MetricsController.GetDashboardData">
+            <summary>
+            Get dashboard data (overview of all agents)
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.GetAllVms(System.String)">
+            <summary>
+            Get all VMs across all agents
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.GetVmsByAgent(System.Guid)">
+            <summary>
+            Get VMs for a specific agent
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.GetVm(System.Guid)">
+            <summary>
+            Get a specific VM by ID
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.GetVmsByFolder(System.Guid)">
+            <summary>
+            Get VMs by folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.GetVmsWithoutFolder">
+            <summary>
+            Get VMs without folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.GetStatistics">
+            <summary>
+            Get VM statistics
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.UpdateMetadata(System.Guid,HyperV.CentralManagement.Controllers.VmMetadataUpdateDto)">
+            <summary>
+            Update VM metadata (folder, tags, notes)
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.PowerOperation(System.Guid,HyperV.CentralManagement.Controllers.PowerOperationDto)">
+            <summary>
+            Power operation on a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.MigratePreCheck(System.Guid,HyperV.CentralManagement.Controllers.MigratePreCheckDto)">
+            <summary>
+            Pre-check migration feasibility
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.MigrateVm(System.Guid,HyperV.CentralManagement.Controllers.MigrationRequestDto)">
+            <summary>
+            Migrate VM to another host (orchestrated)
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.GetMigrationHistory(System.Guid)">
+            <summary>
+            Get migration history for a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.CancelMigration(System.Guid)">
+            <summary>
+            Cancel a migration
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.MoveToFolder(System.Guid,HyperV.CentralManagement.Controllers.MoveToFolderDto)">
+            <summary>
+            Move VM to a folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.GetFolders">
+            <summary>
+            Get all folders
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.GetRootFolders">
+            <summary>
+            Get root folders
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.CreateFolder(HyperV.CentralManagement.Controllers.CreateFolderDto)">
+            <summary>
+            Create a folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.RenameFolder(System.Guid,HyperV.CentralManagement.Controllers.RenameFolderDto)">
+            <summary>
+            Rename a folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Controllers.VmInventoryController.DeleteFolder(System.Guid)">
+            <summary>
+            Delete a folder
+            </summary>
+        </member>
         <member name="T:HyperV.CentralManagement.Migrations.InitialCreate">
             <inheritdoc />
         </member>
@@ -16,6 +159,225 @@
         <member name="M:HyperV.CentralManagement.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:HyperV.CentralManagement.Migrations.AddContentLibrary">
+            <inheritdoc />
+        </member>
+        <member name="M:HyperV.CentralManagement.Migrations.AddContentLibrary.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HyperV.CentralManagement.Migrations.AddContentLibrary.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HyperV.CentralManagement.Migrations.AddContentLibrary.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:HyperV.CentralManagement.Migrations.AddDatacenter">
+            <inheritdoc />
+        </member>
+        <member name="M:HyperV.CentralManagement.Migrations.AddDatacenter.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HyperV.CentralManagement.Migrations.AddDatacenter.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:HyperV.CentralManagement.Migrations.AddDatacenter.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.AlertDefinition.EvaluationPeriods">
+            <summary>
+            How many consecutive evaluation periods the condition must be true before firing
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.AlertDefinition.CooldownSeconds">
+            <summary>
+            Cooldown in seconds before the same alert can fire again
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.AlertDefinition.ClusterId">
+            <summary>
+            Optional scope: specific cluster
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.AlertDefinition.AgentHostId">
+            <summary>
+            Optional scope: specific agent host
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.AlertInstance.AgentHostId">
+            <summary>
+            Which agent host triggered this alert
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.AlertInstance.VmInventoryId">
+            <summary>
+            Which VM triggered this alert (if VM-level metric)
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.DrsConfiguration.CpuImbalanceThreshold">
+            <summary>
+            CPU imbalance threshold (percent difference between most/least loaded host)
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.DrsConfiguration.MemoryImbalanceThreshold">
+            <summary>
+            Memory imbalance threshold
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.DrsConfiguration.EvaluationIntervalSeconds">
+            <summary>
+            Evaluation interval in seconds
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.DrsConfiguration.MinBenefitPercent">
+            <summary>
+            Minimum improvement (percent) required for a migration recommendation
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.DrsRecommendation.EstimatedBenefitPercent">
+            <summary>
+            Estimated improvement in cluster balance (percent)
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.HaConfiguration.HeartbeatIntervalSeconds">
+            <summary>
+            Heartbeat interval in seconds
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.HaConfiguration.FailureThreshold">
+            <summary>
+            Number of missed heartbeats before declaring host failure
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.HaConfiguration.AdmissionControl">
+            <summary>
+            Enable admission control to reserve capacity for failover
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.HaConfiguration.ReservedCpuPercent">
+            <summary>
+            Percent of cluster CPU to reserve for failover
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.HaConfiguration.ReservedMemoryPercent">
+            <summary>
+            Percent of cluster memory to reserve for failover
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.HaVmOverride.RestartOrder">
+            <summary>
+            Lower numbers restart first
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.MetricDataPoint.VmInventoryId">
+            <summary>
+            Optional: VM-level metric
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.NotificationChannel.Configuration">
+            <summary>
+            JSON configuration for the channel (e.g. SMTP settings, webhook URL, Slack token)
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.Permission.Resource">
+            <summary>
+            Resource type: vm, host, cluster, network, storage, user, audit
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.Permission.Action">
+            <summary>
+            Action: read, create, update, delete, power, migrate, snapshot
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.UserAccount.Role">
+            <summary>
+            Legacy role field kept for backward compatibility during migration
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.UserRole.ClusterId">
+            <summary>
+            Optional scope: restrict role to a specific cluster
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.UserRole.AgentHostId">
+            <summary>
+            Optional scope: restrict role to a specific agent host
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Models.VmInventory">
+            <summary>
+            Represents a VM in the central inventory (cached from agents)
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.AgentHostId">
+            <summary>
+            Reference to the agent host that owns this VM
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.VmId">
+            <summary>
+            Original VM ID from the agent
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.Name">
+            <summary>
+            VM name
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.State">
+            <summary>
+            Current state (Running, Off, Paused, Saved, etc.)
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.CpuCount">
+            <summary>
+            Number of virtual CPUs
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.MemoryMB">
+            <summary>
+            Assigned memory in MB
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.Environment">
+            <summary>
+            VM source environment (HCS or WMI)
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.LastSyncUtc">
+            <summary>
+            Last time this VM was synced from the agent
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.FolderId">
+            <summary>
+            Optional folder for organization
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.Tags">
+            <summary>
+            Comma-separated tags for categorization
+            </summary>
+        </member>
+        <member name="P:HyperV.CentralManagement.Models.VmInventory.Notes">
+            <summary>
+            Additional notes or description
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Models.VmFolder">
+            <summary>
+            Folder for organizing VMs hierarchically
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.AlertEvaluationService">
+            <summary>
+            Background service that periodically evaluates alert definitions against agent metrics
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.DashboardData">
+            <summary>
+            DTO matching the MetricsController dashboard endpoint response
+            </summary>
+        </member>
         <member name="T:HyperV.CentralManagement.Services.DatabaseHealthCheck">
             <summary>
             Health check for database connectivity
@@ -24,6 +386,167 @@
         <member name="T:HyperV.CentralManagement.Services.LdapHealthCheck">
             <summary>
             Health check for LDAP connectivity (if enabled)
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.DrsEngine">
+            <summary>
+            Background service that evaluates cluster balance and creates migration recommendations
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.HaEngine">
+            <summary>
+            Background service that monitors host health and restarts VMs on failed hosts
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.JwtTokenService.CreateToken(System.String,System.String)">
+            <summary>
+            Legacy method - creates token with simple role string
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.JwtTokenService.CreateToken(System.Guid,System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{HyperV.CentralManagement.Services.PermissionInfo})">
+            <summary>
+            Creates token with userId, roles, and embedded permission claims
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.MetricsCollectionService">
+            <summary>
+            Background service that polls agents for metrics and stores historical data in PostgreSQL
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.MetricsRetentionService">
+            <summary>
+            Background service that cleans up old metric data points (default: 30 days retention)
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.MigrationOrchestrator.PreCheckAsync(System.Guid,System.Guid)">
+            <summary>
+            Pre-check migration feasibility
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.MigrationOrchestrator.InitiateMigrationAsync(System.Guid,System.Guid,System.Boolean,System.Boolean,System.String)">
+            <summary>
+            Initiate a migration task
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.MigrationOrchestrator.GetMigrationStatusAsync(System.Guid)">
+            <summary>
+            Get migration status
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.MigrationOrchestrator.GetMigrationHistoryAsync(System.Guid)">
+            <summary>
+            Get migration history for a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.MigrationOrchestrator.CancelMigrationAsync(System.Guid)">
+            <summary>
+            Cancel a pending/running migration
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.PermissionService.HasPermissionAsync(System.Guid,System.String,System.String,System.Nullable{System.Guid})">
+            <summary>
+            Check if a user has a specific permission, optionally scoped to a cluster or agent
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.PermissionService.GetUserPermissionsAsync(System.Guid)">
+            <summary>
+            Get all permissions for a user (aggregated from all roles)
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.PermissionService.GetUserRoleNamesAsync(System.Guid)">
+            <summary>
+            Get all role names for a user
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.SignalRClientService">
+            <summary>
+            Manages a SignalR HubConnection to /hubs/vmanager for Blazor components.
+            Scoped service — each circuit gets its own connection.
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.GetAllVmsAsync">
+            <summary>
+            Get all VMs across all agents
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.GetVmsByAgentAsync(System.Guid)">
+            <summary>
+            Get VMs for a specific agent
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.GetVmAsync(System.Guid)">
+            <summary>
+            Get a specific VM by ID
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.GetVmsByFolderAsync(System.Nullable{System.Guid})">
+            <summary>
+            Get VMs by folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.SearchVmsAsync(System.String)">
+            <summary>
+            Search VMs by name or tags
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.SyncVmsFromAgentAsync(HyperV.CentralManagement.Models.AgentHost)">
+            <summary>
+            Sync VMs from a specific agent
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.UpdateVmMetadataAsync(System.Guid,System.Nullable{System.Guid},System.String,System.String)">
+            <summary>
+            Update VM metadata (folder, tags, notes)
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.PowerOperationAsync(System.Guid,System.String)">
+            <summary>
+            Power operation on a VM
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.MigrateVmAsync(System.Guid,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Migrate VM to another host
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.GetFoldersAsync">
+            <summary>
+            Get all folders
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.GetRootFoldersAsync">
+            <summary>
+            Get root folders (no parent)
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.CreateFolderAsync(System.String,System.Nullable{System.Guid})">
+            <summary>
+            Create a folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.RenameFolderAsync(System.Guid,System.String)">
+            <summary>
+            Rename a folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.DeleteFolderAsync(System.Guid)">
+            <summary>
+            Delete a folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.MoveVmToFolderAsync(System.Guid,System.Nullable{System.Guid})">
+            <summary>
+            Move VM to folder
+            </summary>
+        </member>
+        <member name="M:HyperV.CentralManagement.Services.VmInventoryService.GetStatisticsAsync">
+            <summary>
+            Get VM statistics
+            </summary>
+        </member>
+        <member name="T:HyperV.CentralManagement.Services.VmSyncBackgroundService">
+            <summary>
+            Background service that periodically syncs VM inventory from all registered agents
             </summary>
         </member>
     </members>

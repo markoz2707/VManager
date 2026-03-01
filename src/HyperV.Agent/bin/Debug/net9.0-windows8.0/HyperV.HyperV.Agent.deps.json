@@ -47,20 +47,27 @@
           "HyperV.HyperV.Core.Hcs": "1.0.0",
           "HyperV.HyperV.Core.Vhd": "1.0.0",
           "HyperV.HyperV.Core.Wmi": "1.0.0",
+          "HyperV.VManager.Provider.HyperV": "1.0.0",
+          "HyperV.VManager.Provider.KVM": "1.0.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "9.0.0",
           "Microsoft.AspNetCore.Mvc.Testing": "9.0.10",
+          "Microsoft.CodeAnalysis.NetAnalyzers": "9.0.0",
           "Microsoft.Extensions.Caching.Memory": "9.0.0",
           "Moq": "4.20.72",
           "Serilog.AspNetCore": "8.0.1",
           "Swashbuckle.AspNetCore": "6.6.2",
           "Swashbuckle.AspNetCore.Annotations": "6.6.2",
           "System.ServiceProcess.ServiceController": "9.0.0",
+          "prometheus-net.AspNetCore": "8.2.1",
           "xunit": "2.9.3",
           "HyperV.HyperV.Contracts.Reference": "1.0.0.0",
           "HyperV.HyperV.Core.Hcn.Reference": "1.0.0.0",
           "HyperV.HyperV.Core.Hcs.Reference": "1.0.0.0",
           "HyperV.HyperV.Core.Vhd.Reference": "1.0.0.0",
           "HyperV.HyperV.Core.Wmi.Reference": "1.0.0.0",
+          "HyperV.VManager.Libvirt.Reference": "1.0.0.0",
+          "HyperV.VManager.Provider.HyperV.Reference": "1.0.0.0",
+          "HyperV.VManager.Provider.KVM.Reference": "1.0.0.0",
           "Microsoft.AspNetCore.Antiforgery": "9.0.0.0",
           "Microsoft.AspNetCore.Authentication.Abstractions": "9.0.0.0",
           "Microsoft.AspNetCore.Authentication.BearerToken": "9.0.0.0",
@@ -176,7 +183,7 @@
           "Microsoft.Extensions.FileSystemGlobbing.Reference": "9.0.0.0",
           "Microsoft.Extensions.Hosting.Abstractions.Reference": "9.0.0.0",
           "Microsoft.Extensions.Hosting.Reference": "9.0.0.0",
-          "Microsoft.Extensions.Http": "9.0.0.0",
+          "Microsoft.Extensions.Http.Reference": "9.0.0.0",
           "Microsoft.Extensions.Identity.Core": "9.0.0.0",
           "Microsoft.Extensions.Identity.Stores": "9.0.0.0",
           "Microsoft.Extensions.Localization.Abstractions": "9.0.0.0",
@@ -189,7 +196,7 @@
           "Microsoft.Extensions.Logging.EventLog.Reference": "9.0.0.0",
           "Microsoft.Extensions.Logging.EventSource.Reference": "9.0.0.0",
           "Microsoft.Extensions.Logging.TraceSource": "9.0.0.0",
-          "Microsoft.Extensions.ObjectPool": "9.0.0.0",
+          "Microsoft.Extensions.ObjectPool.Reference": "9.0.0.0",
           "Microsoft.Extensions.Options.ConfigurationExtensions.Reference": "9.0.0.0",
           "Microsoft.Extensions.Options.DataAnnotations": "9.0.0.0",
           "Microsoft.Extensions.Options.Reference": "9.0.0.0",
@@ -944,6 +951,35 @@
           "lib/net6.0/Moq.dll": {}
         }
       },
+      "prometheus-net/8.2.1": {
+        "dependencies": {
+          "Microsoft.Extensions.Http": "3.1.0",
+          "Microsoft.Extensions.ObjectPool": "7.0.0"
+        },
+        "runtime": {
+          "lib/net7.0/Prometheus.NetStandard.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.2.1.0"
+          }
+        },
+        "compile": {
+          "lib/net7.0/Prometheus.NetStandard.dll": {}
+        }
+      },
+      "prometheus-net.AspNetCore/8.2.1": {
+        "dependencies": {
+          "prometheus-net": "8.2.1"
+        },
+        "runtime": {
+          "lib/net6.0/Prometheus.AspNetCore.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.2.1.0"
+          }
+        },
+        "compile": {
+          "lib/net6.0/Prometheus.AspNetCore.dll": {}
+        }
+      },
       "Serilog/3.1.1": {
         "runtime": {
           "lib/net7.0/Serilog.dll": {
@@ -1361,6 +1397,56 @@
           "HyperV.HyperV.Core.Wmi.dll": {}
         }
       },
+      "HyperV.VManager.Libvirt/1.0.0": {
+        "dependencies": {
+          "HyperV.HyperV.Contracts": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.10"
+        },
+        "runtime": {
+          "HyperV.VManager.Libvirt.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        },
+        "compile": {
+          "HyperV.VManager.Libvirt.dll": {}
+        }
+      },
+      "HyperV.VManager.Provider.HyperV/1.0.0": {
+        "dependencies": {
+          "HyperV.HyperV.Contracts": "1.0.0",
+          "HyperV.HyperV.Core.Hcn": "1.0.0",
+          "HyperV.HyperV.Core.Hcs": "1.0.0",
+          "HyperV.HyperV.Core.Vhd": "1.0.0",
+          "HyperV.HyperV.Core.Wmi": "1.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.10",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.10"
+        },
+        "runtime": {
+          "HyperV.VManager.Provider.HyperV.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        },
+        "compile": {
+          "HyperV.VManager.Provider.HyperV.dll": {}
+        }
+      },
+      "HyperV.VManager.Provider.KVM/1.0.0": {
+        "dependencies": {
+          "HyperV.HyperV.Contracts": "1.0.0",
+          "HyperV.VManager.Libvirt": "1.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.10",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.10",
+          "Microsoft.Extensions.Options": "9.0.10"
+        },
+        "runtime": {
+          "HyperV.VManager.Provider.KVM.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        },
+        "compile": {
+          "HyperV.VManager.Provider.KVM.dll": {}
+        }
+      },
       "HyperV.HyperV.Contracts.Reference/1.0.0.0": {
         "runtime": {
           "HyperV.HyperV.Contracts.dll": {
@@ -1414,6 +1500,39 @@
         },
         "compile": {
           "HyperV.HyperV.Core.Wmi.dll": {}
+        }
+      },
+      "HyperV.VManager.Libvirt.Reference/1.0.0.0": {
+        "runtime": {
+          "HyperV.VManager.Libvirt.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        },
+        "compile": {
+          "HyperV.VManager.Libvirt.dll": {}
+        }
+      },
+      "HyperV.VManager.Provider.HyperV.Reference/1.0.0.0": {
+        "runtime": {
+          "HyperV.VManager.Provider.HyperV.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        },
+        "compile": {
+          "HyperV.VManager.Provider.HyperV.dll": {}
+        }
+      },
+      "HyperV.VManager.Provider.KVM.Reference/1.0.0.0": {
+        "runtime": {
+          "HyperV.VManager.Provider.KVM.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        },
+        "compile": {
+          "HyperV.VManager.Provider.KVM.dll": {}
         }
       },
       "Microsoft.AspNetCore.Antiforgery/9.0.0.0": {
@@ -2106,7 +2225,7 @@
         },
         "compileOnly": true
       },
-      "Microsoft.Extensions.Http/9.0.0.0": {
+      "Microsoft.Extensions.Http.Reference/9.0.0.0": {
         "compile": {
           "Microsoft.Extensions.Http.dll": {}
         },
@@ -2184,7 +2303,7 @@
         },
         "compileOnly": true
       },
-      "Microsoft.Extensions.ObjectPool/9.0.0.0": {
+      "Microsoft.Extensions.ObjectPool.Reference/9.0.0.0": {
         "compile": {
           "Microsoft.Extensions.ObjectPool.dll": {}
         },
@@ -3228,6 +3347,9 @@
         },
         "compileOnly": true
       },
+      "Microsoft.CodeAnalysis.NetAnalyzers/9.0.0": {
+        "compileOnly": true
+      },
       "Microsoft.Extensions.ApiDescription.Server/6.0.5": {
         "compileOnly": true
       },
@@ -3245,6 +3367,17 @@
           "Microsoft.Extensions.Options": "9.0.10",
           "Microsoft.Extensions.Primitives": "9.0.10"
         },
+        "compileOnly": true
+      },
+      "Microsoft.Extensions.Http/3.1.0": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.10",
+          "Microsoft.Extensions.Logging": "9.0.10",
+          "Microsoft.Extensions.Options": "9.0.10"
+        },
+        "compileOnly": true
+      },
+      "Microsoft.Extensions.ObjectPool/7.0.0": {
         "compileOnly": true
       },
       "xunit.analyzers/1.18.0": {
@@ -3559,6 +3692,20 @@
       "path": "moq/4.20.72",
       "hashPath": "moq.4.20.72.nupkg.sha512"
     },
+    "prometheus-net/8.2.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3wVgdEPOCBF752s2xps5T+VH+c9mJK8S8GKEDg49084P6JZMumTZI5Te6aJ9MQpX0sx7om6JOnBpIi7ZBmmiDQ==",
+      "path": "prometheus-net/8.2.1",
+      "hashPath": "prometheus-net.8.2.1.nupkg.sha512"
+    },
+    "prometheus-net.AspNetCore/8.2.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/4TfTvbwIDqpaKTiWvEsjUywiHYF9zZvGZF5sK15avoDsUO/WPQbKsF8TiMaesuphdFQPK2z52P0zk6j26V0rQ==",
+      "path": "prometheus-net.aspnetcore/8.2.1",
+      "hashPath": "prometheus-net.aspnetcore.8.2.1.nupkg.sha512"
+    },
     "Serilog/3.1.1": {
       "type": "package",
       "serviceable": true,
@@ -3759,6 +3906,21 @@
       "serviceable": false,
       "sha512": ""
     },
+    "HyperV.VManager.Libvirt/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HyperV.VManager.Provider.HyperV/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HyperV.VManager.Provider.KVM/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
     "HyperV.HyperV.Contracts.Reference/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
@@ -3780,6 +3942,21 @@
       "sha512": ""
     },
     "HyperV.HyperV.Core.Wmi.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HyperV.VManager.Libvirt.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HyperV.VManager.Provider.HyperV.Reference/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HyperV.VManager.Provider.KVM.Reference/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -4359,7 +4536,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.Extensions.Http/9.0.0.0": {
+    "Microsoft.Extensions.Http.Reference/9.0.0.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""
@@ -4424,7 +4601,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.Extensions.ObjectPool/9.0.0.0": {
+    "Microsoft.Extensions.ObjectPool.Reference/9.0.0.0": {
       "type": "referenceassembly",
       "serviceable": false,
       "sha512": ""
@@ -5294,6 +5471,13 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Microsoft.CodeAnalysis.NetAnalyzers/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-JajbvkrBgtdRghavIjcJuNHMOja4lqBmEezbhZyqWPYh2cpLhT5mPpfC7NQVDO4IehWQum9t/nwF4v+qQGtYWg==",
+      "path": "microsoft.codeanalysis.netanalyzers/9.0.0",
+      "hashPath": "microsoft.codeanalysis.netanalyzers.9.0.0.nupkg.sha512"
+    },
     "Microsoft.Extensions.ApiDescription.Server/6.0.5": {
       "type": "package",
       "serviceable": true,
@@ -5314,6 +5498,20 @@
       "sha512": "sha512-zbnPX/JQ0pETRSUG9fNPBvpIq42Aufvs15gGYyNIMhCun9yhmWihz0WgsI7bSDPjxWTKBf8oX/zv6v2uZ3W9OQ==",
       "path": "microsoft.extensions.caching.memory/9.0.0",
       "hashPath": "microsoft.extensions.caching.memory.9.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Http/3.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-DLigdcV0nYaT6/ly0rnfP80BnXq8NNd/h8/SkfY39uio7Bd9LauVntp6RcRh1Kj23N+uf80GgL7Win6P3BCtoQ==",
+      "path": "microsoft.extensions.http/3.1.0",
+      "hashPath": "microsoft.extensions.http.3.1.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.ObjectPool/7.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-udvKco0sAVgYGTBnHUb0tY9JQzJ/nPDiv/8PIyz69wl1AibeCDZOLVVI+6156dPfHmJH7ws5oUJRiW4ZmAvuuA==",
+      "path": "microsoft.extensions.objectpool/7.0.0",
+      "hashPath": "microsoft.extensions.objectpool.7.0.0.nupkg.sha512"
     },
     "xunit.analyzers/1.18.0": {
       "type": "package",

@@ -8,9 +8,11 @@ import { OutletContextType } from '../App';
 import * as api from '../services/hypervService';
 import { ReplicationRelationship, FailoverMode, VirtualMachine } from '../types';
 import { PlusIcon, RefreshIcon, ActionsIcon } from '../components/Icons';
+import { useHostContext } from '../hooks/useHostContext';
 
 export const ReplicationPage: React.FC = () => {
   const { addNotification } = useOutletContext<OutletContextType>();
+  const { isKVM } = useHostContext();
   const [relationships, setRelationships] = useState<ReplicationRelationship[]>([]);
   const [vms, setVms] = useState<VirtualMachine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,6 +84,25 @@ export const ReplicationPage: React.FC = () => {
       setFailoverVm(rel);
       setIsFailoverModalOpen(true);
   };
+
+  if (isKVM) {
+    return (
+      <div className="flex flex-col h-full">
+        <header className="p-4 bg-panel-bg border-b border-panel-border flex-shrink-0">
+          <h1 className="text-lg font-semibold text-gray-800">VM Replication</h1>
+        </header>
+        <main className="flex-1 overflow-y-auto p-4">
+          <Card>
+            <div className="p-8 text-center">
+              <div className="text-4xl mb-4">N/A</div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">Replication Not Available</h2>
+              <p className="text-gray-500">VM Replication is a Hyper-V specific feature and is not available on KVM hosts. For KVM, consider using libvirt-based migration or third-party backup solutions.</p>
+            </div>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">

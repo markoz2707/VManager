@@ -14,5 +14,8 @@ public class Cluster
     [MaxLength(2000)]
     public string? Description { get; set; }
 
+    public Guid? DatacenterId { get; set; }
+    public Datacenter? Datacenter { get; set; }
+
     public List<ClusterNode> Nodes { get; set; } = new();
 }

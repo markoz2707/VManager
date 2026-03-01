@@ -1,0 +1,155 @@
+@page "/datacenters"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - Datacenters</PageTitle>
+
+<div class="vm-page-header">
+    <h2>Datacenters</h2>
+    <button class="btn btn-primary btn-sm" @onclick="() => { showModal = true; editId = null; formName = string.Empty; formDesc = null; }">
+        <i class="bi bi-plus-lg"></i> Create Datacenter
+    </button>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading datacenters...</span>
+    </div>
+}
+else if (datacenters.Count == 0)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-building"></i>
+        <p>No datacenters defined. Create one to organize your infrastructure by physical location.</p>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var dc in datacenters)
+        {
+            <div class="col-md-6 col-xl-4">
+                <div class="vm-card">
+                    <div class="vm-card-header">
+                        <h6><i class="bi bi-building me-2 text-primary"></i>@dc.Name</h6>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-outline-primary btn-action" @onclick="() => EditDc(dc)" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-action" @onclick="() => DeleteDc(dc.Id)" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="vm-card-body">
+                        <p class="text-muted mb-1" style="font-size:0.85rem;">@(dc.Description ?? "No description")</p>
+                        <small class="text-muted">Created: @dc.CreatedUtc.ToString("yyyy-MM-dd")</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3" style="font-size:0.85rem;">@error</div>
+}
+
+@if (showModal)
+{
+    <div class="vm-modal-backdrop" @onclick="() => showModal = false">
+        <div class="vm-modal" @onclick:stopPropagation="true" style="max-width:480px;">
+            <div class="vm-modal-header">
+                <h5>@(editId == null ? "Create" : "Edit") Datacenter</h5>
+                <button class="btn-close" @onclick="() => showModal = false"></button>
+            </div>
+            <div class="vm-modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Name</label>
+                    <input class="form-control" @bind="formName" placeholder="e.g. US-East-1" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Description</label>
+                    <textarea class="form-control" @bind="formDesc" rows="3" placeholder="Physical location, rack info, etc."></textarea>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(modalError))
+                {
+                    <div class="alert alert-danger py-2" style="font-size:0.85rem;">@modalError</div>
+                }
+            </div>
+            <div class="vm-modal-footer">
+                <button class="btn btn-secondary" @onclick="() => showModal = false">Cancel</button>
+                <button class="btn btn-primary" @onclick="SaveDc">@(editId == null ? "Create" : "Save")</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool loading = true;
+    private List<Datacenter> datacenters = new();
+    private string error = string.Empty;
+
+    private bool showModal;
+    private Guid? editId;
+    private string formName = string.Empty;
+    private string? formDesc;
+    private string modalError = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        try { datacenters = (await Api.GetDatacentersAsync()).ToList(); }
+        catch (Exception ex) { error = ex.Message; }
+        finally { loading = false; }
+    }
+
+    private void EditDc(Datacenter dc)
+    {
+        editId = dc.Id;
+        formName = dc.Name;
+        formDesc = dc.Description;
+        modalError = string.Empty;
+        showModal = true;
+    }
+
+    private async Task SaveDc()
+    {
+        modalError = string.Empty;
+        if (string.IsNullOrWhiteSpace(formName)) { modalError = "Name is required."; return; }
+        try
+        {
+            var payload = new { name = formName, description = formDesc };
+            HttpResponseMessage response;
+            if (editId == null)
+                response = await Api.CreateDatacenterAsync(payload);
+            else
+                response = await Api.UpdateDatacenterAsync(editId.Value, payload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                showModal = false;
+                await LoadData();
+            }
+            else { modalError = "Save failed."; }
+        }
+        catch (Exception ex) { modalError = ex.Message; }
+    }
+
+    private async Task DeleteDc(Guid id)
+    {
+        error = string.Empty;
+        try { await Api.DeleteDatacenterAsync(id); await LoadData(); }
+        catch (Exception ex) { error = ex.Message; }
+    }
+}

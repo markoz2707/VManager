@@ -23,6 +23,9 @@ public class JwtTokenService
         _options = options.Value;
     }
 
+    /// <summary>
+    /// Legacy method - creates token with simple role string
+    /// </summary>
     public string CreateToken(string username, string role)
     {
         var claims = new[]
@@ -31,6 +34,35 @@ public class JwtTokenService
             new Claim(ClaimTypes.Role, role)
         };
 
+        return GenerateToken(claims);
+    }
+
+    /// <summary>
+    /// Creates token with userId, roles, and embedded permission claims
+    /// </summary>
+    public string CreateToken(Guid userId, string username, IEnumerable<string> roles, IEnumerable<PermissionInfo> permissions)
+    {
+        var claims = new List<Claim>
+        {
+            new("userId", userId.ToString()),
+            new(ClaimTypes.Name, username)
+        };
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        foreach (var perm in permissions)
+        {
+            claims.Add(new Claim("permission", $"{perm.Resource}:{perm.Action}"));
+        }
+
+        return GenerateToken(claims);
+    }
+
+    private string GenerateToken(IEnumerable<Claim> claims)
+    {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expires = DateTime.UtcNow.AddMinutes(_options.ExpirationMinutes);

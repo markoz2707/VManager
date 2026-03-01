@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { VmIcon, NetworkIcon, HostIcon, StorageIcon, ContainerIcon, ReplicationIcon, MetricsIcon, HypervisorIcon } from './Icons';
+import { VmIcon, NetworkIcon, HostIcon, StorageIcon, ContainerIcon, ReplicationIcon, MetricsIcon, HypervisorIcon, LogsIcon } from './Icons';
+import { useHostContext } from '../hooks/useHostContext';
 
 const NavItem = ({ to, icon, label, count }: { to: string, icon: React.ReactNode, label: string, count?: number }) => {
     const activeClass = "bg-black/30 text-white";
@@ -30,6 +31,8 @@ const NavItem = ({ to, icon, label, count }: { to: string, icon: React.ReactNode
 
 
 export const SideNav = ({ counts }: { counts: { vms: number; networks: number } }) => {
+    const { isHyperV } = useHostContext();
+
     return (
         <aside className="w-56 bg-sidebar text-gray-200 flex flex-col h-full flex-shrink-0">
             <div className="px-3 pt-3 pb-2 text-xs text-gray-400 uppercase tracking-wider">Navigator</div>
@@ -39,8 +42,9 @@ export const SideNav = ({ counts }: { counts: { vms: number; networks: number } 
                 <NavItem to="/storage" icon={<StorageIcon className="h-5 w-5" />} label="Storage" />
                 <NavItem to="/networking" icon={<NetworkIcon className="h-5 w-5" />} label="Networking" count={counts.networks} />
                 <NavItem to="/containers" icon={<ContainerIcon className="h-5 w-5" />} label="Containers" />
-                <NavItem to="/replication" icon={<ReplicationIcon className="h-5 w-5" />} label="Replication" />
+                {isHyperV && <NavItem to="/replication" icon={<ReplicationIcon className="h-5 w-5" />} label="Replication" />}
                 <NavItem to="/metrics" icon={<MetricsIcon className="h-5 w-5" />} label="Metrics" />
+                <NavItem to="/logs" icon={<LogsIcon className="h-5 w-5" />} label="System Logs" />
                 <NavItem to="/hypervisor" icon={<HypervisorIcon className="h-5 w-5" />} label="Hypervisor" />
             </nav>
         </aside>

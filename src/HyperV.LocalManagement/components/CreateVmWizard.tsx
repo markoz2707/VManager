@@ -367,6 +367,107 @@ const Step7Summary = ({ vmConfig }: { vmConfig: typeof initialVmConfig }) => (
     </div>
 );
 
+const guestOsFamilies = [
+    {
+        family: 'Windows Server',
+        icon: '🖥️',
+        options: [
+            'Microsoft Windows Server 2025 (64-bit)',
+            'Microsoft Windows Server 2022 (64-bit)',
+            'Microsoft Windows Server 2019 (64-bit)',
+            'Microsoft Windows Server 2016 (64-bit)',
+            'Microsoft Windows Server 2012 R2 (64-bit)',
+        ],
+    },
+    {
+        family: 'Windows Desktop',
+        icon: '💻',
+        options: [
+            'Microsoft Windows 11 (64-bit)',
+            'Microsoft Windows 10 (64-bit)',
+        ],
+    },
+    {
+        family: 'Linux',
+        icon: '🐧',
+        options: [
+            'Ubuntu Linux (64-bit)',
+            'Red Hat Enterprise Linux 9 (64-bit)',
+            'Red Hat Enterprise Linux 8 (64-bit)',
+            'CentOS Stream 9 (64-bit)',
+            'Debian GNU/Linux 12 (64-bit)',
+            'SUSE Linux Enterprise Server 15 (64-bit)',
+            'Oracle Linux 9 (64-bit)',
+            'Fedora Linux (64-bit)',
+        ],
+    },
+    {
+        family: 'Other',
+        icon: '📀',
+        options: [
+            'FreeBSD (64-bit)',
+            'Other Operating System (64-bit)',
+            'Other Operating System (32-bit)',
+        ],
+    },
+];
+
+const Step5GuestOs = ({ vmConfig, setVmConfig }: { vmConfig: typeof initialVmConfig; setVmConfig: React.Dispatch<React.SetStateAction<typeof initialVmConfig>> }) => {
+    const [selectedFamily, setSelectedFamily] = useState(
+        guestOsFamilies.find(f => f.options.includes(vmConfig.guestOsVersion))?.family || 'Windows Server'
+    );
+
+    const currentFamily = guestOsFamilies.find(f => f.family === selectedFamily) || guestOsFamilies[0];
+
+    return (
+        <div>
+            <h3 className="font-bold text-xl text-gray-800">Select a guest OS</h3>
+            <p className="text-sm text-gray-500 mt-1 mb-4">Choose the guest operating system family and version</p>
+
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Guest OS Family</label>
+                <div className="grid grid-cols-4 gap-2">
+                    {guestOsFamilies.map(family => (
+                        <button
+                            key={family.family}
+                            type="button"
+                            onClick={() => setSelectedFamily(family.family)}
+                            className={`p-3 rounded-md border-2 text-center transition-colors ${
+                                selectedFamily === family.family
+                                    ? 'border-primary-600 bg-primary-50 text-primary-800'
+                                    : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                            }`}
+                        >
+                            <div className="text-2xl mb-1">{family.icon}</div>
+                            <div className="text-xs font-medium">{family.family}</div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Guest OS Version</label>
+                <div className="border border-gray-300 rounded-md p-1 max-h-56 overflow-y-auto">
+                    {currentFamily.options.map(os => (
+                        <div
+                            key={os}
+                            onClick={() => setVmConfig(c => ({ ...c, guestOsVersion: os }))}
+                            className={`p-2.5 rounded cursor-pointer text-sm flex items-center ${
+                                vmConfig.guestOsVersion === os
+                                    ? 'bg-primary-700 text-white'
+                                    : 'hover:bg-gray-100 text-gray-800'
+                            }`}
+                        >
+                            <span className="mr-2">{currentFamily.icon}</span>
+                            {os}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const StepContent = ({ step, vmConfig, setVmConfig }: { step: number; vmConfig: typeof initialVmConfig; setVmConfig: React.Dispatch<React.SetStateAction<typeof initialVmConfig>> }) => {
     const commonInputClass = "mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500";
     switch (step) {
@@ -414,7 +515,7 @@ const StepContent = ({ step, vmConfig, setVmConfig }: { step: number; vmConfig: 
                 </div>
             </div>
         );
-        case 5: return <div><h3 className="font-bold text-xl text-gray-800">Select a guest OS</h3><p className="text-sm text-gray-500 mt-1 mb-4">Choose the guest operating system</p><label className="block text-sm font-medium text-gray-700">Guest OS</label><select value={vmConfig.guestOsVersion} onChange={e => setVmConfig(c => ({...c, guestOsVersion: e.target.value}))} className={commonInputClass}><option>Microsoft Windows Server 2022 (64-bit)</option><option>Microsoft Windows Server 2019 (64-bit)</option><option>Ubuntu Linux (64-bit)</option></select></div>;
+        case 5: return <Step5GuestOs vmConfig={vmConfig} setVmConfig={setVmConfig} />;
         case 6: return <Step6CustomizeHardware vmConfig={vmConfig} setVmConfig={setVmConfig} />;
         case 7: return <Step7Summary vmConfig={vmConfig} />;
         default: return null;

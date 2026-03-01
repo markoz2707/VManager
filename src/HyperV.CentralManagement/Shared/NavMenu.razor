@@ -1,49 +1,82 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">HyperV Central</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+@inject NavigationManager Nav
+
+<nav class="d-flex flex-column h-100">
+    <div class="vm-nav-group">
+        <NavLink class="nav-item-link" href="" Match="NavLinkMatch.All">
+            <i class="bi bi-grid-1x2"></i>
+            <span class="nav-text">Dashboard</span>
+        </NavLink>
     </div>
-</div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="login">
-                <span class="oi oi-key" aria-hidden="true"></span> Login
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="agents">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Agents
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="clusters">
-                <span class="oi oi-graph" aria-hidden="true"></span> Clusters
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="audit">
-                <span class="oi oi-clipboard" aria-hidden="true"></span> Audit
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    <div class="vm-nav-group">
+        <div class="nav-group-label">Infrastructure</div>
+        <NavLink class="nav-item-link" href="agents">
+            <i class="bi bi-hdd-network"></i>
+            <span class="nav-text">Agents</span>
+        </NavLink>
+        <NavLink class="nav-item-link" href="clusters">
+            <i class="bi bi-diagram-3"></i>
+            <span class="nav-text">Clusters</span>
+        </NavLink>
+        <NavLink class="nav-item-link" href="datacenters">
+            <i class="bi bi-building"></i>
+            <span class="nav-text">Datacenters</span>
+        </NavLink>
+    </div>
 
-@code {
-    private bool collapseNavMenu = true;
+    <div class="vm-nav-group">
+        <div class="nav-group-label">Compute</div>
+        <NavLink class="nav-item-link" href="vms">
+            <i class="bi bi-pc-display"></i>
+            <span class="nav-text">Virtual Machines</span>
+        </NavLink>
+        <NavLink class="nav-item-link" href="vm-folders">
+            <i class="bi bi-folder2-open"></i>
+            <span class="nav-text">VM Folders</span>
+        </NavLink>
+        <NavLink class="nav-item-link" href="migrations">
+            <i class="bi bi-arrow-left-right"></i>
+            <span class="nav-text">Migrations</span>
+        </NavLink>
+    </div>
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    <div class="vm-nav-group">
+        <div class="nav-group-label">Content</div>
+        <NavLink class="nav-item-link" href="content-library">
+            <i class="bi bi-archive"></i>
+            <span class="nav-text">Content Library</span>
+        </NavLink>
+    </div>
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-}
+    <div class="vm-nav-group">
+        <div class="nav-group-label">Monitoring</div>
+        <NavLink class="nav-item-link" href="alerts">
+            <i class="bi bi-bell"></i>
+            <span class="nav-text">Alerts</span>
+        </NavLink>
+        <NavLink class="nav-item-link" href="metrics">
+            <i class="bi bi-bar-chart-line"></i>
+            <span class="nav-text">Metrics</span>
+        </NavLink>
+        <NavLink class="nav-item-link" href="notifications">
+            <i class="bi bi-megaphone"></i>
+            <span class="nav-text">Notifications</span>
+        </NavLink>
+    </div>
+
+    <div class="vm-nav-group">
+        <div class="nav-group-label">Security</div>
+        <NavLink class="nav-item-link" href="users">
+            <i class="bi bi-people"></i>
+            <span class="nav-text">Users</span>
+        </NavLink>
+        <NavLink class="nav-item-link" href="roles">
+            <i class="bi bi-shield-lock"></i>
+            <span class="nav-text">Roles</span>
+        </NavLink>
+        <NavLink class="nav-item-link" href="audit">
+            <i class="bi bi-journal-text"></i>
+            <span class="nav-text">Audit Log</span>
+        </NavLink>
+    </div>
+</nav>

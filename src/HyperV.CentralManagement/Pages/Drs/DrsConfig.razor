@@ -1,0 +1,226 @@
+@page "/drs/{ClusterId:guid}"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - DRS Configuration</PageTitle>
+
+<div class="vm-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1" style="font-size:0.8rem;">
+                <li class="breadcrumb-item"><a href="/clusters">Clusters</a></li>
+                <li class="breadcrumb-item"><a href="/clusters/@ClusterId">Cluster</a></li>
+                <li class="breadcrumb-item active">DRS</li>
+            </ol>
+        </nav>
+        <h2><i class="bi bi-sliders me-2 text-primary"></i>Distributed Resource Scheduler</h2>
+    </div>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading DRS configuration...</span>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        <!-- Configuration -->
+        <div class="col-lg-5">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6>Configuration</h6>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" @bind="config.IsEnabled" id="drsEnabled" />
+                        <label class="form-check-label" for="drsEnabled">@(config.IsEnabled ? "Enabled" : "Disabled")</label>
+                    </div>
+                </div>
+                <div class="vm-card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Automation Level</label>
+                        <select class="form-select" @bind="config.AutomationLevel">
+                            <option value="0">Manual</option>
+                            <option value="1">Partial</option>
+                            <option value="2">Full</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">CPU Imbalance Threshold (%)</label>
+                        <input type="number" class="form-control" @bind="config.CpuImbalanceThreshold" min="5" max="100" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Memory Imbalance Threshold (%)</label>
+                        <input type="number" class="form-control" @bind="config.MemoryImbalanceThreshold" min="5" max="100" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Evaluation Interval (seconds)</label>
+                        <input type="number" class="form-control" @bind="config.EvaluationIntervalSeconds" min="60" max="3600" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Min Benefit (%)</label>
+                        <input type="number" class="form-control" @bind="config.MinBenefitPercent" min="1" max="50" />
+                    </div>
+
+                    <button class="btn btn-primary" @onclick="SaveConfig" disabled="@saving">
+                        @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        <i class="bi bi-check-lg"></i> Save
+                    </button>
+
+                    @if (!string.IsNullOrWhiteSpace(successMsg))
+                    {
+                        <div class="alert alert-success mt-3 py-2" style="font-size:0.85rem;">@successMsg</div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(error))
+                    {
+                        <div class="alert alert-danger mt-3 py-2" style="font-size:0.85rem;">@error</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="col-lg-7">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6><i class="bi bi-lightbulb me-2"></i>Recommendations</h6>
+                    <span class="badge bg-primary">@recommendations.Count</span>
+                </div>
+                <div class="vm-card-body p-0">
+                    @if (recommendations.Count == 0)
+                    {
+                        <div class="text-center py-4 text-muted" style="font-size:0.85rem;">
+                            No DRS recommendations at this time.
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="font-size:0.75rem;">VM</th>
+                                    <th style="font-size:0.75rem;">Source</th>
+                                    <th style="font-size:0.75rem;">Destination</th>
+                                    <th style="font-size:0.75rem;">Benefit</th>
+                                    <th style="font-size:0.75rem;">Status</th>
+                                    <th style="font-size:0.75rem;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var rec in recommendations)
+                                {
+                                    <tr>
+                                        <td style="font-size:0.85rem;">@rec.VmName</td>
+                                        <td style="font-size:0.85rem;">@rec.SourceAgentName</td>
+                                        <td style="font-size:0.85rem;">@rec.DestinationAgentName</td>
+                                        <td><span class="badge bg-success-subtle text-success">+@rec.EstimatedBenefitPercent.ToString("F1")%</span></td>
+                                        <td><span class="status-badge @rec.Status.ToString().ToLower()">@rec.Status</span></td>
+                                        <td>
+                                            @if (rec.Status == DrsRecommendationStatus.Pending)
+                                            {
+                                                <button class="btn btn-success btn-action me-1" @onclick="() => ApplyRecommendation(rec.Id)" title="Apply">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger btn-action" @onclick="() => RejectRecommendation(rec.Id)" title="Reject">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid ClusterId { get; set; }
+
+    private bool loading = true;
+    private bool saving;
+    private DrsConfigModel config = new();
+    private List<DrsRecommendation> recommendations = new();
+    private string error = string.Empty;
+    private string successMsg = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        loading = true;
+        try
+        {
+            var drsConfig = await Api.GetDrsConfigAsync(ClusterId);
+            if (drsConfig != null)
+            {
+                config = new DrsConfigModel
+                {
+                    IsEnabled = drsConfig.IsEnabled,
+                    AutomationLevel = (int)drsConfig.AutomationLevel,
+                    CpuImbalanceThreshold = drsConfig.CpuImbalanceThreshold,
+                    MemoryImbalanceThreshold = drsConfig.MemoryImbalanceThreshold,
+                    EvaluationIntervalSeconds = drsConfig.EvaluationIntervalSeconds,
+                    MinBenefitPercent = drsConfig.MinBenefitPercent
+                };
+            }
+            recommendations = (await Api.GetDrsRecommendationsAsync(ClusterId)).ToList();
+        }
+        catch { }
+        finally { loading = false; }
+    }
+
+    private async Task SaveConfig()
+    {
+        error = string.Empty; successMsg = string.Empty; saving = true;
+        try
+        {
+            var response = await Api.SaveDrsConfigAsync(ClusterId, new
+            {
+                isEnabled = config.IsEnabled,
+                automationLevel = config.AutomationLevel,
+                cpuImbalanceThreshold = config.CpuImbalanceThreshold,
+                memoryImbalanceThreshold = config.MemoryImbalanceThreshold,
+                evaluationIntervalSeconds = config.EvaluationIntervalSeconds,
+                minBenefitPercent = config.MinBenefitPercent
+            });
+            successMsg = response.IsSuccessStatusCode ? "DRS configuration saved." : "Failed to save.";
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { saving = false; }
+    }
+
+    private async Task ApplyRecommendation(Guid id)
+    {
+        try
+        {
+            await Api.ApplyDrsRecommendationAsync(id);
+            recommendations = (await Api.GetDrsRecommendationsAsync(ClusterId)).ToList();
+        }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private async Task RejectRecommendation(Guid id)
+    {
+        try
+        {
+            await Api.RejectDrsRecommendationAsync(id);
+            recommendations = (await Api.GetDrsRecommendationsAsync(ClusterId)).ToList();
+        }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private class DrsConfigModel
+    {
+        public bool IsEnabled { get; set; } = true;
+        public int AutomationLevel { get; set; }
+        public int CpuImbalanceThreshold { get; set; } = 25;
+        public int MemoryImbalanceThreshold { get; set; } = 25;
+        public int EvaluationIntervalSeconds { get; set; } = 300;
+        public int MinBenefitPercent { get; set; } = 10;
+    }
+}

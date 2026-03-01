@@ -1,19 +1,87 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@inject AuthSession Session
+@inject NavigationManager Nav
 
-<PageTitle>HyperV.CentralManagement</PageTitle>
+<PageTitle>VManager Central</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+@if (string.IsNullOrWhiteSpace(Session.Token) && !IsLoginPage())
+{
+    <div class="login-wrapper">
+        <div class="login-card text-center">
+            <div class="login-brand">
+                <i class="bi bi-hdd-rack"></i>
+                <h3>VManager Central</h3>
+                <p>You must sign in to continue.</p>
+            </div>
+            <a href="/login" class="btn btn-primary w-100">Go to Login</a>
         </div>
+    </div>
+}
+else if (IsLoginPage())
+{
+    @Body
+}
+else
+{
+    <div class="vm-layout">
+        <aside class="vm-sidebar @(sidebarCollapsed ? "collapsed" : "")">
+            <div class="vm-sidebar-brand">
+                <i class="bi bi-hdd-rack brand-icon"></i>
+                <span class="brand-text">VManager</span>
+            </div>
+            <NavMenu />
+        </aside>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <div class="vm-main">
+            <header class="vm-topbar">
+                <div class="vm-topbar-left">
+                    <button class="btn-sidebar-toggle" @onclick="ToggleSidebar" title="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <span class="text-muted" style="font-size:0.85rem;">Central Management</span>
+                </div>
+                <div class="vm-topbar-right">
+                    <div class="vm-user-badge">
+                        <div class="user-avatar">@GetInitials()</div>
+                        <span>@(Session.Username ?? "User")</span>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm" @onclick="Logout">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <main class="vm-content">
+                @Body
+            </main>
+        </div>
+    </div>
+}
+
+@code {
+    private bool sidebarCollapsed = false;
+
+    private bool IsLoginPage()
+    {
+        var uri = Nav.ToBaseRelativePath(Nav.Uri);
+        return uri.Equals("login", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void ToggleSidebar()
+    {
+        sidebarCollapsed = !sidebarCollapsed;
+    }
+
+    private void Logout()
+    {
+        Session.Token = null;
+        Session.Username = null;
+        Nav.NavigateTo("/login");
+    }
+
+    private string GetInitials()
+    {
+        var name = Session.Username ?? "U";
+        return name.Length >= 2 ? name[..2].ToUpper() : name.ToUpper();
+    }
+}

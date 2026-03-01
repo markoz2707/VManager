@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HyperV.HyperV.CentralManagement")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ee1ceda5bf85795d857f36c9ec0269b1c6db9b66")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cb8c81d2d4a6470217adede869c9980349b5d49c")]
 [assembly: System.Reflection.AssemblyProductAttribute("HyperV.HyperV.CentralManagement")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HyperV.HyperV.CentralManagement")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

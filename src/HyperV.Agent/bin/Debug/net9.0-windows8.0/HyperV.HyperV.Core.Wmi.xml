@@ -320,7 +320,7 @@
             <summary>Gets SLP data root.</summary>
         </member>
         <member name="M:HyperV.Core.Wmi.Services.VmService.ModifySlpDataRoot(System.String,System.String)">
-            <summary>Modifies SLP data root.</summary>
+            <summary>Modifies SLP data root (configuration data root path for the VM).</summary>
         </member>
         <member name="M:HyperV.Core.Wmi.Services.VmService.GetVmGeneration(System.String)">
             <summary>Gets VM generation.</summary>
@@ -338,7 +338,13 @@
             <summary>Sets boot order.</summary>
         </member>
         <member name="M:HyperV.Core.Wmi.Services.VmService.MigrateVm(System.String,System.String,System.Boolean,System.Boolean)">
-            <summary>Migrates VM to another host.</summary>
+            <summary>Migrates VM to another host using Msvm_VirtualSystemMigrationService.</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.MoveVmStorage(System.String,System.String)">
+            <summary>Moves VM storage to a new location (Storage Live Migration).</summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.VmService.GetVmConnectInfo(System.String)">
+            <summary>Gets VM connection info for console access.</summary>
         </member>
         <member name="M:HyperV.Core.Wmi.Services.VmService.GetAppHealth(System.String)">
             <summary>Gets application health status.</summary>
@@ -505,6 +511,22 @@
         <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetDefaultObjectFromResourcePool(System.Management.ManagementObject)">
             <summary>
             Gets default object from resource pool.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.SetVlanConfiguration(System.String,System.Int32,System.Int32,System.Nullable{System.Int32},System.Int32[])">
+            <summary>
+            Sets VLAN configuration on a VM's network adapter port.
+            Uses Msvm_EthernetSwitchPortVlanSettingData.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.GetVlanConfiguration(System.String)">
+            <summary>
+            Gets the current VLAN configuration for a VM's network adapter.
+            </summary>
+        </member>
+        <member name="M:HyperV.Core.Wmi.Services.WmiNetworkService.RemoveVlanConfiguration(System.String)">
+            <summary>
+            Removes VLAN configuration from a VM's network adapter.
             </summary>
         </member>
         <member name="M:HyperV.Core.Wmi.WmiUtilities.GetHostComputerSystem(System.Management.ManagementScope)">

@@ -5,11 +5,12 @@ using System.Text.Json;
 using System.Threading;
 using HyperV.Core.Wmi;
 using HyperV.Contracts;
+using HyperV.Contracts.Services;
 using Microsoft.Extensions.Logging;
 
 namespace HyperV.Core.Wmi.Services
 {
-    public class ReplicationService
+    public class ReplicationService : IReplicationService
     {
         private readonly ILogger _logger;
 

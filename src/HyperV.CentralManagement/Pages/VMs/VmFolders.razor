@@ -1,0 +1,204 @@
+@page "/vm-folders"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - VM Folders</PageTitle>
+
+<div class="vm-page-header">
+    <h2>VM Folders</h2>
+    <button class="btn btn-primary btn-sm" @onclick="() => showCreateModal = true">
+        <i class="bi bi-folder-plus"></i> Create Folder
+    </button>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading folders...</span>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        <!-- Folder Tree -->
+        <div class="col-lg-4">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6><i class="bi bi-folder2-open me-2"></i>Folders</h6>
+                </div>
+                <div class="vm-card-body folder-tree">
+                    <div class="folder-item @(selectedFolderId == null ? "active" : "")"
+                         @onclick="() => SelectFolder(null)">
+                        <i class="bi bi-folder"></i>
+                        <span>Root (Unassigned VMs)</span>
+                    </div>
+                    @foreach (var folder in rootFolders)
+                    {
+                        <div class="folder-item @(selectedFolderId == folder.Id ? "active" : "")"
+                             @onclick="() => SelectFolder(folder.Id)">
+                            <i class="bi bi-folder-fill text-warning"></i>
+                            <span>@folder.Name</span>
+                            @if (folder.ChildCount > 0)
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary ms-auto" style="font-size:0.65rem;">@folder.ChildCount sub</span>
+                            }
+                        </div>
+                    }
+
+                    @if (rootFolders.Count == 0)
+                    {
+                        <div class="text-muted text-center py-3" style="font-size:0.85rem;">
+                            No folders created yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- VMs in Selected Folder -->
+        <div class="col-lg-8">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6>
+                        <i class="bi bi-pc-display me-2"></i>
+                        @if (selectedFolderId == null)
+                        {
+                            <span>Unassigned VMs</span>
+                        }
+                        else
+                        {
+                            <span>VMs in "@(rootFolders.FirstOrDefault(f => f.Id == selectedFolderId)?.Name ?? "Folder")"</span>
+                        }
+                    </h6>
+                    <span class="badge bg-primary">@folderVms.Count</span>
+                </div>
+                <div class="vm-card-body p-0">
+                    @if (folderVms.Count == 0)
+                    {
+                        <div class="text-center py-4 text-muted" style="font-size:0.85rem;">
+                            No VMs in this folder.
+                        </div>
+                    }
+                    else
+                    {
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="font-size:0.75rem;">Name</th>
+                                    <th style="font-size:0.75rem;">State</th>
+                                    <th style="font-size:0.75rem;">Host</th>
+                                    <th style="font-size:0.75rem;">CPU</th>
+                                    <th style="font-size:0.75rem;">Memory</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var vm in folderVms)
+                                {
+                                    <tr>
+                                        <td><a href="/vms/@vm.Id">@vm.Name</a></td>
+                                        <td><span class="status-badge @vm.State.ToLower()">@vm.State</span></td>
+                                        <td style="font-size:0.85rem;">@(vm.AgentHostName ?? "-")</td>
+                                        <td style="font-size:0.85rem;">@vm.CpuCount</td>
+                                        <td style="font-size:0.85rem;">@vm.MemoryMB MB</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3" style="font-size:0.85rem;">@error</div>
+}
+
+@if (showCreateModal)
+{
+    <div class="vm-modal-backdrop" @onclick="() => showCreateModal = false">
+        <div class="vm-modal" @onclick:stopPropagation="true" style="max-width:400px;">
+            <div class="vm-modal-header">
+                <h5>Create Folder</h5>
+                <button class="btn-close" @onclick="() => showCreateModal = false"></button>
+            </div>
+            <div class="vm-modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Folder Name</label>
+                    <input class="form-control" @bind="newFolderName" placeholder="e.g. Production VMs" />
+                </div>
+            </div>
+            <div class="vm-modal-footer">
+                <button class="btn btn-secondary" @onclick="() => showCreateModal = false">Cancel</button>
+                <button class="btn btn-primary" @onclick="CreateFolder">Create</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool loading = true;
+    private List<VmFolderDto> rootFolders = new();
+    private List<VmInventoryDto> folderVms = new();
+    private Guid? selectedFolderId;
+    private string error = string.Empty;
+
+    private bool showCreateModal;
+    private string newFolderName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        try
+        {
+            rootFolders = (await Api.GetVmFoldersAsync()).ToList();
+            await LoadFolderVms();
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { loading = false; }
+    }
+
+    private async Task SelectFolder(Guid? folderId)
+    {
+        selectedFolderId = folderId;
+        await LoadFolderVms();
+    }
+
+    private async Task LoadFolderVms()
+    {
+        try
+        {
+            if (selectedFolderId == null)
+                folderVms = (await Api.GetVmsWithoutFolderAsync()).ToList();
+            else
+                folderVms = (await Api.GetVmsByFolderAsync(selectedFolderId.Value)).ToList();
+        }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private async Task CreateFolder()
+    {
+        if (string.IsNullOrWhiteSpace(newFolderName)) return;
+        try
+        {
+            var response = await Api.CreateVmFolderAsync(new { name = newFolderName });
+            if (response.IsSuccessStatusCode)
+            {
+                showCreateModal = false;
+                newFolderName = string.Empty;
+                rootFolders = (await Api.GetVmFoldersAsync()).ToList();
+            }
+        }
+        catch (Exception ex) { error = ex.Message; }
+    }
+}

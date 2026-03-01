@@ -1,8 +1,8 @@
+using HyperV.Contracts.Interfaces.Providers;
+using HyperV.Contracts.Models.Common;
 using Microsoft.AspNetCore.Mvc;
-using HyperV.Contracts.Models;
-using HyperV.Core.Hcs.Services;
-using HyperV.Core.Wmi.Services;
-using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace HyperV.Agent.Controllers;
 
@@ -11,279 +11,168 @@ namespace HyperV.Agent.Controllers;
 [Route("api/v1/[controller]")]
 public class ContainersController : ControllerBase
 {
-    private readonly Core.Hcs.Services.ContainerService _hcsContainerSvc;
-    private readonly Core.Wmi.Services.ContainerService _wmiContainerSvc;
+    private readonly IContainerProvider _containerProvider;
+    private readonly ILogger<ContainersController> _logger;
 
-    public ContainersController(
-        Core.Hcs.Services.ContainerService hcsContainerSvc,
-        Core.Wmi.Services.ContainerService wmiContainerSvc)
+    public ContainersController(IContainerProvider containerProvider, ILogger<ContainersController> logger)
     {
-        _hcsContainerSvc = hcsContainerSvc;
-        _wmiContainerSvc = wmiContainerSvc;
+        _containerProvider = containerProvider;
+        _logger = logger;
     }
 
-    /// <summary>Creates a new container using specified backend (HCS or WMI).</summary>
+    /// <summary>Creates a new container.</summary>
     [HttpPost]
-    public IActionResult CreateContainer([FromBody] CreateContainerRequest req)
+    [SwaggerOperation(Summary = "Create container", Description = "Creates a new container using the current hypervisor's container runtime.")]
+    public async Task<IActionResult> CreateContainer([FromBody] CreateContainerSpec spec)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (string.IsNullOrEmpty(spec.Name))
+                return BadRequest(new { error = "Container name is required" });
 
-            string resultJson;
-
-            switch (req.Mode)
-            {
-                case ContainerCreationMode.HCS:
-                    // Use HCS service for lightweight containers
-                    resultJson = _hcsContainerSvc.Create(req.Id, req);
-                    break;
-
-                case ContainerCreationMode.WMI:
-                    // Use WMI service for Hyper-V isolated containers
-                    resultJson = _wmiContainerSvc.Create(req.Id, req);
-                    break;
-
-                default:
-                    return BadRequest(new { error = $"Unsupported container creation mode: {req.Mode}" });
-            }
-
-            var result = JsonSerializer.Deserialize<JsonElement>(resultJson);
-            return Ok(result);
+            var result = await _containerProvider.CreateContainerAsync(spec);
+            return Ok(new { status = "created", id = result });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error creating container");
             return StatusCode(500, new { error = ex.Message });
         }
     }
 
-    /// <summary>Lists all containers from both HCS and WMI backends.</summary>
+    /// <summary>Lists all containers.</summary>
     [HttpGet]
-    public IActionResult ListContainers()
+    [SwaggerOperation(Summary = "List containers", Description = "Lists all containers from the current hypervisor.")]
+    public async Task<IActionResult> ListContainers()
     {
         try
         {
-            var hcsContainers = _hcsContainerSvc.ListContainers();
-            var wmiContainers = _wmiContainerSvc.ListContainers();
-
-            var obj = new
-            {
-                HcsContainers = hcsContainers,
-                WmiContainers = wmiContainers,
-                TotalCount = hcsContainers.Count + wmiContainers.Count,
-                Message = "Combined container list from HCS and WMI backends"
-            };
-            return Ok(obj);
+            var containers = await _containerProvider.ListContainersAsync();
+            return Ok(containers);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error listing containers");
             return StatusCode(500, new { error = ex.Message });
         }
     }
 
-    /// <summary>Gets container information by ID.</summary>
+    /// <summary>Gets container details by ID.</summary>
     [HttpGet("{id}")]
-    public IActionResult GetContainer(string id)
+    [SwaggerOperation(Summary = "Get container", Description = "Gets details of a specific container.")]
+    public async Task<IActionResult> GetContainer(string id)
     {
         try
         {
-            // Try HCS first
-            if (_hcsContainerSvc.IsContainerPresent(id))
-            {
-                var properties = _hcsContainerSvc.GetContainerProperties(id);
-                var result = JsonSerializer.Deserialize<JsonElement>(properties);
-                return Ok(new { backend = "HCS", properties = result });
-            }
-
-            // Try WMI
-            if (_wmiContainerSvc.IsContainerPresent(id))
-            {
-                var properties = _wmiContainerSvc.GetContainerProperties(id);
-                var result = JsonSerializer.Deserialize<JsonElement>(properties);
-                return Ok(new { backend = "WMI", properties = result });
-            }
-
-            return NotFound(new { error = $"Container {id} not found in any backend" });
+            var container = await _containerProvider.GetContainerAsync(id);
+            if (container == null) return NotFound(new { error = $"Container '{id}' not found" });
+            return Ok(container);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error getting container {Id}", id);
             return StatusCode(500, new { error = ex.Message });
         }
     }
 
-    /// <summary>Starts a container by ID.</summary>
+    /// <summary>Starts a container.</summary>
     [HttpPost("{id}/start")]
-    public IActionResult StartContainer(string id)
+    [SwaggerOperation(Summary = "Start container")]
+    public async Task<IActionResult> StartContainer(string id)
     {
         try
         {
-            // Try HCS first
-            if (_hcsContainerSvc.IsContainerPresent(id))
-            {
-                _hcsContainerSvc.StartContainer(id);
-                return Ok(new { message = $"HCS container {id} started successfully" });
-            }
-
-            // Try WMI
-            if (_wmiContainerSvc.IsContainerPresent(id))
-            {
-                _wmiContainerSvc.StartContainer(id);
-                return Ok(new { message = $"WMI container {id} started successfully" });
-            }
-
-            return NotFound(new { error = $"Container {id} not found" });
+            await _containerProvider.StartContainerAsync(id);
+            return Ok(new { status = "started", id });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error starting container {Id}", id);
             return StatusCode(500, new { error = ex.Message });
         }
     }
 
-    /// <summary>Stops a container by ID.</summary>
+    /// <summary>Stops a container.</summary>
     [HttpPost("{id}/stop")]
-    public IActionResult StopContainer(string id)
+    [SwaggerOperation(Summary = "Stop container")]
+    public async Task<IActionResult> StopContainer(string id)
     {
         try
         {
-            // Try HCS first
-            if (_hcsContainerSvc.IsContainerPresent(id))
-            {
-                _hcsContainerSvc.StopContainer(id);
-                return Ok(new { message = $"HCS container {id} stopped successfully" });
-            }
-
-            // Try WMI
-            if (_wmiContainerSvc.IsContainerPresent(id))
-            {
-                _wmiContainerSvc.StopContainer(id);
-                return Ok(new { message = $"WMI container {id} stopped successfully" });
-            }
-
-            return NotFound(new { error = $"Container {id} not found" });
+            await _containerProvider.StopContainerAsync(id);
+            return Ok(new { status = "stopped", id });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error stopping container {Id}", id);
             return StatusCode(500, new { error = ex.Message });
         }
     }
 
-    /// <summary>Terminates a container by ID.</summary>
+    /// <summary>Terminates a container forcefully.</summary>
     [HttpPost("{id}/terminate")]
-    public IActionResult TerminateContainer(string id)
+    [SwaggerOperation(Summary = "Terminate container")]
+    public async Task<IActionResult> TerminateContainer(string id)
     {
         try
         {
-            // Try HCS first
-            if (_hcsContainerSvc.IsContainerPresent(id))
-            {
-                _hcsContainerSvc.TerminateContainer(id);
-                return Ok(new { message = $"HCS container {id} terminated successfully" });
-            }
-
-            // Try WMI
-            if (_wmiContainerSvc.IsContainerPresent(id))
-            {
-                _wmiContainerSvc.TerminateContainer(id);
-                return Ok(new { message = $"WMI container {id} terminated successfully" });
-            }
-
-            return NotFound(new { error = $"Container {id} not found" });
+            await _containerProvider.TerminateContainerAsync(id);
+            return Ok(new { status = "terminated", id });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error terminating container {Id}", id);
             return StatusCode(500, new { error = ex.Message });
         }
     }
 
-    /// <summary>Pauses a container by ID.</summary>
+    /// <summary>Pauses a container.</summary>
     [HttpPost("{id}/pause")]
-    public IActionResult PauseContainer(string id)
+    [SwaggerOperation(Summary = "Pause container")]
+    public async Task<IActionResult> PauseContainer(string id)
     {
         try
         {
-            // Try HCS first
-            if (_hcsContainerSvc.IsContainerPresent(id))
-            {
-                _hcsContainerSvc.PauseContainer(id);
-                return Ok(new { message = $"HCS container {id} paused successfully" });
-            }
-
-            // Try WMI
-            if (_wmiContainerSvc.IsContainerPresent(id))
-            {
-                _wmiContainerSvc.PauseContainer(id);
-                return Ok(new { message = $"WMI container {id} paused successfully" });
-            }
-
-            return NotFound(new { error = $"Container {id} not found" });
+            await _containerProvider.PauseContainerAsync(id);
+            return Ok(new { status = "paused", id });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error pausing container {Id}", id);
             return StatusCode(500, new { error = ex.Message });
         }
     }
 
-    /// <summary>Resumes a container by ID.</summary>
+    /// <summary>Resumes a paused container.</summary>
     [HttpPost("{id}/resume")]
-    public IActionResult ResumeContainer(string id)
+    [SwaggerOperation(Summary = "Resume container")]
+    public async Task<IActionResult> ResumeContainer(string id)
     {
         try
         {
-            // Try HCS first
-            if (_hcsContainerSvc.IsContainerPresent(id))
-            {
-                _hcsContainerSvc.ResumeContainer(id);
-                return Ok(new { message = $"HCS container {id} resumed successfully" });
-            }
-
-            // Try WMI
-            if (_wmiContainerSvc.IsContainerPresent(id))
-            {
-                _wmiContainerSvc.ResumeContainer(id);
-                return Ok(new { message = $"WMI container {id} resumed successfully" });
-            }
-
-            return NotFound(new { error = $"Container {id} not found" });
+            await _containerProvider.ResumeContainerAsync(id);
+            return Ok(new { status = "resumed", id });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error resuming container {Id}", id);
             return StatusCode(500, new { error = ex.Message });
         }
     }
 
-    /// <summary>Deletes a container by ID.</summary>
+    /// <summary>Deletes a container.</summary>
     [HttpDelete("{id}")]
-    public IActionResult DeleteContainer(string id)
+    [SwaggerOperation(Summary = "Delete container")]
+    public async Task<IActionResult> DeleteContainer(string id)
     {
         try
         {
-            // Try to terminate and clean up the container
-            bool found = false;
-
-            if (_hcsContainerSvc.IsContainerPresent(id))
-            {
-                _hcsContainerSvc.TerminateContainer(id);
-                found = true;
-            }
-
-            if (_wmiContainerSvc.IsContainerPresent(id))
-            {
-                _wmiContainerSvc.TerminateContainer(id);
-                found = true;
-            }
-
-            if (!found)
-            {
-                return NotFound(new { error = $"Container {id} not found" });
-            }
-
-            return Ok(new { message = $"Container {id} deleted successfully" });
+            await _containerProvider.DeleteContainerAsync(id);
+            return Ok(new { status = "deleted", id });
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error deleting container {Id}", id);
             return StatusCode(500, new { error = ex.Message });
         }
     }

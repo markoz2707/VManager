@@ -1,0 +1,196 @@
+@page "/ha/{ClusterId:guid}"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - HA Configuration</PageTitle>
+
+<div class="vm-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1" style="font-size:0.8rem;">
+                <li class="breadcrumb-item"><a href="/clusters">Clusters</a></li>
+                <li class="breadcrumb-item"><a href="/clusters/@ClusterId">Cluster</a></li>
+                <li class="breadcrumb-item active">High Availability</li>
+            </ol>
+        </nav>
+        <h2><i class="bi bi-shield-check me-2 text-primary"></i>High Availability</h2>
+    </div>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading HA configuration...</span>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6>Configuration</h6>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" @bind="config.IsEnabled" id="haEnabled" />
+                        <label class="form-check-label" for="haEnabled">@(config.IsEnabled ? "Enabled" : "Disabled")</label>
+                    </div>
+                </div>
+                <div class="vm-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Heartbeat Interval (seconds)</label>
+                            <input type="number" class="form-control" @bind="config.HeartbeatIntervalSeconds" min="5" max="120" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Failure Threshold (missed heartbeats)</label>
+                            <input type="number" class="form-control" @bind="config.FailureThreshold" min="1" max="20" />
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" @bind="config.AdmissionControl" id="admCtrl" />
+                                <label class="form-check-label" for="admCtrl">Enable Admission Control</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Reserved CPU (%)</label>
+                            <input type="number" class="form-control" @bind="config.ReservedCpuPercent" min="0" max="100" />
+                            <div class="vm-progress mt-2">
+                                <div class="vm-progress-bar bg-primary" style="width:@(config.ReservedCpuPercent)%"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Reserved Memory (%)</label>
+                            <input type="number" class="form-control" @bind="config.ReservedMemoryPercent" min="0" max="100" />
+                            <div class="vm-progress mt-2">
+                                <div class="vm-progress-bar bg-success" style="width:@(config.ReservedMemoryPercent)%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button class="btn btn-primary" @onclick="SaveConfig" disabled="@saving">
+                            @if (saving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                            <i class="bi bi-check-lg"></i> Save Configuration
+                        </button>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(successMsg))
+                    {
+                        <div class="alert alert-success mt-3 py-2" style="font-size:0.85rem;">@successMsg</div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(error))
+                    {
+                        <div class="alert alert-danger mt-3 py-2" style="font-size:0.85rem;">@error</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- HA Events -->
+        <div class="col-lg-4">
+            <div class="vm-card">
+                <div class="vm-card-header">
+                    <h6><i class="bi bi-journal-text me-2"></i>HA Events</h6>
+                </div>
+                <div class="vm-card-body p-0">
+                    @if (events.Count == 0)
+                    {
+                        <div class="text-center py-4 text-muted" style="font-size:0.85rem;">No HA events recorded.</div>
+                    }
+                    else
+                    {
+                        @foreach (var evt in events.Take(15))
+                        {
+                            <div class="px-3 py-2 border-bottom" style="font-size:0.8rem;">
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-semibold">@evt.EventType</span>
+                                    <span class="text-muted">@evt.TimestampUtc.ToString("MM/dd HH:mm")</span>
+                                </div>
+                                <div class="text-muted">
+                                    @(evt.AgentHostName ?? "") @(evt.VmName != null ? $"/ {evt.VmName}" : "")
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(evt.Details))
+                                {
+                                    <div class="text-muted" style="font-size:0.75rem;">@evt.Details</div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid ClusterId { get; set; }
+
+    private bool loading = true;
+    private bool saving;
+    private HaConfigModel config = new();
+    private List<HaEvent> events = new();
+    private string error = string.Empty;
+    private string successMsg = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        loading = true;
+        try
+        {
+            var haConfig = await Api.GetHaConfigAsync(ClusterId);
+            if (haConfig != null)
+            {
+                config = new HaConfigModel
+                {
+                    IsEnabled = haConfig.IsEnabled,
+                    HeartbeatIntervalSeconds = haConfig.HeartbeatIntervalSeconds,
+                    FailureThreshold = haConfig.FailureThreshold,
+                    AdmissionControl = haConfig.AdmissionControl,
+                    ReservedCpuPercent = haConfig.ReservedCpuPercent,
+                    ReservedMemoryPercent = haConfig.ReservedMemoryPercent
+                };
+            }
+            events = (await Api.GetHaEventsAsync(ClusterId)).ToList();
+        }
+        catch { /* config doesn't exist yet, use defaults */ }
+        finally { loading = false; }
+    }
+
+    private async Task SaveConfig()
+    {
+        error = string.Empty;
+        successMsg = string.Empty;
+        saving = true;
+        try
+        {
+            var response = await Api.SaveHaConfigAsync(ClusterId, new
+            {
+                isEnabled = config.IsEnabled,
+                heartbeatIntervalSeconds = config.HeartbeatIntervalSeconds,
+                failureThreshold = config.FailureThreshold,
+                admissionControl = config.AdmissionControl,
+                reservedCpuPercent = config.ReservedCpuPercent,
+                reservedMemoryPercent = config.ReservedMemoryPercent
+            });
+            if (response.IsSuccessStatusCode)
+                successMsg = "HA configuration saved successfully.";
+            else
+                error = "Failed to save configuration.";
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { saving = false; }
+    }
+
+    private class HaConfigModel
+    {
+        public bool IsEnabled { get; set; } = true;
+        public int HeartbeatIntervalSeconds { get; set; } = 10;
+        public int FailureThreshold { get; set; } = 3;
+        public bool AdmissionControl { get; set; } = true;
+        public int ReservedCpuPercent { get; set; } = 25;
+        public int ReservedMemoryPercent { get; set; } = 25;
+    }
+}

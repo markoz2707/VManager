@@ -13,12 +13,18 @@ export class ApiError extends Error {
     }
 }
 
+export function getAuthHeaders(): Record<string, string> {
+    const token = localStorage.getItem('vmanager_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
 export async function fetchApi(url: string, options: RequestInit = {}) {
     try {
         const response = await fetch(`${BASE_URL}${url}`, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
+                ...getAuthHeaders(),
                 ...options.headers,
             },
         });

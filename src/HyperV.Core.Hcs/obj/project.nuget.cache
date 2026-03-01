@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "IbyKoqZfs7w=",
+  "dgSpecHash": "uYKuteru+J4=",
   "success": true,
   "projectFilePath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mkozn\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
+    "C:\\Users\\mkozn\\.nuget\\packages\\microsoft.codeanalysis.netanalyzers\\9.0.0\\microsoft.codeanalysis.netanalyzers.9.0.0.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\microsoft.openapi\\1.6.14\\microsoft.openapi.1.6.14.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\moq\\4.20.72\\moq.4.20.72.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\swashbuckle.aspnetcore.annotations\\6.6.2\\swashbuckle.aspnetcore.annotations.6.6.2.nupkg.sha512",

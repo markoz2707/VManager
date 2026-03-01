@@ -1,46 +1,100 @@
 @page "/login"
+@layout MainLayout
 @inject CentralApiClient Api
 @inject AuthSession Session
 @inject NavigationManager Nav
 
-<PageTitle>Login</PageTitle>
+<PageTitle>VManager - Login</PageTitle>
 
-<h2>Login</h2>
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-brand">
+            <i class="bi bi-hdd-rack"></i>
+            <h3>VManager Central</h3>
+            <p>Sign in to manage your infrastructure</p>
+        </div>
 
-<div class="card p-3">
-    <div class="mb-2">
-        <label class="form-label">Username</label>
-        <input class="form-control" @bind="username" />
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="LoginForm">
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="font-size:0.85rem;">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input class="form-control" @bind="loginModel.Username" placeholder="Enter username" disabled="@isLoading" />
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="form-label fw-semibold" style="font-size:0.85rem;">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input class="form-control" type="password" @bind="loginModel.Password" placeholder="Enter password" disabled="@isLoading" />
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(error))
+            {
+                <div class="alert alert-danger py-2" style="font-size:0.85rem;">
+                    <i class="bi bi-exclamation-circle me-1"></i> @error
+                </div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100 py-2" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    <span>Signing in...</span>
+                }
+                else
+                {
+                    <i class="bi bi-box-arrow-in-right me-1"></i>
+                    <span>Sign In</span>
+                }
+            </button>
+        </EditForm>
     </div>
-    <div class="mb-2">
-        <label class="form-label">Password</label>
-        <input class="form-control" type="password" @bind="password" />
-    </div>
-    <button class="btn btn-primary" @onclick="HandleLogin">Sign in</button>
 </div>
 
-@if (!string.IsNullOrWhiteSpace(error))
-{
-    <div class="alert alert-danger mt-3">@error</div>
-}
-
 @code {
-    private string username = string.Empty;
-    private string password = string.Empty;
+    private LoginModel loginModel = new();
     private string error = string.Empty;
+    private bool isLoading = false;
 
     private async Task HandleLogin()
     {
         error = string.Empty;
-        var token = await Api.LoginAsync(username, password);
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            error = "Login failed. Check credentials or LDAP configuration.";
-            return;
-        }
+        isLoading = true;
 
-        Session.Token = token;
-        Session.Username = username;
-        Nav.NavigateTo("/agents");
+        try
+        {
+            if (string.IsNullOrWhiteSpace(loginModel.Username) || string.IsNullOrWhiteSpace(loginModel.Password))
+            {
+                error = "Username and password are required.";
+                return;
+            }
+
+            var token = await Api.LoginAsync(loginModel.Username, loginModel.Password);
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                error = "Login failed. Check your credentials or LDAP configuration.";
+                return;
+            }
+
+            Session.Token = token;
+            Session.Username = loginModel.Username;
+            Nav.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            error = $"Connection error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private class LoginModel
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }

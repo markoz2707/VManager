@@ -1,0 +1,274 @@
+@page "/alerts"
+@implements IAsyncDisposable
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+@inject SignalRClientService SignalR
+
+<PageTitle>VManager - Alerts</PageTitle>
+
+<div class="vm-page-header">
+    <h2>Alerts</h2>
+    <button class="btn btn-primary btn-sm" @onclick="GoToNewAlert">
+        <i class="bi bi-plus-lg"></i> Create Alert Rule
+    </button>
+</div>
+
+<!-- Tabs -->
+<div class="vm-tabs">
+    <button class="vm-tab @(activeTab == "active" ? "active" : "")" @onclick="SwitchToActive">
+        <i class="bi bi-exclamation-triangle me-1"></i> Active Alerts
+        @if (activeAlerts.Count > 0)
+        {
+            <span class="badge bg-danger ms-1">@activeAlerts.Count</span>
+        }
+    </button>
+    <button class="vm-tab @(activeTab == "definitions" ? "active" : "")" @onclick="SwitchToDefinitions">
+        <i class="bi bi-gear me-1"></i> Alert Rules
+    </button>
+    <button class="vm-tab @(activeTab == "history" ? "active" : "")" @onclick="SwitchToHistory">
+        <i class="bi bi-clock-history me-1"></i> History
+    </button>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading...</span>
+    </div>
+}
+else if (activeTab == "active")
+{
+    @if (activeAlerts.Count == 0)
+    {
+        <div class="vm-empty-state">
+            <i class="bi bi-check-circle text-success"></i>
+            <p>No active alerts. All systems are healthy.</p>
+        </div>
+    }
+    else
+    {
+        <div class="vm-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Severity</th>
+                        <th>Alert</th>
+                        <th>Host / VM</th>
+                        <th>Value</th>
+                        <th>Fired</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var alert in activeAlerts)
+                    {
+                        <tr>
+                            <td>
+                                <span class="severity-badge @GetSeverityClass(alert.AlertDefinition?.Severity)">
+                                    @(alert.AlertDefinition?.Severity.ToString() ?? "Unknown")
+                                </span>
+                            </td>
+                            <td class="fw-semibold" style="font-size:0.85rem;">@(alert.AlertDefinition?.Name ?? "Unknown")</td>
+                            <td style="font-size:0.85rem;">@(alert.AgentHostName ?? alert.VmName ?? "-")</td>
+                            <td style="font-size:0.85rem;">@alert.CurrentValue.ToString("F2")</td>
+                            <td style="font-size:0.8rem;" class="text-muted">@alert.FiredUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>
+                                <button class="btn btn-outline-warning btn-action me-1" @onclick="() => AcknowledgeAlert(alert.Id)" title="Acknowledge">
+                                    <i class="bi bi-check"></i> Ack
+                                </button>
+                                <button class="btn btn-outline-success btn-action" @onclick="() => ResolveAlert(alert.Id)" title="Resolve">
+                                    <i class="bi bi-check-all"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+else if (activeTab == "definitions")
+{
+    @if (definitions.Count == 0)
+    {
+        <div class="vm-empty-state">
+            <i class="bi bi-gear"></i>
+            <p>No alert rules defined yet.</p>
+        </div>
+    }
+    else
+    {
+        <div class="vm-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Metric</th>
+                        <th>Condition</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var def in definitions)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@def.Name</td>
+                            <td style="font-size:0.85rem;"><code>@def.MetricName</code></td>
+                            <td style="font-size:0.85rem;">@def.Condition @def.ThresholdValue</td>
+                            <td><span class="severity-badge @def.Severity.ToString().ToLower()">@def.Severity</span></td>
+                            <td>
+                                @if (def.IsEnabled)
+                                {
+                                    <span class="status-badge running">Enabled</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge off">Disabled</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="/alerts/@def.Id" class="btn btn-outline-primary btn-action me-1" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button class="btn btn-outline-danger btn-action" @onclick="() => DeleteDefinition(def.Id)" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+else if (activeTab == "history")
+{
+    @if (history.Count == 0)
+    {
+        <div class="vm-empty-state">
+            <i class="bi bi-clock-history"></i>
+            <p>No alert history.</p>
+        </div>
+    }
+    else
+    {
+        <div class="vm-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Alert</th>
+                        <th>Host / VM</th>
+                        <th>Status</th>
+                        <th>Value</th>
+                        <th>Fired</th>
+                        <th>Acknowledged</th>
+                        <th>Resolved</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var h in history)
+                    {
+                        <tr>
+                            <td style="font-size:0.85rem;">@(h.AlertDefinition?.Name ?? "Unknown")</td>
+                            <td style="font-size:0.85rem;">@(h.AgentHostName ?? h.VmName ?? "-")</td>
+                            <td><span class="status-badge @h.Status.ToString().ToLower()">@h.Status</span></td>
+                            <td style="font-size:0.85rem;">@h.CurrentValue.ToString("F2")</td>
+                            <td style="font-size:0.8rem;" class="text-muted">@h.FiredUtc.ToString("MM/dd HH:mm")</td>
+                            <td style="font-size:0.8rem;" class="text-muted">
+                                @(h.AcknowledgedUtc?.ToString("MM/dd HH:mm") ?? "-")
+                                @if (!string.IsNullOrWhiteSpace(h.AcknowledgedBy))
+                                {
+                                    <br/><span style="font-size:0.7rem;">by @h.AcknowledgedBy</span>
+                                }
+                            </td>
+                            <td style="font-size:0.8rem;" class="text-muted">@(h.ResolvedUtc?.ToString("MM/dd HH:mm") ?? "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3" style="font-size:0.85rem;">@error</div>
+}
+
+@code {
+    private bool loading = true;
+    private string activeTab = "active";
+    private List<AlertInstance> activeAlerts = new();
+    private List<AlertDefinition> definitions = new();
+    private List<AlertInstance> history = new();
+    private string error = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadTab();
+        SignalR.OnAlertFired += _ => InvokeAsync(LoadTab);
+        SignalR.OnAlertResolved += _ => InvokeAsync(LoadTab);
+        await SignalR.StartAsync();
+        await SignalR.JoinAlertsGroupAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        SignalR.OnAlertFired -= _ => InvokeAsync(LoadTab);
+        SignalR.OnAlertResolved -= _ => InvokeAsync(LoadTab);
+    }
+
+    private void GoToNewAlert() => Nav.NavigateTo("/alerts/new");
+    private Task SwitchToActive() => SwitchTab("active");
+    private Task SwitchToDefinitions() => SwitchTab("definitions");
+    private Task SwitchToHistory() => SwitchTab("history");
+
+    private async Task SwitchTab(string tab)
+    {
+        activeTab = tab;
+        await LoadTab();
+    }
+
+    private async Task LoadTab()
+    {
+        loading = true; error = string.Empty;
+        try
+        {
+            if (activeTab == "active") activeAlerts = (await Api.GetActiveAlertsAsync()).ToList();
+            else if (activeTab == "definitions") definitions = (await Api.GetAlertDefinitionsAsync()).ToList();
+            else if (activeTab == "history") history = (await Api.GetAlertHistoryAsync()).ToList();
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { loading = false; }
+    }
+
+    private async Task AcknowledgeAlert(Guid id)
+    {
+        try { await Api.AcknowledgeAlertAsync(id); await LoadTab(); }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private async Task ResolveAlert(Guid id)
+    {
+        try { await Api.ResolveAlertAsync(id); await LoadTab(); }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private async Task DeleteDefinition(Guid id)
+    {
+        try { await Api.DeleteAlertDefinitionAsync(id); await LoadTab(); }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private string GetSeverityClass(AlertSeverity? severity) => severity switch
+    {
+        AlertSeverity.Critical => "critical",
+        AlertSeverity.Warning => "warning",
+        _ => "info"
+    };
+}

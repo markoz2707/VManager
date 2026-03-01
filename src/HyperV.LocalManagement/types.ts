@@ -285,6 +285,17 @@ export interface HostPerformance {
   storageUsagePercent: Record<string, number>;
 }
 
+export interface HostCapabilities {
+  hypervisorType: 'Hyper-V' | 'KVM';
+  supportsLiveMigration: boolean;
+  supportsDynamicMemory: boolean;
+  supportsReplication: boolean;
+  supportsFibreChannel: boolean;
+  supportsStorageQoS: boolean;
+  supportedDiskFormats: string[];
+  consoleType: 'RDP' | 'VNC' | 'SPICE';
+}
+
 export interface HostTask {
   target: string;
   initiator: string;

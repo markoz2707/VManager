@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "M8JScRsrmiI=",
+  "dgSpecHash": "LH/ZffpoArA=",
   "success": true,
   "projectFilePath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi.Tests\\HyperV.Core.Wmi.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mkozn\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\coverlet.collector\\6.0.4\\coverlet.collector.6.0.4.nupkg.sha512",
+    "C:\\Users\\mkozn\\.nuget\\packages\\microsoft.codeanalysis.netanalyzers\\9.0.0\\microsoft.codeanalysis.netanalyzers.9.0.0.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\microsoft.codecoverage\\17.14.1\\microsoft.codecoverage.17.14.1.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\microsoft.net.test.sdk\\17.14.1\\microsoft.net.test.sdk.17.14.1.nupkg.sha512",
     "C:\\Users\\mkozn\\.nuget\\packages\\microsoft.openapi\\1.6.14\\microsoft.openapi.1.6.14.nupkg.sha512",

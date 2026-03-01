@@ -196,3 +196,7 @@ export const SnapshotIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export const ConnectIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}><path d="M17 7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h10c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-8 8H7c-1.65 0-3-1.35-3-3s1.35-3 3-3h2v6zm6-6h2c1.65 0 3 1.35 3 3s-1.35 3-3 3h-2V9z"/></svg>
 );
+
+export const LogsIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}><path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/></svg>
+);

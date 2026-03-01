@@ -15,8 +15,6 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
-build_property.TargetFrameworkIdentifier = .NETCoreApp
-build_property.TargetFrameworkVersion = v9.0
 build_property.RootNamespace = HyperV.CentralManagement
 build_property.RootNamespace = HyperV.CentralManagement
 build_property.ProjectDir = I:\AI Projects\VManager\hyperv-agent\src\HyperV.CentralManagement\
@@ -27,27 +25,59 @@ build_property.SupportLocalizedComponentNames =
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
 build_property.MSBuildProjectDirectory = I:\AI Projects\VManager\hyperv-agent\src\HyperV.CentralManagement
 build_property._RazorSourceGeneratorDebug = 
-build_property.EffectiveAnalysisLevelStyle = 9.0
+build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
 [I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/App.razor]
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/AgentDetails.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWdlbnREZXRhaWxzLnJhem9y
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Agents/AgentDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWdlbnRzXEFnZW50RGV0YWlsLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Agents.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWdlbnRzLnJhem9y
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Agents/AgentList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWdlbnRzXEFnZW50TGlzdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Audit.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXQucmF6b3I=
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Agents/RegisterAgent.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWdlbnRzXFJlZ2lzdGVyQWdlbnQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Clusters.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2x1c3RlcnMucmF6b3I=
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Alerts/AlertDefinitionEdit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWxlcnRzXEFsZXJ0RGVmaW5pdGlvbkVkaXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Alerts/AlertList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWxlcnRzXEFsZXJ0TGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Audit/AuditLogView.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXVkaXRcQXVkaXRMb2dWaWV3LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Clusters/ClusterDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2x1c3RlcnNcQ2x1c3RlckRldGFpbC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Clusters/ClusterList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2x1c3RlcnNcQ2x1c3Rlckxpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/ContentLibrary/LibraryList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ29udGVudExpYnJhcnlcTGlicmFyeUxpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Datacenters/DatacenterList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGF0YWNlbnRlcnNcRGF0YWNlbnRlckxpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Drs/DrsConfig.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRHJzXERyc0NvbmZpZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Ha/HaConfig.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSGFcSGFDb25maWcucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Index.razor]
@@ -56,6 +86,50 @@ build_metadata.AdditionalFiles.CssScope =
 
 [I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Login.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Migration/MigrationView.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTWlncmF0aW9uXE1pZ3JhdGlvblZpZXcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Monitoring/MetricsView.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTW9uaXRvcmluZ1xNZXRyaWNzVmlldy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Notifications/ChannelList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm90aWZpY2F0aW9uc1xDaGFubmVsTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Roles/RoleEdit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUm9sZXNcUm9sZUVkaXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Roles/RoleList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUm9sZXNcUm9sZUxpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Users/UserEdit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlcnNcVXNlckVkaXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/Users/UserList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlcnNcVXNlckxpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/VMs/VmDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVk1zXFZtRGV0YWlsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/VMs/VmFolders.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVk1zXFZtRm9sZGVycy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Pages/VMs/VmList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVk1zXFZtTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/Routes.razor]
+build_metadata.AdditionalFiles.TargetPath = Um91dGVzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [I:/AI Projects/VManager/hyperv-agent/src/HyperV.CentralManagement/_Imports.razor]

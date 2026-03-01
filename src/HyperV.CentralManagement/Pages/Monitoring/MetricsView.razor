@@ -1,0 +1,153 @@
+@page "/metrics"
+@implements IAsyncDisposable
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+@inject SignalRClientService SignalR
+
+<PageTitle>VManager - Metrics</PageTitle>
+
+<div class="vm-page-header">
+    <h2>Metrics Overview</h2>
+    <button class="btn btn-outline-secondary btn-sm" @onclick="LoadData">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading metrics...</span>
+    </div>
+}
+else if (dashboard == null)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-bar-chart-line"></i>
+        <p>No metrics data available.</p>
+    </div>
+}
+else
+{
+    <!-- Global Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value">@dashboard.TotalAgents</div>
+                <div class="stat-label">Total Hosts</div>
+                <div class="vm-progress mt-2">
+                    <div class="vm-progress-bar bg-success"
+                         style="width:@(dashboard.TotalAgents > 0 ? (int)(dashboard.OnlineAgents * 100.0 / dashboard.TotalAgents) : 0)%"></div>
+                </div>
+                <div class="stat-detail mt-1">@dashboard.OnlineAgents online / @(dashboard.TotalAgents - dashboard.OnlineAgents) offline</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value">@dashboard.TotalVms</div>
+                <div class="stat-label">Total VMs</div>
+                <div class="vm-progress mt-2">
+                    <div class="vm-progress-bar bg-primary"
+                         style="width:@(dashboard.TotalVms > 0 ? (int)(dashboard.RunningVms * 100.0 / dashboard.TotalVms) : 0)%"></div>
+                </div>
+                <div class="stat-detail mt-1">@dashboard.RunningVms running</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value">@dashboard.ActiveAlerts</div>
+                <div class="stat-label">Active Alerts</div>
+                <div class="vm-progress mt-2">
+                    <div class="vm-progress-bar @(dashboard.ActiveAlerts > 0 ? "bg-danger" : "bg-success")"
+                         style="width:@(dashboard.ActiveAlerts > 0 ? 100 : 0)%"></div>
+                </div>
+                <div class="stat-detail mt-1">@(dashboard.ActiveAlerts > 0 ? "Needs attention" : "All clear")</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value">@clusterCount</div>
+                <div class="stat-label">Clusters</div>
+                <div class="stat-detail mt-2">Logical groups</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Per-Host Status -->
+    <div class="vm-card">
+        <div class="vm-card-header">
+            <h6><i class="bi bi-hdd-network me-2"></i>Host Status</h6>
+        </div>
+        <div class="vm-card-body p-0">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th style="font-size:0.75rem;">Hostname</th>
+                        <th style="font-size:0.75rem;">Status</th>
+                        <th style="font-size:0.75rem;">Type</th>
+                        <th style="font-size:0.75rem;">Last Seen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var agent in dashboard.Agents)
+                    {
+                        <tr>
+                            <td>
+                                <a href="/agents/@agent.Id" class="fw-semibold text-decoration-none">@agent.Hostname</a>
+                            </td>
+                            <td>
+                                <span class="status-dot @(agent.Status == "Online" ? "online" : "offline")"></span>
+                                @agent.Status
+                            </td>
+                            <td style="font-size:0.85rem;">@agent.HostType</td>
+                            <td style="font-size:0.8rem;" class="text-muted">@agent.LastSeenUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3" style="font-size:0.85rem;">@error</div>
+}
+
+@code {
+    private bool loading = true;
+    private DashboardData? dashboard;
+    private int clusterCount;
+    private string error = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadData();
+        SignalR.OnMetricsUpdate += _ => InvokeAsync(LoadData);
+        SignalR.OnAgentStatusChanged += _ => InvokeAsync(LoadData);
+        await SignalR.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        SignalR.OnMetricsUpdate -= _ => InvokeAsync(LoadData);
+        SignalR.OnAgentStatusChanged -= _ => InvokeAsync(LoadData);
+    }
+
+    private async Task LoadData()
+    {
+        loading = true; error = string.Empty;
+        try
+        {
+            var dashTask = Api.GetMetricsDashboardAsync();
+            var clusterTask = Api.GetClustersAsync();
+            await Task.WhenAll(dashTask, clusterTask);
+            dashboard = await dashTask;
+            clusterCount = (await clusterTask).Count;
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { loading = false; }
+    }
+}

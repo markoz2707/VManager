@@ -44,6 +44,15 @@ const initialVmOptionsConfig = {
     vmName: '',
     lockGuestOs: false,
     enableVbs: false,
+    bootOrder: ['Hard Drive', 'CD/DVD', 'Network', 'Floppy'] as string[],
+    autoStart: 'Nothing' as 'Nothing' | 'AutoStartIfRunning' | 'AlwaysAutoStart',
+    autoStartDelay: 0,
+    autoStop: 'ShutDown' as 'Save' | 'ShutDown' | 'TurnOff',
+    heartbeat: true,
+    timeSync: true,
+    shutdown: true,
+    kvpExchange: true,
+    guestServices: false,
 };
 
 export const VmSettingsModal: React.FC<VmSettingsModalProps> = ({ isOpen, onClose, vm, onSave, isSaving }) => {
@@ -92,16 +101,133 @@ export const VmSettingsModal: React.FC<VmSettingsModalProps> = ({ isOpen, onClos
                 </div>
             </AccordionItem>
             <AccordionItem title="Remote Console Options" summary="">
-                 <div className="flex items-center">
-                    <input type="checkbox" id="lock-guest" checked={vmOptionsConfig.lockGuestOs} onChange={e => setVmOptionsConfig(c => ({...c, lockGuestOs: e.target.checked}))} className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" style={{ colorScheme: 'light' }} />
-                    <label htmlFor="lock-guest" className="ml-2 text-sm text-gray-700">Lock the guest operating system when the last remote user disconnects</label>
+                 <div className="bg-gray-50 p-3 rounded text-sm text-gray-600">
+                    Console access is configured via the Remote Console section below. Use VMConnect or RDP to connect.
+                 </div>
+            </AccordionItem>
+            <AccordionItem title="HV Tools" summary={vmOptionsConfig.heartbeat ? 'Configured' : 'Custom'}>
+                <div className="space-y-3">
+                    <p className="text-sm text-gray-600 mb-3">Integration Services allow the host to communicate with the guest operating system.</p>
+                    {([
+                        { key: 'heartbeat' as const, label: 'Heartbeat', desc: 'Monitors the state of the virtual machine by reporting a heartbeat at regular intervals.' },
+                        { key: 'timeSync' as const, label: 'Time Synchronization', desc: 'Synchronizes the time of the virtual machine with the host.' },
+                        { key: 'shutdown' as const, label: 'Guest Shutdown', desc: 'Allows the host to trigger a guest shutdown.' },
+                        { key: 'kvpExchange' as const, label: 'Key-Value Pair Exchange', desc: 'Allows exchange of key-value pairs between host and guest.' },
+                        { key: 'guestServices' as const, label: 'Guest Services', desc: 'Allows the host to copy files to the guest OS.' },
+                    ]).map(svc => (
+                        <div key={svc.key} className="flex items-start">
+                            <input
+                                type="checkbox"
+                                id={`svc-${svc.key}`}
+                                checked={vmOptionsConfig[svc.key]}
+                                onChange={e => setVmOptionsConfig(c => ({ ...c, [svc.key]: e.target.checked }))}
+                                className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-0.5"
+                                style={{ colorScheme: 'light' }}
+                            />
+                            <div className="ml-2">
+                                <label htmlFor={`svc-${svc.key}`} className="text-sm font-medium text-gray-700">{svc.label}</label>
+                                <p className="text-xs text-gray-500">{svc.desc}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </AccordionItem>
-            <AccordionItem title="HV Tools" summary="Expand for HV Tools settings"><p className="text-sm text-gray-500">Settings available after creation.</p></AccordionItem>
-            <AccordionItem title="Power management" summary="Expand for power management settings"><p className="text-sm text-gray-500">Settings available after creation.</p></AccordionItem>
-            <AccordionItem title="Boot Options" summary="Expand for boot options"><p className="text-sm text-gray-500">Settings available after creation.</p></AccordionItem>
-            <AccordionItem title="Advanced" summary="Expand for advanced settings"><p className="text-sm text-gray-500">Settings available after creation.</p></AccordionItem>
-            <AccordionItem title="Fiber Channel NPIV" summary="Expand for fiber channel NPIV"><p className="text-sm text-gray-500">Settings available after creation.</p></AccordionItem>
+            <AccordionItem title="Power management" summary={vmOptionsConfig.autoStart}>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Automatic Start Action</label>
+                        <select
+                            value={vmOptionsConfig.autoStart}
+                            onChange={e => setVmOptionsConfig(c => ({ ...c, autoStart: e.target.value as typeof c.autoStart }))}
+                            className={inputClass + ' w-full'}
+                        >
+                            <option value="Nothing">Nothing</option>
+                            <option value="AutoStartIfRunning">Automatically start if it was running when the service stopped</option>
+                            <option value="AlwaysAutoStart">Always start this virtual machine automatically</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Startup Delay (seconds)</label>
+                        <input
+                            type="number"
+                            min="0"
+                            max="3600"
+                            value={vmOptionsConfig.autoStartDelay}
+                            onChange={e => setVmOptionsConfig(c => ({ ...c, autoStartDelay: parseInt(e.target.value) || 0 }))}
+                            className={inputClass + ' w-32'}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Automatic Stop Action</label>
+                        <select
+                            value={vmOptionsConfig.autoStop}
+                            onChange={e => setVmOptionsConfig(c => ({ ...c, autoStop: e.target.value as typeof c.autoStop }))}
+                            className={inputClass + ' w-full'}
+                        >
+                            <option value="Save">Save the virtual machine state</option>
+                            <option value="ShutDown">Shut down the guest operating system</option>
+                            <option value="TurnOff">Turn off the virtual machine</option>
+                        </select>
+                    </div>
+                </div>
+            </AccordionItem>
+            <AccordionItem title="Boot Options" summary={vmOptionsConfig.bootOrder[0]}>
+                <div className="space-y-3">
+                    <p className="text-sm text-gray-600 mb-2">Drag items to reorder the boot sequence, or use the arrow buttons.</p>
+                    <div className="border border-gray-300 rounded-md divide-y divide-gray-200">
+                        {vmOptionsConfig.bootOrder.map((device, index) => (
+                            <div key={device} className="flex items-center justify-between p-2 bg-white">
+                                <div className="flex items-center">
+                                    <span className="text-xs text-gray-400 w-6 text-center">{index + 1}</span>
+                                    <span className="text-sm text-gray-800 ml-2">{device}</span>
+                                </div>
+                                <div className="flex space-x-1">
+                                    <button
+                                        type="button"
+                                        disabled={index === 0}
+                                        onClick={() => {
+                                            const newOrder = [...vmOptionsConfig.bootOrder];
+                                            [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+                                            setVmOptionsConfig(c => ({ ...c, bootOrder: newOrder }));
+                                        }}
+                                        className="text-gray-500 hover:text-gray-800 disabled:opacity-30 p-1"
+                                    >
+                                        &#9650;
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={index === vmOptionsConfig.bootOrder.length - 1}
+                                        onClick={() => {
+                                            const newOrder = [...vmOptionsConfig.bootOrder];
+                                            [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+                                            setVmOptionsConfig(c => ({ ...c, bootOrder: newOrder }));
+                                        }}
+                                        className="text-gray-500 hover:text-gray-800 disabled:opacity-30 p-1"
+                                    >
+                                        &#9660;
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </AccordionItem>
+            <AccordionItem title="Remote Console" summary="RDP / VMConnect">
+                <div className="space-y-3">
+                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                        <p className="text-sm text-blue-800 font-medium">Connection Information</p>
+                        <p className="text-xs text-blue-600 mt-1">Protocol: Enhanced Session Mode (RDP)</p>
+                        <p className="text-xs text-blue-600">Tool: VMConnect or Remote Desktop Connection</p>
+                        <p className="text-xs text-blue-600">Port: 2179 (default VMBus pipe)</p>
+                    </div>
+                    <div className="flex items-center">
+                        <input type="checkbox" id="lock-guest" checked={vmOptionsConfig.lockGuestOs} onChange={e => setVmOptionsConfig(c => ({ ...c, lockGuestOs: e.target.checked }))} className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" style={{ colorScheme: 'light' }} />
+                        <label htmlFor="lock-guest" className="ml-2 text-sm text-gray-700">Lock the guest operating system when the last remote user disconnects</label>
+                    </div>
+                </div>
+            </AccordionItem>
+            <AccordionItem title="Advanced" summary="Expand for advanced settings"><p className="text-sm text-gray-500">Advanced settings for firmware, automatic checkpoints, and smart paging.</p></AccordionItem>
+            <AccordionItem title="Fiber Channel NPIV" summary="Expand for fiber channel NPIV"><p className="text-sm text-gray-500">Configure virtual Fibre Channel adapters for SAN connectivity.</p></AccordionItem>
             
             <div className="border-t border-gray-200">
                 <div className="w-full flex items-center py-3 px-3 text-left">

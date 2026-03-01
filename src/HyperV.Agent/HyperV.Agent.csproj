@@ -9,6 +9,8 @@
     <ProjectReference Include="..\HyperV.Core.Wmi\HyperV.Core.Wmi.csproj" />
     <ProjectReference Include="..\HyperV.Core.Vhd\HyperV.Core.Vhd.csproj" />
     <ProjectReference Include="..\HyperV.Contracts\HyperV.Contracts.csproj" />
+    <ProjectReference Include="..\VManager.Provider.HyperV\VManager.Provider.HyperV.csproj" />
+    <ProjectReference Include="..\VManager.Provider.KVM\VManager.Provider.KVM.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
@@ -16,6 +18,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
     <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />

@@ -1,0 +1,196 @@
+@page "/vms"
+@implements IAsyncDisposable
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+@inject SignalRClientService SignalR
+
+<PageTitle>VManager - Virtual Machines</PageTitle>
+
+<div class="vm-page-header">
+    <h2>Virtual Machines</h2>
+    <button class="btn btn-outline-secondary btn-sm" @onclick="LoadData">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+</div>
+
+<!-- Filters -->
+<div class="vm-filter-bar">
+    <div class="input-group" style="max-width:300px;">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input class="form-control" placeholder="Search by name..." @bind="searchText" @bind:event="oninput" />
+    </div>
+    <select class="form-select" @bind="filterState" style="max-width:160px;">
+        <option value="">All States</option>
+        <option value="Running">Running</option>
+        <option value="Off">Off</option>
+        <option value="Paused">Paused</option>
+        <option value="Saved">Saved</option>
+    </select>
+    <select class="form-select" @bind="filterAgentId" style="max-width:220px;">
+        <option value="">All Hosts</option>
+        @foreach (var agent in agents)
+        {
+            <option value="@agent.Id">@agent.Hostname</option>
+        }
+    </select>
+    <span class="text-muted ms-auto" style="font-size:0.8rem;">@filteredVms.Count of @vms.Count VMs</span>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading virtual machines...</span>
+    </div>
+}
+else if (vms.Count == 0)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-pc-display"></i>
+        <p>No virtual machines in inventory. Make sure agents are registered and VM sync is running.</p>
+    </div>
+}
+else
+{
+    <div class="vm-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>State</th>
+                    <th>Host</th>
+                    <th>CPU</th>
+                    <th>Memory</th>
+                    <th>Environment</th>
+                    <th>Tags</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var vm in filteredVms)
+                {
+                    <tr>
+                        <td>
+                            <a href="/vms/@vm.Id" class="fw-semibold text-decoration-none">@vm.Name</a>
+                        </td>
+                        <td>
+                            <span class="status-badge @vm.State.ToLower()">@vm.State</span>
+                        </td>
+                        <td style="font-size:0.85rem;">@(vm.AgentHostName ?? "-")</td>
+                        <td style="font-size:0.85rem;">@vm.CpuCount vCPU</td>
+                        <td style="font-size:0.85rem;">@vm.MemoryMB MB</td>
+                        <td><span class="badge bg-secondary-subtle text-secondary" style="font-size:0.7rem;">@vm.Environment</span></td>
+                        <td style="font-size:0.8rem;" class="text-muted">@(vm.Tags ?? "-")</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                @if (vm.State != "Running")
+                                {
+                                    <button class="btn btn-success btn-action" @onclick="@(() => PowerAction(vm.Id, "start"))" title="Start">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                }
+                                @if (vm.State == "Running")
+                                {
+                                    <button class="btn btn-warning btn-action" @onclick="@(() => PowerAction(vm.Id, "shutdown"))" title="Shutdown">
+                                        <i class="bi bi-power"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-action" @onclick="@(() => PowerAction(vm.Id, "stop"))" title="Force Stop">
+                                        <i class="bi bi-stop-fill"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3" style="font-size:0.85rem;">@error</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(successMsg))
+{
+    <div class="alert alert-success mt-3" style="font-size:0.85rem;">@successMsg</div>
+}
+
+@code {
+    private bool loading = true;
+    private List<VmInventoryDto> vms = new();
+    private List<AgentHost> agents = new();
+    private string searchText = string.Empty;
+    private string filterState = string.Empty;
+    private string filterAgentId = string.Empty;
+    private string error = string.Empty;
+    private string successMsg = string.Empty;
+
+    private List<VmInventoryDto> filteredVms => vms
+        .Where(v => string.IsNullOrWhiteSpace(searchText) || v.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+        .Where(v => string.IsNullOrWhiteSpace(filterState) || v.State.Equals(filterState, StringComparison.OrdinalIgnoreCase))
+        .Where(v => string.IsNullOrWhiteSpace(filterAgentId) || v.AgentHostId.ToString() == filterAgentId)
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadData();
+        SignalR.OnVmStateChanged += _ => InvokeAsync(LoadData);
+        SignalR.OnAgentStatusChanged += _ => InvokeAsync(LoadData);
+        await SignalR.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        SignalR.OnVmStateChanged -= _ => InvokeAsync(LoadData);
+        SignalR.OnAgentStatusChanged -= _ => InvokeAsync(LoadData);
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        error = string.Empty;
+        try
+        {
+            var vmsTask = Api.GetVmsAsync();
+            var agentsTask = Api.GetAgentsAsync();
+            await Task.WhenAll(vmsTask, agentsTask);
+            vms = (await vmsTask).ToList();
+            agents = (await agentsTask).ToList();
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to load VMs: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task PowerAction(Guid vmId, string action)
+    {
+        error = string.Empty;
+        successMsg = string.Empty;
+        try
+        {
+            var response = await Api.PowerVmAsync(vmId, action);
+            if (response.IsSuccessStatusCode)
+            {
+                successMsg = $"Power operation '{action}' sent successfully.";
+                await LoadData();
+            }
+            else
+            {
+                error = $"Power operation '{action}' failed.";
+            }
+        }
+        catch (Exception ex)
+        {
+            error = $"Error: {ex.Message}";
+        }
+    }
+}

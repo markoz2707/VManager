@@ -1,3 +1,4 @@
+using HyperV.CentralManagement.Authorization;
 using HyperV.CentralManagement.Data;
 using HyperV.CentralManagement.Models;
 using HyperV.CentralManagement.Services;
@@ -21,7 +22,7 @@ public class ClustersController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    [RequirePermission("cluster", "read")]
     public async Task<IActionResult> GetClusters()
     {
         var clusters = await _db.Clusters
@@ -34,13 +35,14 @@ public class ClustersController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [RequirePermission("cluster", "create")]
     public async Task<IActionResult> CreateCluster([FromBody] ClusterRequest request)
     {
         var cluster = new Cluster
         {
             Name = request.Name,
-            Description = request.Description
+            Description = request.Description,
+            DatacenterId = request.DatacenterId
         };
 
         _db.Clusters.Add(cluster);
@@ -51,7 +53,7 @@ public class ClustersController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Admin")]
+    [RequirePermission("cluster", "update")]
     public async Task<IActionResult> UpdateCluster(Guid id, [FromBody] ClusterRequest request)
     {
         var cluster = await _db.Clusters.FirstOrDefaultAsync(c => c.Id == id);
@@ -62,6 +64,7 @@ public class ClustersController : ControllerBase
 
         cluster.Name = request.Name;
         cluster.Description = request.Description;
+        cluster.DatacenterId = request.DatacenterId;
         await _db.SaveChangesAsync();
         await _audit.WriteAsync(User.Identity?.Name, "cluster_updated", cluster.Name);
 
@@ -69,7 +72,7 @@ public class ClustersController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Admin")]
+    [RequirePermission("cluster", "delete")]
     public async Task<IActionResult> DeleteCluster(Guid id)
     {
         var cluster = await _db.Clusters.FirstOrDefaultAsync(c => c.Id == id);
@@ -85,7 +88,7 @@ public class ClustersController : ControllerBase
     }
 
     [HttpPost("{id:guid}/nodes")]
-    [Authorize(Roles = "Admin")]
+    [RequirePermission("cluster", "update")]
     public async Task<IActionResult> AddNode(Guid id, [FromBody] ClusterNodeRequest request)
     {
         if (!await _db.Clusters.AnyAsync(c => c.Id == id))
@@ -111,7 +114,7 @@ public class ClustersController : ControllerBase
     }
 
     [HttpDelete("{id:guid}/nodes/{nodeId:guid}")]
-    [Authorize(Roles = "Admin")]
+    [RequirePermission("cluster", "update")]
     public async Task<IActionResult> RemoveNode(Guid id, Guid nodeId)
     {
         var node = await _db.ClusterNodes.FirstOrDefaultAsync(n => n.Id == nodeId && n.ClusterId == id);
@@ -127,5 +130,5 @@ public class ClustersController : ControllerBase
     }
 }
 
-public record ClusterRequest(string Name, string? Description);
+public record ClusterRequest(string Name, string? Description, Guid? DatacenterId);
 public record ClusterNodeRequest(Guid AgentHostId);

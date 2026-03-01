@@ -1,0 +1,174 @@
+@page "/clusters"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - Clusters</PageTitle>
+
+<div class="vm-page-header">
+    <h2>Clusters</h2>
+    <button class="btn btn-primary btn-sm" @onclick="() => showCreateModal = true">
+        <i class="bi bi-plus-lg"></i> Create Cluster
+    </button>
+</div>
+
+@if (loading)
+{
+    <div class="vm-loading">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading clusters...</span>
+    </div>
+}
+else if (clusters.Count == 0)
+{
+    <div class="vm-empty-state">
+        <i class="bi bi-diagram-3"></i>
+        <p>No clusters defined yet. Create a cluster to group agent hosts together.</p>
+        <button class="btn btn-primary" @onclick="() => showCreateModal = true">
+            <i class="bi bi-plus-lg"></i> Create Cluster
+        </button>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var cluster in clusters)
+        {
+            <div class="col-md-6 col-xl-4">
+                <div class="vm-card">
+                    <div class="vm-card-header">
+                        <h6>
+                            <i class="bi bi-diagram-3 me-2 text-primary"></i>
+                            <a href="/clusters/@cluster.Id" class="text-decoration-none">@cluster.Name</a>
+                        </h6>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-outline-danger btn-action" @onclick="() => DeleteCluster(cluster.Id)" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="vm-card-body">
+                        <p class="text-muted mb-2" style="font-size:0.85rem;">@(cluster.Description ?? "No description")</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary-subtle text-primary">
+                                <i class="bi bi-hdd-network me-1"></i> @cluster.Nodes.Count nodes
+                            </span>
+                            <a href="/clusters/@cluster.Id" class="btn btn-outline-primary btn-action">
+                                Details <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </div>
+                        @if (cluster.Nodes.Count > 0)
+                        {
+                            <div class="mt-2">
+                                @foreach (var node in cluster.Nodes.Take(3))
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary me-1 mb-1" style="font-size:0.7rem;">
+                                        @(node.AgentHost?.Hostname ?? node.AgentHostId.ToString()[..8])
+                                    </span>
+                                }
+                                @if (cluster.Nodes.Count > 3)
+                                {
+                                    <span class="text-muted" style="font-size:0.7rem;">+@(cluster.Nodes.Count - 3) more</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3" style="font-size:0.85rem;">@error</div>
+}
+
+@if (showCreateModal)
+{
+    <div class="vm-modal-backdrop" @onclick="() => showCreateModal = false">
+        <div class="vm-modal" @onclick:stopPropagation="true" style="max-width:480px;">
+            <div class="vm-modal-header">
+                <h5>Create Cluster</h5>
+                <button class="btn-close" @onclick="() => showCreateModal = false"></button>
+            </div>
+            <div class="vm-modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Name</label>
+                    <input class="form-control" @bind="newCluster.Name" placeholder="e.g. Production Cluster" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Description</label>
+                    <textarea class="form-control" @bind="newCluster.Description" rows="3" placeholder="Optional description..."></textarea>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(createError))
+                {
+                    <div class="alert alert-danger py-2" style="font-size:0.85rem;">@createError</div>
+                }
+            </div>
+            <div class="vm-modal-footer">
+                <button class="btn btn-secondary" @onclick="() => showCreateModal = false">Cancel</button>
+                <button class="btn btn-primary" @onclick="CreateCluster">Create</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool loading = true;
+    private List<Cluster> clusters = new();
+    private string error = string.Empty;
+
+    private bool showCreateModal;
+    private string createError = string.Empty;
+    private NewClusterModel newCluster = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); return; }
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        try { clusters = (await Api.GetClustersAsync()).ToList(); }
+        catch (Exception ex) { error = ex.Message; }
+        finally { loading = false; }
+    }
+
+    private async Task CreateCluster()
+    {
+        createError = string.Empty;
+        if (string.IsNullOrWhiteSpace(newCluster.Name)) { createError = "Name is required."; return; }
+        try
+        {
+            var response = await Api.CreateClusterAsync(new { name = newCluster.Name, description = newCluster.Description });
+            if (response.IsSuccessStatusCode)
+            {
+                showCreateModal = false;
+                newCluster = new();
+                await LoadData();
+            }
+            else { createError = "Failed to create cluster."; }
+        }
+        catch (Exception ex) { createError = ex.Message; }
+    }
+
+    private async Task DeleteCluster(Guid id)
+    {
+        error = string.Empty;
+        try
+        {
+            await Api.DeleteClusterAsync(id);
+            await LoadData();
+        }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private class NewClusterModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+}

@@ -1,5 +1,5 @@
 import { fetchApi } from './baseService';
-import { HostHardware, HostSystem, HostPerformance, HostTask, HostUsageSummary } from '../types';
+import { HostHardware, HostSystem, HostPerformance, HostTask, HostUsageSummary, HostCapabilities } from '../types';
 
 export const getHardwareInfo = async (): Promise<HostHardware> => {
     return fetchApi('/host/hardware');
@@ -19,4 +19,8 @@ export const getHostUsageSummary = async (): Promise<HostUsageSummary> => {
 
 export const getRecentTasks = async (limit: number = 10): Promise<HostTask[]> => {
     return fetchApi(`/host/tasks?limit=${limit}`);
+};
+
+export const getCapabilities = async (): Promise<HostCapabilities> => {
+    return fetchApi('/host/capabilities');
 };

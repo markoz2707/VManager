@@ -11,6 +11,8 @@ import { PlayIcon, StopIcon, PlusIcon, TrashIcon, SettingsIcon, RefreshIcon, Act
 import { OutletContextType } from '../App';
 import { CreateVmWizard } from '../components/CreateVmWizard';
 import { VmSettingsModal } from '../components/VmSettingsModal';
+import { useSignalR } from '../hooks/useSignalR';
+import { useHostContext } from '../hooks/useHostContext';
 
 type VmAction = 'start' | 'stop' | 'pause' | 'resume' | 'shutdown' | 'terminate' | 'save';
 
@@ -28,8 +30,8 @@ const statusColors: Record<string, string> = {
     [VmStatus.UNKNOWN]: 'text-gray-400',
 };
 
-const ActionDropdown: React.FC<{ vm: VirtualMachine, onAction: (name: string, action: VmAction) => void, onOpenModal: (type: 'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy' | 'storage-migrate' | 'console', vm: VirtualMachine) => void, isBusy: boolean }> =
-({ vm, onAction, onOpenModal, isBusy }) => {
+const ActionDropdown: React.FC<{ vm: VirtualMachine, onAction: (name: string, action: VmAction) => void, onOpenModal: (type: 'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy' | 'storage-migrate' | 'console', vm: VirtualMachine) => void, isBusy: boolean, isHyperV: boolean }> =
+({ vm, onAction, onOpenModal, isBusy, isHyperV }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const handleActionClick = (action: VmAction) => {
@@ -51,8 +53,8 @@ const ActionDropdown: React.FC<{ vm: VirtualMachine, onAction: (name: string, ac
                     <div className="py-1" role="menu" aria-orientation="vertical">
                         <a href="#" onClick={() => handleModalClick('console')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Open Console</a>
                         <a href="#" onClick={() => handleModalClick('migrate')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Migrate</a>
-                        <a href="#" onClick={() => handleModalClick('storage-migrate')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Migrate Storage</a>
-                        <a href="#" onClick={() => handleModalClick('health')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">App Health</a>
+                        {isHyperV && <a href="#" onClick={() => handleModalClick('storage-migrate')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Migrate Storage</a>}
+                        {isHyperV && <a href="#" onClick={() => handleModalClick('health')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">App Health</a>}
                         <a href="#" onClick={() => handleModalClick('filecopy')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Copy File to Guest</a>
                         <div className="border-t my-1"></div>
                         <a href="#" onClick={() => handleActionClick('pause')} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Pause</a>
@@ -71,11 +73,14 @@ const ActionDropdown: React.FC<{ vm: VirtualMachine, onAction: (name: string, ac
 
 export const VirtualMachinesPage = () => {
     const { addNotification } = useOutletContext<OutletContextType>();
+    const { isHyperV, isKVM, capabilities } = useHostContext();
     const [vms, setVms] = useState<VirtualMachine[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [busyVm, setBusyVm] = useState<string | null>(null);
     const [selectedVm, setSelectedVm] = useState<VirtualMachine | null>(null);
+    const [selectedVmIds, setSelectedVmIds] = useState<Set<string>>(new Set());
+    const [isBulkAction, setIsBulkAction] = useState(false);
     
     // Modals states
     const [activeModal, setActiveModal] = useState<'snapshot' | 'config' | 'migrate' | 'health' | 'filecopy' | 'storage-migrate' | 'console' | null>(null);
@@ -130,6 +135,12 @@ export const VirtualMachinesPage = () => {
         fetchVms();
     }, [fetchVms]);
 
+    // Real-time updates via SignalR
+    useSignalR({
+        groups: ['vm-events'],
+        onVmStateChanged: () => fetchVms(),
+    });
+
     const handleAction = async (name: string, action: VmAction) => {
         setBusyVm(name);
         const actionMap = {
@@ -146,6 +157,48 @@ export const VirtualMachinesPage = () => {
         } finally {
             setBusyVm(null);
         }
+    };
+
+    const toggleVmSelection = (vmId: string) => {
+        setSelectedVmIds(prev => {
+            const next = new Set(prev);
+            if (next.has(vmId)) next.delete(vmId);
+            else next.add(vmId);
+            return next;
+        });
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedVmIds.size === vms.length) {
+            setSelectedVmIds(new Set());
+        } else {
+            setSelectedVmIds(new Set(vms.map(vm => vm.id)));
+        }
+    };
+
+    const handleBulkAction = async (action: VmAction) => {
+        const selectedVms = vms.filter(vm => selectedVmIds.has(vm.id));
+        if (selectedVms.length === 0) return;
+
+        setIsBulkAction(true);
+        const actionMap = {
+            start: api.startVm, stop: api.stopVm, pause: api.pauseVm, resume: api.resumeVm,
+            shutdown: api.shutdownVm, terminate: api.terminateVm, save: api.saveVm,
+        };
+
+        const results = await Promise.allSettled(
+            selectedVms.map(vm => actionMap[action](vm.name))
+        );
+
+        const succeeded = results.filter(r => r.status === 'fulfilled').length;
+        const failed = results.filter(r => r.status === 'rejected').length;
+
+        if (succeeded > 0) addNotification('success', `Bulk ${action}: ${succeeded} VMs succeeded.`);
+        if (failed > 0) addNotification('error', `Bulk ${action}: ${failed} VMs failed.`);
+
+        setSelectedVmIds(new Set());
+        setIsBulkAction(false);
+        setTimeout(fetchVms, 2000);
     };
 
     const handleCreationComplete = () => {
@@ -292,8 +345,23 @@ export const VirtualMachinesPage = () => {
     return (
         <div className="flex flex-col h-full">
             <header className="p-4 bg-panel-bg border-b border-panel-border flex items-center justify-between flex-shrink-0">
-                 <h1 className="text-lg font-semibold text-gray-800">Virtual Machines</h1>
+                 <div className="flex items-center space-x-3">
+                    <h1 className="text-lg font-semibold text-gray-800">Virtual Machines</h1>
+                    {selectedVmIds.size > 0 && (
+                        <span className="text-sm text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">
+                            {selectedVmIds.size} selected
+                        </span>
+                    )}
+                 </div>
                  <div className="flex items-center space-x-1">
+                    {selectedVmIds.size > 0 && (
+                        <>
+                            <Button variant="toolbar" size="md" onClick={() => handleBulkAction('start')} disabled={isBulkAction} leftIcon={<PlayIcon className="h-4 w-4" />}>Start All</Button>
+                            <Button variant="toolbar" size="md" onClick={() => handleBulkAction('stop')} disabled={isBulkAction} leftIcon={<StopIcon className="h-4 w-4" />}>Stop All</Button>
+                            <Button variant="toolbar" size="md" onClick={() => handleBulkAction('pause')} disabled={isBulkAction}>Pause All</Button>
+                            <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                        </>
+                    )}
                     <Button variant="toolbar" size="md" onClick={() => setIsWizardOpen(true)} leftIcon={<PlusIcon />}>Create VM</Button>
                     <Button variant="toolbar" size="md" onClick={fetchVms} leftIcon={<RefreshIcon/>}>Refresh</Button>
                  </div>
@@ -305,6 +373,15 @@ export const VirtualMachinesPage = () => {
                         <table className="min-w-full text-sm">
                             <thead className="bg-gray-100 border-b border-panel-border">
                                 <tr>
+                                    <th className="px-2 py-2 w-8">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedVmIds.size === vms.length && vms.length > 0}
+                                            onChange={toggleSelectAll}
+                                            className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                            style={{ colorScheme: 'light' }}
+                                        />
+                                    </th>
                                     <th className="px-4 py-2 text-left font-semibold text-gray-600">Name</th>
                                     <th className="px-4 py-2 text-left font-semibold text-gray-600">State</th>
                                     <th className="px-4 py-2 text-left font-semibold text-gray-600">CPUs</th>
@@ -314,7 +391,16 @@ export const VirtualMachinesPage = () => {
                             </thead>
                             <tbody className="divide-y divide-gray-200 align-middle">
                                 {vms.map(vm => (
-                                    <tr key={vm.id} className="hover:bg-gray-50">
+                                    <tr key={vm.id} className={`hover:bg-gray-50 ${selectedVmIds.has(vm.id) ? 'bg-primary-50' : ''}`}>
+                                        <td className="px-2 py-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedVmIds.has(vm.id)}
+                                                onChange={() => toggleVmSelection(vm.id)}
+                                                className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                                style={{ colorScheme: 'light' }}
+                                            />
+                                        </td>
                                         <td className="px-4 py-2 font-medium text-gray-800">{vm.name}</td>
                                         <td className="px-4 py-2">
                                             <div className="flex items-center">
@@ -330,7 +416,7 @@ export const VirtualMachinesPage = () => {
                                                 <Button variant="ghost" size="md" title="Stop" disabled={busyVm === vm.name || vm.status !== VmStatus.RUNNING} onClick={() => handleAction(vm.name, 'stop')}><StopIcon className="h-5 w-5"/></Button>
                                                 <Button variant="ghost" size="md" title="Snapshots" disabled={busyVm === vm.name} onClick={() => handleOpenModal('snapshot', vm)}><SnapshotIcon className="h-5 w-5"/></Button>
                                                 <Button variant="ghost" size="md" title="Configure" disabled={busyVm === vm.name || vm.status !== VmStatus.STOPPED} onClick={() => handleOpenModal('config', vm)}><SettingsIcon className="h-5 w-5"/></Button>
-                                                <ActionDropdown vm={vm} onAction={handleAction} onOpenModal={handleOpenModal} isBusy={busyVm === vm.name} />
+                                                <ActionDropdown vm={vm} onAction={handleAction} onOpenModal={handleOpenModal} isBusy={busyVm === vm.name} isHyperV={isHyperV} />
                                             </div>
                                         </td>
                                     </tr>
@@ -442,10 +528,25 @@ export const VirtualMachinesPage = () => {
                                 <p><strong>Protocol:</strong> {consoleInfo.protocol}</p>
                                 <p><strong>Host:</strong> {consoleInfo.rdpHost}:{consoleInfo.rdpPort}</p>
                             </div>
-                            <div className="flex space-x-2">
-                                <Button onClick={handleDownloadRdp}>Download .rdp File</Button>
-                            </div>
-                            <p className="text-xs text-gray-500">Open the downloaded .rdp file with Remote Desktop Connection to access the VM console.</p>
+                            {isHyperV ? (
+                                <>
+                                    <div className="flex space-x-2">
+                                        <Button onClick={handleDownloadRdp}>Download .rdp File</Button>
+                                    </div>
+                                    <p className="text-xs text-gray-500">Open the downloaded .rdp file with Remote Desktop Connection to access the VM console.</p>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="flex space-x-2">
+                                        <Button onClick={() => window.open(`vnc://${consoleInfo.rdpHost}:${consoleInfo.rdpPort}`, '_blank')}>
+                                            Open {capabilities?.consoleType || 'VNC'} Console
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-gray-500">
+                                        Connect using a {capabilities?.consoleType || 'VNC'} client to {consoleInfo.rdpHost}:{consoleInfo.rdpPort} to access the VM console.
+                                    </p>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>

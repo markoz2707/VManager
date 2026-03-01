@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HyperV.HyperV.Core.Wmi.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c6a8c7ba9597c6ae6ea89bc1ff5384d9ccd86b26")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cb8c81d2d4a6470217adede869c9980349b5d49c")]
 [assembly: System.Reflection.AssemblyProductAttribute("HyperV.HyperV.Core.Wmi.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HyperV.HyperV.Core.Wmi.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

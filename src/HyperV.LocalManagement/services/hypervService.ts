@@ -7,6 +7,7 @@ import * as healthService from './healthService';
 import * as replicationService from './replicationService';
 import * as metricsService from './metricsService';
 import * as hostService from './hostService';
+import * as authService from './authService';
 
 import { fetchApi, ApiError } from './baseService';
 import { VirtualMachine, VmStatus, VirtualNetwork, NetworkType, ServiceInfo, VmEnvironment, HostDetails, Stats } from '../types';
@@ -20,7 +21,8 @@ export {
     healthService,
     replicationService,
     metricsService,
-    hostService
+    hostService,
+    authService
 };
 
 export const getPhysicalAdapters = networkService.getPhysicalAdapters;

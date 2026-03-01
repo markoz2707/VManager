@@ -1,3 +1,4 @@
+using HyperV.CentralManagement.Authorization;
 using HyperV.CentralManagement.Data;
 using HyperV.CentralManagement.Models;
 using HyperV.CentralManagement.Services;
@@ -21,7 +22,7 @@ public class AgentsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    [RequirePermission("host", "read")]
     public async Task<IActionResult> GetAgents()
     {
         var agents = await _db.AgentHosts.AsNoTracking().ToListAsync();
@@ -29,11 +30,33 @@ public class AgentsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize]
+    [RequirePermission("host", "read")]
     public async Task<IActionResult> GetAgent(Guid id)
     {
         var agent = await _db.AgentHosts.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
         return agent == null ? NotFound() : Ok(agent);
+    }
+
+    [HttpPost]
+    [RequirePermission("host", "create")]
+    public async Task<IActionResult> CreateAgent([FromBody] CreateAgentRequest request)
+    {
+        var agent = new AgentHost
+        {
+            Hostname = request.Hostname,
+            ApiBaseUrl = request.ApiBaseUrl,
+            IpAddress = request.IpAddress,
+            HostType = string.IsNullOrWhiteSpace(request.HostType) ? "Hyper-V" : request.HostType,
+            Status = AgentStatus.Unknown,
+            LastSeenUtc = DateTimeOffset.UtcNow,
+            DatacenterId = request.DatacenterId
+        };
+
+        _db.AgentHosts.Add(agent);
+        await _db.SaveChangesAsync();
+        await _audit.WriteAsync(User.Identity?.Name, "agent_created", agent.Hostname);
+
+        return Ok(agent);
     }
 
     [HttpPost("register")]
@@ -56,6 +79,9 @@ public class AgentsController : ControllerBase
             ApiBaseUrl = request.ApiBaseUrl,
             IpAddress = request.IpAddress,
             HyperVVersion = request.HyperVVersion,
+            HypervisorVersion = request.HypervisorVersion,
+            OperatingSystem = request.OperatingSystem,
+            AgentVersion = request.AgentVersion,
             HostType = string.IsNullOrWhiteSpace(request.HostType) ? "Hyper-V" : request.HostType,
             Tags = request.Tags,
             Status = AgentStatus.Online,
@@ -89,7 +115,7 @@ public class AgentsController : ControllerBase
     }
 
     [HttpPatch("{id:guid}")]
-    [Authorize]
+    [RequirePermission("host", "update")]
     public async Task<IActionResult> UpdateAgent(Guid id, [FromBody] UpdateAgentRequest request)
     {
         var agent = await _db.AgentHosts.FirstOrDefaultAsync(a => a.Id == id);
@@ -114,7 +140,7 @@ public class AgentsController : ControllerBase
     }
 
     [HttpPost("tokens")]
-    [Authorize(Roles = "Admin")]
+    [RequirePermission("host", "create")]
     public async Task<IActionResult> CreateRegistrationToken([FromBody] CreateTokenRequest request)
     {
         var token = new RegistrationToken
@@ -137,9 +163,14 @@ public record RegisterAgentRequest(
     string Token,
     string? IpAddress,
     string? HyperVVersion,
+    string? HypervisorVersion,
+    string? OperatingSystem,
+    string? AgentVersion,
     string? HostType,
     string? Tags,
     string? ClusterName);
+
+public record CreateAgentRequest(string Hostname, string ApiBaseUrl, string? IpAddress, string? HostType, Guid? DatacenterId);
 
 public record UpdateAgentRequest(string? Tags, string? ClusterName);
 

@@ -52,27 +52,37 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net9.0-windows8.0": {
           "targetAlias": "net9.0-windows8.0",
           "dependencies": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
-              "version": "[17.12.0, )"
+              "version": "[17.14.1, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.20.72, )"
             },
             "coverlet.collector": {
               "target": "Package",
-              "version": "[6.0.2, )"
+              "version": "[6.0.4, )"
             },
             "xunit": {
               "target": "Package",
-              "version": "[2.9.2, )"
+              "version": "[2.9.3, )"
             },
             "xunit.runner.visualstudio": {
               "target": "Package",
-              "version": "[2.8.2, )"
+              "version": "[3.1.4, )"
             }
           },
           "imports": [
@@ -91,7 +101,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-rc.2.25502.107/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
@@ -103,6 +113,641 @@
         "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent\\HyperV.Agent.csproj",
         "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
         "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Agent\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows8.0": {
+            "targetAlias": "net9.0-windows8.0",
+            "projectReferences": {
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj"
+              },
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj"
+              },
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj"
+              },
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj"
+              },
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj"
+              },
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.HyperV\\VManager.Provider.HyperV.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.HyperV\\VManager.Provider.HyperV.csproj"
+              },
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.KVM\\VManager.Provider.KVM.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.KVM\\VManager.Provider.KVM.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net9.0-windows8.0": {
+          "targetAlias": "net9.0-windows8.0",
+          "dependencies": {
+            "FluentValidation.AspNetCore": {
+              "target": "Package",
+              "version": "[11.3.1, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.AspNetCore.Mvc.Testing": {
+              "target": "Package",
+              "version": "[9.0.10, )"
+            },
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Caching.Memory": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.20.72, )"
+            },
+            "Serilog.AspNetCore": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.6.2, )"
+            },
+            "Swashbuckle.AspNetCore.Annotations": {
+              "target": "Package",
+              "version": "[6.6.2, )"
+            },
+            "System.ServiceProcess.ServiceController": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "prometheus-net.AspNetCore": {
+              "target": "Package",
+              "version": "[8.2.1, )"
+            },
+            "xunit": {
+              "target": "Package",
+              "version": "[2.9.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+        "projectName": "HyperV.HyperV.Contracts",
+        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj",
+        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
+        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Swashbuckle.AspNetCore.Annotations": {
+              "target": "Package",
+              "version": "[6.6.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+        "projectName": "HyperV.HyperV.Core.Hcn",
+        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
+        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows7.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows7.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows7.0",
+          "dependencies": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+        "projectName": "HyperV.HyperV.Core.Hcs",
+        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
+        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
+        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows7.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows7.0",
+            "projectReferences": {
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows7.0",
+          "dependencies": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.20.72, )"
+            },
+            "System.Management": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            },
+            "xunit": {
+              "target": "Package",
+              "version": "[2.9.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+        "projectName": "HyperV.HyperV.Core.Vhd",
+        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
+        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
+        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows7.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows7.0",
+            "projectReferences": {
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows7.0",
+          "dependencies": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+        "projectName": "HyperV.HyperV.Core.Wmi",
+        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
+        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
+        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0-windows7.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0-windows7.0": {
+            "targetAlias": "net9.0-windows7.0",
+            "projectReferences": {
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net9.0-windows7.0": {
+          "targetAlias": "net9.0-windows7.0",
+          "dependencies": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.20.72, )"
+            },
+            "System.Management": {
+              "target": "Package",
+              "version": "[9.0.8, )"
+            },
+            "xunit": {
+              "target": "Package",
+              "version": "[2.9.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Libvirt\\VManager.Libvirt.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Libvirt\\VManager.Libvirt.csproj",
+        "projectName": "HyperV.VManager.Libvirt",
+        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Libvirt\\VManager.Libvirt.csproj",
+        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
+        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Libvirt\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.200"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.HyperV\\VManager.Provider.HyperV.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.HyperV\\VManager.Provider.HyperV.csproj",
+        "projectName": "HyperV.VManager.Provider.HyperV",
+        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.HyperV\\VManager.Provider.HyperV.csproj",
+        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
+        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.HyperV\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -152,122 +797,25 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net9.0-windows8.0": {
           "targetAlias": "net9.0-windows8.0",
           "dependencies": {
-            "FluentValidation.AspNetCore": {
-              "target": "Package",
-              "version": "[11.3.1, )"
-            },
-            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
               "version": "[9.0.0, )"
             },
-            "Microsoft.AspNetCore.Mvc.Testing": {
-              "target": "Package",
-              "version": "[9.0.10, )"
-            },
-            "Microsoft.Extensions.Caching.Memory": {
+            "Microsoft.Extensions.DependencyInjection.Abstractions": {
               "target": "Package",
               "version": "[9.0.0, )"
             },
-            "Moq": {
+            "Microsoft.Extensions.Logging.Abstractions": {
               "target": "Package",
-              "version": "[4.20.72, )"
-            },
-            "Serilog.AspNetCore": {
-              "target": "Package",
-              "version": "[8.0.1, )"
-            },
-            "Swashbuckle.AspNetCore": {
-              "target": "Package",
-              "version": "[6.6.2, )"
-            },
-            "Swashbuckle.AspNetCore.Annotations": {
-              "target": "Package",
-              "version": "[6.6.2, )"
-            },
-            "xunit": {
-              "target": "Package",
-              "version": "[2.9.3, )"
-            }
-          },
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.AspNetCore.App": {
-              "privateAssets": "none"
-            },
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-rc.2.25502.107/PortableRuntimeIdentifierGraph.json"
-        }
-      }
-    },
-    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj",
-        "projectName": "HyperV.HyperV.Contracts",
-        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj",
-        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
-        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\obj\\",
-        "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
-        "configFilePaths": [
-          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
-        ],
-        "originalTargetFrameworks": [
-          "net9.0-windows7.0"
-        ],
-        "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {}
-        },
-        "frameworks": {
-          "net9.0-windows7.0": {
-            "targetAlias": "net9.0-windows7.0",
-            "projectReferences": {}
-          }
-        },
-        "warningProperties": {
-          "warnAsError": [
-            "NU1605"
-          ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "10.0.100"
-      },
-      "frameworks": {
-        "net9.0-windows7.0": {
-          "targetAlias": "net9.0-windows7.0",
-          "dependencies": {
-            "Swashbuckle.AspNetCore.Annotations": {
-              "target": "Package",
-              "version": "[6.6.2, )"
+              "version": "[9.0.0, )"
             }
           },
           "imports": [
@@ -286,18 +834,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-rc.2.25502.107/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj": {
+    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.KVM\\VManager.Provider.KVM.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
-        "projectName": "HyperV.HyperV.Core.Hcn",
-        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\HyperV.Core.Hcn.csproj",
+        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.KVM\\VManager.Provider.KVM.csproj",
+        "projectName": "HyperV.VManager.Provider.KVM",
+        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.KVM\\VManager.Provider.KVM.csproj",
         "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
-        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcn\\obj\\",
+        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Provider.KVM\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -308,7 +856,7 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net9.0-windows7.0"
+          "net9.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -316,77 +864,14 @@
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net9.0-windows7.0": {
-            "targetAlias": "net9.0-windows7.0",
-            "projectReferences": {}
-          }
-        },
-        "warningProperties": {
-          "warnAsError": [
-            "NU1605"
-          ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "10.0.100"
-      },
-      "frameworks": {
-        "net9.0-windows7.0": {
-          "targetAlias": "net9.0-windows7.0",
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-rc.2.25502.107/PortableRuntimeIdentifierGraph.json"
-        }
-      }
-    },
-    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
-        "projectName": "HyperV.HyperV.Core.Hcs",
-        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\HyperV.Core.Hcs.csproj",
-        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
-        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Hcs\\obj\\",
-        "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
-        "configFilePaths": [
-          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
-        ],
-        "originalTargetFrameworks": [
-          "net9.0-windows7.0"
-        ],
-        "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {}
-        },
-        "frameworks": {
-          "net9.0-windows7.0": {
-            "targetAlias": "net9.0-windows7.0",
+          "net9.0": {
+            "targetAlias": "net9.0",
             "projectReferences": {
               "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
                 "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj"
+              },
+              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Libvirt\\VManager.Libvirt.csproj": {
+                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\VManager.Libvirt\\VManager.Libvirt.csproj"
               }
             }
           }
@@ -401,23 +886,29 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
-        "net9.0-windows7.0": {
-          "targetAlias": "net9.0-windows7.0",
+        "net9.0": {
+          "targetAlias": "net9.0",
           "dependencies": {
-            "Moq": {
+            "Microsoft.CodeAnalysis.NetAnalyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
-              "version": "[4.20.72, )"
+              "version": "[9.0.0, )"
             },
-            "System.Management": {
+            "Microsoft.Extensions.DependencyInjection.Abstractions": {
               "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[9.0.0, )"
             },
-            "xunit": {
+            "Microsoft.Extensions.Logging.Abstractions": {
               "target": "Package",
-              "version": "[2.9.3, )"
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Options": {
+              "target": "Package",
+              "version": "[9.0.0, )"
             }
           },
           "imports": [
@@ -436,161 +927,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-rc.2.25502.107/PortableRuntimeIdentifierGraph.json"
-        }
-      }
-    },
-    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
-        "projectName": "HyperV.HyperV.Core.Vhd",
-        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\HyperV.Core.Vhd.csproj",
-        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
-        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Vhd\\obj\\",
-        "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
-        "configFilePaths": [
-          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
-        ],
-        "originalTargetFrameworks": [
-          "net9.0-windows7.0"
-        ],
-        "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {}
-        },
-        "frameworks": {
-          "net9.0-windows7.0": {
-            "targetAlias": "net9.0-windows7.0",
-            "projectReferences": {
-              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
-                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj"
-              }
-            }
-          }
-        },
-        "warningProperties": {
-          "warnAsError": [
-            "NU1605"
-          ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "10.0.100"
-      },
-      "frameworks": {
-        "net9.0-windows7.0": {
-          "targetAlias": "net9.0-windows7.0",
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-rc.2.25502.107/PortableRuntimeIdentifierGraph.json"
-        }
-      }
-    },
-    "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
-        "projectName": "HyperV.HyperV.Core.Wmi",
-        "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\HyperV.Core.Wmi.csproj",
-        "packagesPath": "C:\\Users\\mkozn\\.nuget\\packages\\",
-        "outputPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Core.Wmi\\obj\\",
-        "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "I:\\Program Files\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
-        "configFilePaths": [
-          "C:\\Users\\mkozn\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
-        ],
-        "originalTargetFrameworks": [
-          "net9.0-windows7.0"
-        ],
-        "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {}
-        },
-        "frameworks": {
-          "net9.0-windows7.0": {
-            "targetAlias": "net9.0-windows7.0",
-            "projectReferences": {
-              "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj": {
-                "projectPath": "I:\\AI Projects\\VManager\\hyperv-agent\\src\\HyperV.Contracts\\HyperV.Contracts.csproj"
-              }
-            }
-          }
-        },
-        "warningProperties": {
-          "warnAsError": [
-            "NU1605"
-          ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "10.0.100"
-      },
-      "frameworks": {
-        "net9.0-windows7.0": {
-          "targetAlias": "net9.0-windows7.0",
-          "dependencies": {
-            "Moq": {
-              "target": "Package",
-              "version": "[4.20.72, )"
-            },
-            "System.Management": {
-              "target": "Package",
-              "version": "[9.0.8, )"
-            },
-            "xunit": {
-              "target": "Package",
-              "version": "[2.9.3, )"
-            }
-          },
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-rc.2.25502.107/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200-preview.0.26103.119/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

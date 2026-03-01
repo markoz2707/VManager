@@ -1,4 +1,7 @@
 using HyperV.Contracts.Interfaces;
+using Prometheus;
+using VManager.Provider.HyperV;
+using VManager.Provider.KVM;
 using HyperV.Contracts.Services;
 using HyperV.Core.Hcn.Services;
 using HyperV.Core.Hcs.Services;
@@ -10,6 +13,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Linq;
 using Serilog;
 using HyperV.Agent.Middleware;
+using HyperV.Agent.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -39,7 +43,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+// Determine hypervisor mode early (needed for conditional controller registration)
+var hypervisorType = builder.Configuration.GetValue<string>("Hypervisor:Type") ?? "auto";
+var isKvm = hypervisorType == "kvm" || (hypervisorType == "auto" && System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux));
+
+builder.Services.AddControllers()
+    .ConfigureApplicationPartManager(m =>
+        m.FeatureProviders.Add(new HyperV.Agent.Controllers.HypervisorControllerFeatureProvider(isKvm)));
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure JWT Authentication
@@ -76,9 +87,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Hyper-V Agent API",
+        Title = "VManager Agent API",
         Version = "v1",
-        Description = "REST API exposing Hyper-V host functions (HCS, HCN, WMI, VHD).",
+        Description = "REST API for multi-hypervisor VM management (Hyper-V, KVM).",
         Contact = new OpenApiContact { Name = "HyperV Agent", Email = "admin@example.com" },
         License = new OpenApiLicense { Name = "MIT", Url = new Uri("https://opensource.org/licenses/MIT") }
     });
@@ -89,22 +100,52 @@ builder.Services.AddSwaggerGen(c =>
     c.EnableAnnotations();
 });
 
-builder.Services.AddSingleton<HyperV.Core.Hcs.Services.VmService>();
-builder.Services.AddSingleton<HyperV.Core.Wmi.Services.VmService>();
-builder.Services.AddSingleton<VmCreationService>();
-builder.Services.AddSingleton<MetricsService>();
-builder.Services.AddSingleton<ResourcePoolsService>();
-builder.Services.AddSingleton<NetworkService>();
-builder.Services.AddSingleton<WmiNetworkService>();
-builder.Services.AddSingleton<ReplicationService>();
-builder.Services.AddSingleton<FibreChannelService>();
-builder.Services.AddSingleton<HyperV.Core.Hcs.Services.ContainerService>();
-builder.Services.AddSingleton<HyperV.Core.Wmi.Services.ContainerService>();
-builder.Services.AddSingleton<IStorageService, EnhancedStorageService>();
-builder.Services.AddSingleton<IImageManagementService, HyperV.Core.Wmi.Services.ImageManagementService>();
-builder.Services.AddSingleton<IStorageQoSService, HyperV.Core.Wmi.Services.StorageQoSService>();
+// Common services (both hypervisors)
 builder.Services.AddSingleton<IJobService, HyperV.Agent.Services.InMemoryJobService>();
-builder.Services.AddSingleton<IHostInfoService>(sp => new HyperV.Core.Wmi.Services.HostInfoService(sp.GetRequiredService<ILogger<HyperV.Core.Wmi.Services.HostInfoService>>(), sp.GetRequiredService<IMemoryCache>()));
+builder.Services.AddHostedService<HyperV.Agent.Services.PrometheusMetricsCollector>();
+
+// Conditional hypervisor provider and service registration
+if (isKvm)
+{
+    builder.Services.Configure<KvmOptions>(builder.Configuration.GetSection("Hypervisor:KVM"));
+    builder.Services.AddKvmProvider();
+}
+else
+{
+    // HyperV-specific backing services (required by HyperV providers)
+    builder.Services.AddSingleton<HyperV.Core.Hcs.Services.VmService>();
+    builder.Services.AddSingleton<HyperV.Core.Wmi.Services.VmService>();
+    builder.Services.AddSingleton<VmCreationService>();
+    builder.Services.AddSingleton<MetricsService>();
+    builder.Services.AddSingleton<ResourcePoolsService>();
+    builder.Services.AddSingleton<NetworkService>();
+    builder.Services.AddSingleton<WmiNetworkService>();
+    builder.Services.AddSingleton<HyperV.Core.Hcs.Services.ContainerService>();
+    builder.Services.AddSingleton<HyperV.Core.Wmi.Services.ContainerService>();
+    builder.Services.AddSingleton<IStorageService, EnhancedStorageService>();
+    builder.Services.AddSingleton<IHostInfoService>(sp => new HyperV.Core.Wmi.Services.HostInfoService(sp.GetRequiredService<ILogger<HyperV.Core.Wmi.Services.HostInfoService>>(), sp.GetRequiredService<IMemoryCache>()));
+
+    // HyperV providers (IVmProvider, IHostProvider, IMetricsProvider, etc.)
+    builder.Services.AddHyperVProvider();
+
+    // Services for HyperVFeaturesController (HyperV-only)
+    builder.Services.AddSingleton<IReplicationService, ReplicationService>();
+    builder.Services.AddSingleton<FibreChannelService>();
+    builder.Services.AddSingleton<IImageManagementService, HyperV.Core.Wmi.Services.ImageManagementService>();
+    builder.Services.AddSingleton<IStorageQoSService, HyperV.Core.Wmi.Services.StorageQoSService>();
+}
+
+// Health checks (conditional)
+var hc = builder.Services.AddHealthChecks();
+if (!isKvm)
+{
+    hc.AddCheck<HyperV.Agent.Services.WmiHealthCheck>("wmi", tags: new[] { "hyperv", "wmi" });
+    hc.AddCheck<HyperV.Agent.Services.HcsHealthCheck>("hcs", tags: new[] { "hyperv", "hcs" });
+}
+hc.AddCheck<HyperV.Agent.Services.DiskSpaceHealthCheck>("disk-space", tags: new[] { "system" });
+
+// Register SignalR hub notifier
+builder.Services.AddSingleton<IAgentHubNotifier, AgentHubNotifier>();
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -157,11 +198,14 @@ var app = builder.Build();
 // Global exception handler
 app.UseMiddleware<GlobalExceptionHandler>();
 
+// Security headers (X-Content-Type-Options, X-Frame-Options, HSTS, CSP, etc.)
+app.UseSecurityHeaders();
+
+// Rate limiting (IP-based, configurable via RateLimiting section in appsettings)
+app.UseRateLimiting();
+
 // Enable CORS middleware - use default policy for development
 app.UseCors();
-
-// Alternative: Use named policy for production
-// app.UseCors("ProductionCORS");
 
 // Authentication and Authorization
 app.UseAuthentication();
@@ -178,12 +222,30 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok" }))
-   .WithTags("Service")
-   .WithSummary("Health check")
-   .WithDescription("Returns health status of the agent.");
+app.MapHealthChecks("/api/v1/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds + "ms"
+            }),
+            totalDuration = report.TotalDuration.TotalMilliseconds + "ms"
+        };
+        await context.Response.WriteAsJsonAsync(result);
+    }
+});
 
+app.MapMetrics(); // Prometheus /metrics endpoint
 app.MapControllers();
+app.MapHub<AgentHub>("/hubs/agent");
 
 // SPA fallback - serve index.html only for non-API routes
 app.Map("{*path:nonfile}", async (HttpContext context) =>

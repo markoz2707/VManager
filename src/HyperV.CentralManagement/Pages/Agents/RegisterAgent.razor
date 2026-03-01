@@ -1,0 +1,141 @@
+@page "/agents/register"
+@inject CentralApiClient Api
+@inject AuthSession Session
+@inject NavigationManager Nav
+
+<PageTitle>VManager - Register Agent</PageTitle>
+
+<div class="vm-page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1" style="font-size:0.8rem;">
+                <li class="breadcrumb-item"><a href="/agents">Agents</a></li>
+                <li class="breadcrumb-item active">Register</li>
+            </ol>
+        </nav>
+        <h2>Register Agent</h2>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Generate Token -->
+    <div class="col-lg-6">
+        <div class="vm-card">
+            <div class="vm-card-header">
+                <h6><i class="bi bi-key me-2"></i>Step 1: Generate Registration Token</h6>
+            </div>
+            <div class="vm-card-body">
+                <p class="text-muted" style="font-size:0.85rem;">
+                    Generate a one-time registration token. The agent will use this token to self-register with Central Management.
+                </p>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">TTL (minutes)</label>
+                    <input type="number" class="form-control" @bind="ttlMinutes" min="5" max="1440" style="max-width:200px;" />
+                </div>
+                <button class="btn btn-primary" @onclick="GenerateToken" disabled="@generatingToken">
+                    @if (generatingToken) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                    <i class="bi bi-key"></i> Generate Token
+                </button>
+
+                @if (!string.IsNullOrWhiteSpace(generatedToken))
+                {
+                    <div class="mt-3 p-3 bg-light rounded border">
+                        <label class="form-label fw-semibold text-success">
+                            <i class="bi bi-check-circle me-1"></i>Token Generated
+                        </label>
+                        <div class="input-group">
+                            <input class="form-control font-monospace" value="@generatedToken" readonly />
+                        </div>
+                        <small class="text-muted mt-1 d-block">
+                            This token expires in @ttlMinutes minutes. Copy it to configure on the agent host.
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="col-lg-6">
+        <div class="vm-card">
+            <div class="vm-card-header">
+                <h6><i class="bi bi-info-circle me-2"></i>Step 2: Configure Agent</h6>
+            </div>
+            <div class="vm-card-body">
+                <p class="text-muted" style="font-size:0.85rem;">
+                    On the target Hyper-V host, configure the VManager Agent with the following settings:
+                </p>
+                <div class="bg-dark text-light p-3 rounded font-monospace" style="font-size:0.8rem;">
+                    <div class="text-muted">// appsettings.json on the agent host</div>
+                    <div>&#123;</div>
+                    <div>&nbsp;&nbsp;"CentralManagement": &#123;</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;"Enabled": true,</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;"ServerUrl": "<span class="text-warning">@GetCurrentUrl()</span>",</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;"RegistrationToken": "<span class="text-info">@(generatedToken ?? "[PASTE_TOKEN_HERE]")</span>"</div>
+                    <div>&nbsp;&nbsp;&#125;</div>
+                    <div>&#125;</div>
+                </div>
+                <p class="text-muted mt-3" style="font-size:0.85rem;">
+                    The agent will automatically register itself with Central Management on startup using the provided token.
+                    Once registered, the token is consumed and cannot be reused.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger mt-3">@error</div>
+}
+
+@code {
+    private int ttlMinutes = 60;
+    private string? generatedToken;
+    private string error = string.Empty;
+    private bool generatingToken;
+
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrWhiteSpace(Session.Token)) { Nav.NavigateTo("/login"); }
+    }
+
+    private async Task GenerateToken()
+    {
+        error = string.Empty;
+        generatingToken = true;
+
+        try
+        {
+            var response = await Api.CreateRegistrationTokenAsync(new { ttlMinutes });
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<TokenResult>();
+                generatedToken = result?.Token;
+            }
+            else
+            {
+                error = "Failed to generate token.";
+            }
+        }
+        catch (Exception ex)
+        {
+            error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            generatingToken = false;
+        }
+    }
+
+    private string GetCurrentUrl()
+    {
+        var uri = new Uri(Nav.BaseUri);
+        return $"{uri.Scheme}://{uri.Host}:{uri.Port}";
+    }
+
+    private class TokenResult
+    {
+        public string Token { get; set; } = string.Empty;
+    }
+}

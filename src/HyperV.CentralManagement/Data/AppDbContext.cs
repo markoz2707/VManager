@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<AgentHost> AgentHosts => Set<AgentHost>();
     public DbSet<Cluster> Clusters => Set<Cluster>();
     public DbSet<ClusterNode> ClusterNodes => Set<ClusterNode>();
+    public DbSet<Datacenter> Datacenters => Set<Datacenter>();
     public DbSet<UserAccount> UserAccounts => Set<UserAccount>();
     public DbSet<RegistrationToken> RegistrationTokens => Set<RegistrationToken>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
@@ -51,6 +52,23 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Datacenter relationships
+        modelBuilder.Entity<Datacenter>()
+            .HasIndex(d => d.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<Cluster>()
+            .HasOne(c => c.Datacenter)
+            .WithMany()
+            .HasForeignKey(c => c.DatacenterId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<AgentHost>()
+            .HasOne(a => a.Datacenter)
+            .WithMany()
+            .HasForeignKey(a => a.DatacenterId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         modelBuilder.Entity<ClusterNode>()
             .HasOne(n => n.Cluster)
             .WithMany(c => c.Nodes)
